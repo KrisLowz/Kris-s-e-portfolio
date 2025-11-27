@@ -1,50 +1,47 @@
 import React from 'react';
 import { EXPERIENCE } from '../constants';
-import { Briefcase } from 'lucide-react';
 
 const Experience: React.FC = () => {
   return (
-    <section id="experience" className="py-24">
-      <div className="max-w-4xl mx-auto px-6">
-        <h2 className="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-12 text-center">Professional Journey</h2>
+    <section id="experience" className="py-32 relative">
+      <div className="max-w-3xl mx-auto px-6">
+        <div className="text-center mb-16 reveal-on-scroll">
+          <div className="inline-block px-4 py-1 bg-soft-mint text-teal-700 rounded-full text-sm font-bold mb-4">
+            Career Journey
+          </div>
+          <h2 className="text-4xl font-extrabold text-slate-900">Experience</h2>
+        </div>
 
-        <div className="relative space-y-12">
-          {/* Vertical Line */}
-          <div className="absolute left-4 md:left-1/2 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-800 -translate-x-1/2 hidden md:block" />
-          <div className="absolute left-4 top-0 bottom-0 w-px bg-slate-200 dark:bg-slate-800 md:hidden" />
-
+        <div className="space-y-8">
           {EXPERIENCE.map((exp, idx) => (
-            <div key={exp.id} className={`relative flex flex-col md:flex-row gap-8 ${idx % 2 === 0 ? 'md:flex-row-reverse' : ''}`}>
+            <div key={exp.id} className="reveal-on-scroll group relative pl-8 border-l-2 border-slate-200 hover:border-pop-primary transition-colors pb-8 last:pb-0">
               
-              {/* Timeline Dot */}
-              <div className="absolute left-4 md:left-1/2 w-8 h-8 bg-slate-50 dark:bg-slate-900 border-4 border-white dark:border-brand-surface rounded-full -translate-x-1/2 flex items-center justify-center z-10 shadow-sm">
-                <div className="w-2 h-2 bg-brand-primary rounded-full" />
-              </div>
+              {/* Dot */}
+              <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-white border-4 border-slate-200 group-hover:border-pop-primary transition-colors" />
 
-              {/* Content Card */}
-              <div className="ml-12 md:ml-0 md:w-1/2">
-                <div className={`p-6 bg-white dark:bg-brand-surface border border-slate-200 dark:border-slate-800 rounded-2xl hover:border-brand-primary/50 transition-colors shadow-sm dark:shadow-none ${idx % 2 === 0 ? 'md:mr-8' : 'md:ml-8'}`}>
-                  <div className="flex items-center gap-2 mb-2 text-brand-primary">
-                    <Briefcase className="w-4 h-4" />
-                    <span className="text-xs font-bold uppercase tracking-wider">{exp.period}</span>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 hover:shadow-lg transition-all hover:-translate-y-1">
+                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
+                  <div>
+                    <h3 className="text-xl font-bold text-slate-900">{exp.role}</h3>
+                    <p className="text-pop-primary font-medium">{exp.company}</p>
                   </div>
-                  <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">{exp.role}</h3>
-                  <p className="text-lg text-slate-600 dark:text-slate-400 mb-4 font-medium">{exp.company}</p>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm mb-4 leading-relaxed">
-                    {exp.description}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {exp.skills.map((skill) => (
-                      <span key={skill} className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-xs text-slate-600 dark:text-slate-300 rounded-md border border-slate-200 dark:border-slate-700">
-                        {skill}
-                      </span>
-                    ))}
-                  </div>
+                  <span className="mt-2 sm:mt-0 px-3 py-1 bg-slate-50 text-slate-500 text-xs font-bold rounded-full">
+                    {exp.period}
+                  </span>
+                </div>
+                
+                <p className="text-slate-600 leading-relaxed mb-4">
+                  {exp.description}
+                </p>
+
+                <div className="flex flex-wrap gap-2">
+                  {exp.skills.map((skill) => (
+                    <span key={skill} className="text-xs font-semibold text-slate-500 bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                      {skill}
+                    </span>
+                  ))}
                 </div>
               </div>
-              
-              {/* Empty space for opposite side */}
-              <div className="md:w-1/2" />
             </div>
           ))}
         </div>

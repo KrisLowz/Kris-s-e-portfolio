@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { MessageCircle, X, Send, Loader2, Sparkles } from 'lucide-react';
+import { MessageCircle, X, Send, Loader2, Bot } from 'lucide-react';
 import { Message } from '../types';
 import { sendMessageToGemini } from '../services/geminiService';
 
 const AIChatBot: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { id: 'init', role: 'model', text: "Hi! I'm Chee Fei's AI assistant. Ask me about his projects, skills, or experience!" }
+    { id: 'init', role: 'model', text: "Hi there! I'm Chee Fei's virtual assistant. Ask me anything about his skills or projects! 👋" }
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +33,6 @@ const AIChatBot: React.FC = () => {
     setInputValue('');
     setIsLoading(true);
 
-    // Prepare history for API
     const history = messages.map(m => ({
       role: m.role,
       parts: [{ text: m.text }]
@@ -62,36 +61,40 @@ const AIChatBot: React.FC = () => {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-80 sm:w-96 bg-white dark:bg-brand-surface border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] animate-in slide-in-from-bottom-10 duration-300">
+        <div className="mb-4 w-80 sm:w-96 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] animate-in slide-in-from-bottom-10 duration-300">
           {/* Header */}
-          <div className="bg-brand-primary/10 border-b border-slate-200 dark:border-slate-700 p-4 flex justify-between items-center backdrop-blur-sm">
+          <div className="bg-pop-primary p-4 flex justify-between items-center text-white">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-brand-primary" />
+              <div className="p-1.5 bg-white/20 rounded-lg">
+                <Bot className="w-5 h-5" />
+              </div>
               <div>
-                <h3 className="font-semibold text-slate-900 dark:text-slate-100">AI Portfolio Assistant</h3>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Powered by Gemini 2.5 Flash</p>
+                <h3 className="font-bold text-sm">Portfolio Assistant</h3>
+                <p className="text-[10px] text-indigo-100 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
+                </p>
               </div>
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              className="text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+              className="text-white/70 hover:text-white transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/50">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 custom-scrollbar">
             {messages.map((msg) => (
               <div
                 key={msg.id}
                 className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed shadow-sm ${
+                  className={`max-w-[85%] p-3 text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user'
-                      ? 'bg-brand-primary text-slate-900 font-medium rounded-tr-none'
-                      : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 rounded-tl-none'
+                      ? 'bg-pop-primary text-white rounded-2xl rounded-tr-none'
+                      : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100'
                   }`}
                 >
                   {msg.text}
@@ -100,9 +103,9 @@ const AIChatBot: React.FC = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-sm">
-                  <Loader2 className="w-4 h-4 animate-spin text-brand-primary" />
-                  <span className="text-xs text-slate-500 dark:text-slate-400">Thinking...</span>
+                <div className="bg-white border border-slate-100 p-3 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-sm">
+                  <Loader2 className="w-4 h-4 animate-spin text-pop-primary" />
+                  <span className="text-xs text-slate-400 font-medium">Typing...</span>
                 </div>
               </div>
             )}
@@ -110,20 +113,20 @@ const AIChatBot: React.FC = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-white dark:bg-brand-surface border-t border-slate-200 dark:border-slate-700">
+          <div className="p-4 bg-white border-t border-slate-100">
             <div className="flex gap-2">
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="Ask about my projects..."
-                className="flex-1 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-4 py-2 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-brand-primary transition-colors placeholder-slate-400 dark:placeholder-slate-500"
+                placeholder="Ask me a question..."
+                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pop-primary/20 transition-all"
               />
               <button
                 onClick={handleSend}
                 disabled={isLoading || !inputValue.trim()}
-                className="bg-brand-primary text-slate-900 p-2 rounded-lg hover:bg-emerald-400 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                className="bg-pop-primary text-white p-2 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
               >
                 <Send className="w-5 h-5" />
               </button>
@@ -136,14 +139,13 @@ const AIChatBot: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`${
-          isOpen ? 'bg-slate-700 rotate-90' : 'bg-brand-primary hover:bg-emerald-400'
-        } text-slate-900 p-4 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center group`}
-        aria-label="Toggle Chat"
+          isOpen ? 'bg-slate-800 rotate-90' : 'bg-pop-primary hover:-translate-y-1'
+        } text-white p-4 rounded-full shadow-lg shadow-pop-primary/30 transition-all duration-300 flex items-center justify-center z-50`}
       >
         {isOpen ? (
-          <X className="w-6 h-6 text-white" />
+          <X className="w-6 h-6" />
         ) : (
-          <MessageCircle className="w-7 h-7 group-hover:scale-110 transition-transform" />
+          <MessageCircle className="w-7 h-7" />
         )}
       </button>
     </div>

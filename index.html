@@ -1,38 +1,36 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="scroll-smooth" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Low Chee Fei | Software Developer</title>
     
+    <!-- Google Fonts: Plus Jakarta Sans (Friendly/Geometric) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- GSAP for Physics Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-      // Initialize theme to prevent flash
-      if (localStorage.getItem('theme') === 'light') {
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-      }
-
       tailwind.config = {
         darkMode: 'class',
         theme: {
           extend: {
             colors: {
-              brand: {
-                dark: '#0f172a',    // Slate 900
-                primary: '#10b981', // Emerald 500
-                accent: '#38bdf8',  // Sky 400
-                surface: '#1e293b', // Slate 800
-              }
+              'soft-bg': 'var(--bg-color)',
+              'pop-text': 'var(--text-color)',
+              'pop-primary': '#4f46e5',
+              'pop-accent': 'var(--accent-color)',
             },
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
             },
             animation: {
-              'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'blob': 'blob 7s infinite',
+              'blob': 'blob 10s infinite',
             },
             keyframes: {
               blob: {
@@ -62,7 +60,7 @@
     }
     </script>
   </head>
-  <body class="bg-slate-50 dark:bg-brand-dark text-slate-600 dark:text-slate-300 antialiased transition-colors duration-300">
+  <body class="bg-soft-bg text-pop-text antialiased overflow-x-hidden selection:bg-indigo-200 selection:text-indigo-900 transition-colors duration-500">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>
   </body>
