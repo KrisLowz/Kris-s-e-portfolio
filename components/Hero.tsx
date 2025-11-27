@@ -1,13 +1,38 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ArrowRight, Download, Github, Linkedin } from 'lucide-react';
 import { PROFILE } from '../constants';
 import MagneticButton from './MagneticButton';
 
+declare var Typed: any;
+
 const Hero: React.FC = () => {
   const [loaded, setLoaded] = useState(false);
+  const typeTarget = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     setTimeout(() => setLoaded(true), 100);
+
+    // Initialize Typed.js
+    if (typeTarget.current && typeof Typed !== 'undefined') {
+      const typed = new Typed(typeTarget.current, {
+        strings: [
+          PROFILE.name,
+          "Web Developer",
+          "Mobile Developer",
+          "UI/UX Designer"
+        ],
+        typeSpeed: 50,
+        backSpeed: 40,
+        backDelay: 1500,
+        startDelay: 500,
+        loop: true,
+        smartBackspace: false // Ensure full name is backspaced to show roles
+      });
+
+      return () => {
+        typed.destroy();
+      };
+    }
   }, []);
 
   return (
@@ -25,16 +50,15 @@ const Hero: React.FC = () => {
             Available for 2025 Opportunities
           </div>
           
-          {/* Main Headline */}
-          <h1 className="text-5xl md:text-7xl font-extrabold text-pop-text-main tracking-tight leading-[1.1] mb-8">
-            Building software that <br />
+          {/* Main Headline with Typewriter */}
+          <h1 className="text-5xl md:text-7xl font-extrabold text-pop-text-main tracking-tight leading-[1.1] mb-8 min-h-[160px] md:min-h-[auto]">
+            Hi, I am <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-pop-primary to-pop-secondary">
-              feels human.
+              <span ref={typeTarget}></span>
             </span>
           </h1>
           
           <p className="text-lg md:text-xl text-pop-text-muted mb-10 leading-relaxed max-w-2xl mx-auto">
-            Hi, I'm <span className="font-bold text-pop-text-main">{PROFILE.name}</span>. 
             I bridge the gap between playful mobile interactions and robust enterprise systems.
           </p>
           
