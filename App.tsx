@@ -9,18 +9,25 @@ import AIChatBot from './components/AIChatBot';
 import MeshBackground from './components/MeshBackground';
 import GhostCursors from './components/GhostCursors';
 import ReactionButton from './components/ReactionButton';
+import WireframeGlobe from './components/WireframeGlobe';
+import MeteorShower from './components/MeteorShower';
 
 const App: React.FC = () => {
   return (
-    <main className="relative min-h-screen text-pop-text font-sans selection:bg-soft-purple selection:text-pop-primary">
+    <main className="relative min-h-screen text-pop-text-main font-sans selection:bg-pop-primary selection:text-white transition-colors duration-300">
       <MeshBackground />
+      <WireframeGlobe />
+      <MeteorShower />
+      
       <GhostCursors />
+      
       <Navigation />
       <Hero />
       <About />
       <Experience />
       <Projects />
       <Contact />
+      
       <ReactionButton />
       <AIChatBot />
     </main>

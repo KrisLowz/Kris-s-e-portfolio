@@ -11,7 +11,7 @@ const Contact: React.FC = () => {
         <div className="bg-pop-primary rounded-[3rem] p-10 md:p-16 text-white relative overflow-hidden shadow-2xl reveal-on-scroll">
           {/* Decor */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-900 opacity-20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
           <div className="relative z-10 grid md:grid-cols-2 gap-12">
             <div>
@@ -41,21 +41,21 @@ const Contact: React.FC = () => {
               </div>
             </div>
 
-            <form className="bg-white p-8 rounded-3xl text-slate-800 shadow-xl" onSubmit={(e) => e.preventDefault()}>
+            <form className="bg-pop-surface p-8 rounded-3xl text-pop-text-main shadow-xl" onSubmit={(e) => e.preventDefault()}>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Name</label>
-                  <input type="text" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all" placeholder="John Doe" />
+                  <label className="block text-sm font-bold text-pop-text-main mb-2">Name</label>
+                  <input type="text" className="w-full bg-pop-surface-2 border border-pop-border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all text-pop-text-main" placeholder="John Doe" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Email</label>
-                  <input type="email" className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all" placeholder="john@example.com" />
+                  <label className="block text-sm font-bold text-pop-text-main mb-2">Email</label>
+                  <input type="email" className="w-full bg-pop-surface-2 border border-pop-border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all text-pop-text-main" placeholder="john@example.com" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold text-slate-700 mb-2">Message</label>
-                  <textarea rows={3} className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all" placeholder="Tell me about your project..."></textarea>
+                  <label className="block text-sm font-bold text-pop-text-main mb-2">Message</label>
+                  <textarea rows={3} className="w-full bg-pop-surface-2 border border-pop-border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all text-pop-text-main" placeholder="Tell me about your project..."></textarea>
                 </div>
-                <MagneticButton className="w-full py-4 bg-pop-dark text-white font-bold rounded-xl hover:bg-black transition-colors flex justify-center items-center gap-2">
+                <MagneticButton className="w-full py-4 bg-pop-text-main text-pop-surface font-bold rounded-xl hover:bg-black dark:hover:bg-white transition-colors flex justify-center items-center gap-2">
                   Send Message <Send className="w-4 h-4" />
                 </MagneticButton>
               </div>
@@ -63,7 +63,7 @@ const Contact: React.FC = () => {
           </div>
         </div>
 
-        <div className="mt-16 text-center text-slate-400 text-sm font-medium">
+        <div className="mt-16 text-center text-pop-text-muted text-sm font-medium">
           <p>&copy; 2025 Low Chee Fei. Designed with ♥ and React.</p>
         </div>
       </div>

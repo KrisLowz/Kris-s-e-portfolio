@@ -61,7 +61,7 @@ const AIChatBot: React.FC = () => {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-80 sm:w-96 bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] animate-in slide-in-from-bottom-10 duration-300">
+        <div className="mb-4 w-80 sm:w-96 bg-pop-surface border border-pop-border rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[500px] animate-in slide-in-from-bottom-10 duration-300">
           {/* Header */}
           <div className="bg-pop-primary p-4 flex justify-between items-center text-white">
             <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ const AIChatBot: React.FC = () => {
               </div>
               <div>
                 <h3 className="font-bold text-sm">Portfolio Assistant</h3>
-                <p className="text-[10px] text-indigo-100 flex items-center gap-1">
+                <p className="text-[10px] text-white/80 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full"></span> Online
                 </p>
               </div>
@@ -84,7 +84,7 @@ const AIChatBot: React.FC = () => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-slate-50 custom-scrollbar">
+          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-pop-surface-2 custom-scrollbar">
             {messages.map((msg) => (
               <div
                 key={msg.id}
@@ -94,7 +94,7 @@ const AIChatBot: React.FC = () => {
                   className={`max-w-[85%] p-3 text-sm leading-relaxed shadow-sm ${
                     msg.role === 'user'
                       ? 'bg-pop-primary text-white rounded-2xl rounded-tr-none'
-                      : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100'
+                      : 'bg-pop-surface text-pop-text-main rounded-2xl rounded-tl-none border border-pop-border'
                   }`}
                 >
                   {msg.text}
@@ -103,9 +103,9 @@ const AIChatBot: React.FC = () => {
             ))}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="bg-white border border-slate-100 p-3 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-sm">
+                <div className="bg-pop-surface border border-pop-border p-3 rounded-2xl rounded-tl-none flex items-center gap-2 shadow-sm">
                   <Loader2 className="w-4 h-4 animate-spin text-pop-primary" />
-                  <span className="text-xs text-slate-400 font-medium">Typing...</span>
+                  <span className="text-xs text-pop-text-muted font-medium">Typing...</span>
                 </div>
               </div>
             )}
@@ -113,7 +113,7 @@ const AIChatBot: React.FC = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-4 bg-white border-t border-slate-100">
+          <div className="p-4 bg-pop-surface border-t border-pop-border">
             <div className="flex gap-2">
               <input
                 type="text"
@@ -121,12 +121,12 @@ const AIChatBot: React.FC = () => {
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyPress}
                 placeholder="Ask me a question..."
-                className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-pop-primary/20 transition-all"
+                className="flex-1 bg-pop-surface-2 border border-pop-border rounded-xl px-4 py-2 text-sm text-pop-text-main focus:outline-none focus:ring-2 focus:ring-pop-primary/20 transition-all placeholder:text-pop-text-muted"
               />
               <button
                 onClick={handleSend}
                 disabled={isLoading || !inputValue.trim()}
-                className="bg-pop-primary text-white p-2 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-sm"
+                className="bg-pop-primary text-white p-2 rounded-xl hover:bg-pop-primary/90 disabled:opacity-50 transition-colors shadow-sm"
               >
                 <Send className="w-5 h-5" />
               </button>
@@ -139,7 +139,7 @@ const AIChatBot: React.FC = () => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={`${
-          isOpen ? 'bg-slate-800 rotate-90' : 'bg-pop-primary hover:-translate-y-1'
+          isOpen ? 'bg-pop-text-main rotate-90' : 'bg-pop-primary hover:-translate-y-1'
         } text-white p-4 rounded-full shadow-lg shadow-pop-primary/30 transition-all duration-300 flex items-center justify-center z-50`}
       >
         {isOpen ? (

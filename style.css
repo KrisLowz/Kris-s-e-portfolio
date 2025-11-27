@@ -1,105 +1,150 @@
-/* Theme Variables */
+/* STRICT THEME VARIABLES - The Single Source of Truth */
 :root {
-  /* Light Mode (Pastel/Creamy) - Default */
-  --bg-color: #f8fafc;
-  --text-color: #1e293b;
-  --accent-color: #4f46e5;
-  --blob-1: #d1fae5; /* Mint */
-  --blob-2: #e9d5ff; /* Purple */
-  --blob-3: #bae6fd; /* Blue */
+  /* LIGHT MODE (Default) */
+  --bg-primary: #f8fafc;       /* Slate 50 */
+  --bg-surface: #ffffff;       /* White */
+  --bg-surface-2: #f1f5f9;     /* Slate 100 */
+  
+  --text-main: #0f172a;        /* Slate 900 */
+  --text-muted: #64748b;       /* Slate 500 */
+  
+  --border-color: #e2e8f0;     /* Slate 200 */
+  --accent-primary: #4f46e5;   /* Indigo 600 */
+  --accent-secondary: #8b5cf6; /* Violet 500 */
+  
+  --globe-color: rgba(15, 23, 42, 0.08); /* Faint dark lines */
+  --meteor-color: #6366f1;     /* Indigo */
+  
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(255, 255, 255, 0.6);
-  --card-shadow: rgba(0, 0, 0, 0.05);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+  /* Blob Colors */
+  --blob-1: #d1fae5;
+  --blob-2: #e9d5ff;
+  --blob-3: #bae6fd;
 }
 
-/* Dark Mode Overrides - Triggered by .dark class OR data-theme="dark" */
+/* DARK MODE OVERRIDES */
 [data-theme="dark"], .dark {
-  --bg-color: #0f172a; /* Slate 900 */
-  --text-color: #f1f5f9; /* Slate 100 */
-  --accent-color: #818cf8; /* Indigo 400 */
-  --blob-1: #4c1d95; /* Deep Violet */
-  --blob-2: #0f766e; /* Deep Teal */
-  --blob-3: #1e3a8a; /* Deep Blue */
+  --bg-primary: #020617;       /* Slate 950 */
+  --bg-surface: #0f172a;       /* Slate 900 */
+  --bg-surface-2: #1e293b;     /* Slate 800 */
+  
+  --text-main: #f8fafc;        /* Slate 50 */
+  --text-muted: #94a3b8;       /* Slate 400 */
+  
+  --border-color: #334155;     /* Slate 700 */
+  --accent-primary: #818cf8;   /* Indigo 400 */
+  --accent-secondary: #a78bfa; /* Violet 400 */
+  
+  --globe-color: rgba(34, 211, 238, 0.2); /* Cyan Glow */
+  --meteor-color: #22d3ee;     /* Cyan */
+  
   --glass-bg: rgba(15, 23, 42, 0.6);
   --glass-border: rgba(255, 255, 255, 0.1);
-  --card-shadow: rgba(0, 0, 0, 0.5);
+  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+
+  /* Blob Colors */
+  --blob-1: #312e81; /* Indigo 900 */
+  --blob-2: #134e4a; /* Teal 900 */
+  --blob-3: #172554; /* Blue 900 */
 }
 
-/* Glassmorphism */
+/* Base Transition for EVERYTHING */
+*, *::before, *::after {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+}
+
+/* Utilities using Variables */
 .glass-panel {
   background: var(--glass-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 4px 30px var(--card-shadow);
-  transition: background-color 0.5s ease, border-color 0.5s ease;
+  box-shadow: var(--card-shadow);
 }
 
 .glass-card {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   border: 1px solid var(--glass-border);
-  box-shadow: 0 10px 40px -10px var(--card-shadow);
+  box-shadow: var(--card-shadow);
   transform-style: preserve-3d;
-  will-change: transform;
-  transition: border-color 0.3s ease;
 }
 
-/* 3D Tilt Effect Classes */
 .tilt-card-inner {
   transform: translateZ(20px);
 }
 
-/* Elastic Scroll Reveal */
+/* Animations */
 .reveal-on-scroll {
   opacity: 0;
   transform: translateY(60px) scale(0.9);
-  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Elastic Spring */
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
-
 .reveal-on-scroll.active {
   opacity: 1;
   transform: translateY(0) scale(1);
 }
 
-/* Mesh Gradient Blobs */
-.mesh-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.6;
-  z-index: -1;
-  transition: background-color 1s ease;
+.animate-spin-slow {
+  animation: spin 60s linear infinite;
 }
 
-/* Emoji Reaction Animation */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.meteor {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, var(--meteor-color), transparent);
+  opacity: 0;
+  transform: rotate(-45deg);
+  animation: meteor 4s ease-in-out infinite;
+}
+
+@keyframes meteor {
+  0% {
+    opacity: 0;
+    transform: rotate(-45deg) translateX(-100%);
+  }
+  10% {
+    opacity: 0.7;
+  }
+  20% {
+    opacity: 0;
+    transform: rotate(-45deg) translateX(100vw);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
 .reaction-emoji {
   position: absolute;
   pointer-events: none;
   font-size: 24px;
   z-index: 100;
-  user-select: none;
 }
 
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-color);
-}
-::-webkit-scrollbar-thumb {
-  background: #94a3b8;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
-}
-
-/* Ghost Cursor */
-.ghost-cursor {
-  pointer-events: none;
-  z-index: 50;
-  transition: opacity 0.3s ease;
-  mix-blend-mode: exclusion;
+.mesh-blob {
+  transition: background-color 1s ease;
 }

@@ -36,7 +36,7 @@ const Navigation: React.FC = () => {
           <div className="p-2 bg-pop-primary text-white rounded-full group-hover:rotate-12 transition-transform duration-300 shadow-md shadow-pop-primary/30">
             <Code2 className="w-4 h-4" />
           </div>
-          <span className="text-lg font-bold text-pop-text tracking-tight hidden sm:block">
+          <span className="text-lg font-bold text-pop-text-main tracking-tight hidden sm:block">
             {PROFILE.name.split(' ')[0]}<span className="text-pop-primary">.dev</span>
           </span>
         </a>
@@ -47,7 +47,7 @@ const Navigation: React.FC = () => {
             <a
               key={link.name}
               href={link.href}
-              className="px-5 py-2 text-sm font-semibold text-pop-text hover:text-pop-primary hover:bg-white/50 rounded-full transition-all"
+              className="px-5 py-2 text-sm font-semibold text-pop-text-main hover:text-pop-primary hover:bg-pop-surface/50 rounded-full transition-all"
             >
               {link.name}
             </a>
@@ -64,10 +64,10 @@ const Navigation: React.FC = () => {
                 key={i}
                 src={`https://i.pravatar.cc/100?img=${10 + i}`}
                 alt="User"
-                className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 shadow-sm"
+                className="w-8 h-8 rounded-full border-2 border-pop-surface shadow-sm"
               />
             ))}
-            <div className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-800 bg-green-100 flex items-center justify-center text-[10px] font-bold text-green-700">
+            <div className="w-8 h-8 rounded-full border-2 border-pop-surface bg-green-100 dark:bg-green-900 flex items-center justify-center text-[10px] font-bold text-green-700 dark:text-green-300">
               +3
             </div>
           </div>
@@ -77,7 +77,7 @@ const Navigation: React.FC = () => {
           <div className="hidden md:block">
              <a
               href="#contact"
-              className="px-6 py-2.5 bg-pop-text text-soft-bg text-sm font-bold rounded-full shadow-lg hover:-translate-y-0.5 transition-all"
+              className="px-6 py-2.5 bg-pop-text-main text-pop-surface text-sm font-bold rounded-full shadow-lg hover:-translate-y-0.5 transition-all"
             >
               Let's Talk
             </a>
@@ -85,7 +85,7 @@ const Navigation: React.FC = () => {
 
           {/* Mobile Toggle */}
           <button
-            className="md:hidden p-2 text-pop-text bg-white/50 rounded-full"
+            className="md:hidden p-2 text-pop-text-main bg-pop-surface/50 rounded-full"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
@@ -102,7 +102,7 @@ const Navigation: React.FC = () => {
                 key={link.name}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-lg font-bold text-pop-text p-4 hover:bg-white/20 rounded-2xl transition-colors"
+                className="text-lg font-bold text-pop-text-main p-4 hover:bg-pop-surface/50 rounded-2xl transition-colors"
               >
                 {link.name}
               </a>
