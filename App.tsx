@@ -11,10 +11,13 @@ import GhostCursors from './components/GhostCursors';
 import ReactionButton from './components/ReactionButton';
 import WireframeGlobe from './components/WireframeGlobe';
 import MeteorShower from './components/MeteorShower';
+import FogBackground from './components/FogBackground';
+import ProfessionalSkills from './components/ProfessionalSkills';
 
 const App: React.FC = () => {
   return (
     <main className="relative min-h-screen text-pop-text-main font-sans selection:bg-pop-primary selection:text-white transition-colors duration-300">
+      <FogBackground />
       <MeshBackground />
       <WireframeGlobe />
       <MeteorShower />
@@ -24,6 +27,7 @@ const App: React.FC = () => {
       <Navigation />
       <Hero />
       <About />
+      <ProfessionalSkills />
       <Experience />
       <Projects />
       <Contact />

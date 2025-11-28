@@ -24,9 +24,10 @@ const About: React.FC = () => {
     { name: 'SQL', iconClass: 'devicon-mysql-plain colored' },
   ];
 
+  // SWAPPED ICONS HERE: Django -> Figma, Flask -> Tailwind CSS
   const outerRingSkills = [
-    { name: 'Django', iconClass: 'devicon-django-plain colored' },
-    { name: 'Flask', iconClass: 'devicon-flask-original colored' },
+    { name: 'Figma', iconClass: 'devicon-figma-plain colored' },
+    { name: 'Tailwind CSS', iconClass: 'devicon-tailwindcss-original colored' },
     { name: 'PostgreSQL', iconClass: 'devicon-postgresql-plain colored' },
     { name: 'Firebase', iconClass: 'devicon-firebase-plain colored' },
     { name: 'Kotlin', iconClass: 'devicon-kotlin-plain colored' },
@@ -122,12 +123,7 @@ const About: React.FC = () => {
 
           {/* Skills Solar System */}
           <div className="solar-system-container" ref={solarSystemRef}>
-            {/* Fog Atmosphere */}
-            <div className="fog-wrapper">
-              <div className="fog-layer"></div>
-              <div className="fog-layer layer-2"></div>
-            </div>
-
+            
             {/* Background Text - BOLD & VISIBLE */}
             <h1 className="solar-bg-text">SKILLS</h1>
             

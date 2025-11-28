@@ -52,7 +52,7 @@
   --blob-2: #134e4a; /* Teal 900 */
   --blob-3: #172554; /* Blue 900 */
 
-  --fog-color: rgba(15, 23, 42, 0.6);
+  --fog-color: rgba(15, 23, 42, 0.2);
 }
 
 /* Base Transition for EVERYTHING */
@@ -202,36 +202,40 @@
   user-select: none;
 }
 
-/* Fog Atmosphere */
-.fog-wrapper {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: 2; /* Above text, below rings */
+/* Fog Atmosphere - Global & Local */
+.fog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
   pointer-events: none;
+  overflow: hidden;
 }
 
-.fog-layer {
+.fog-layer-global {
   position: absolute;
   top: 0;
   left: 0;
   width: 200%;
   height: 100%;
-  background: linear-gradient(90deg, transparent 0%, var(--fog-color) 40%, transparent 100%);
-  filter: blur(40px);
-  animation: drift 40s linear infinite;
-  opacity: 0.4;
+  background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog1.png') repeat-x;
+  background-size: contain;
+  animation: fogMove 60s linear infinite;
+  opacity: 0.3;
 }
 
-.fog-layer.layer-2 {
-  animation-duration: 60s;
-  animation-direction: reverse;
+.fog-layer-global.two {
+  background: url('https://raw.githubusercontent.com/danielstuart14/CSS_FOG_ANIMATION/master/fog2.png') repeat-x;
+  background-size: contain;
+  animation: fogMove 40s linear infinite reverse;
   opacity: 0.2;
 }
 
-@keyframes drift {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0%); }
+@keyframes fogMove {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
 .orbit-ring {
@@ -241,7 +245,9 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10; /* Above fog */
+  z-index: 10;
+  /* FIX: Allow clicks to pass through ring container */
+  pointer-events: none; 
 }
 
 .planet {
@@ -254,6 +260,9 @@
   border-radius: 50%;
   box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
+  /* FIX: Re-enable pointer events for the icon itself */
+  pointer-events: auto; 
+  cursor: pointer;
 }
 .planet:hover {
   border-color: var(--accent-primary);
@@ -278,4 +287,33 @@
   align-items: center;
   color: white;
   z-index: 15;
+}
+
+/* Professional Skills Card Hover */
+.skill-card {
+  perspective: 1000px;
+}
+.skill-card-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+.skill-card:hover .skill-card-inner {
+  transform: rotateY(180deg);
+}
+
+.skill-card-front, .skill-card-back {
+  backface-visibility: hidden;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.skill-card-back {
+  transform: rotateY(180deg);
+  background: var(--bg-surface-2);
 }
