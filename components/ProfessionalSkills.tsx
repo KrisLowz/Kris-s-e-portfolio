@@ -1,5 +1,6 @@
 import React from 'react';
 import { Brain, Users, Clock, MessageCircle, Target, Zap, Briefcase } from 'lucide-react';
+import SpotlightCard from './SpotlightCard';
 
 const skills = [
   {
@@ -54,26 +55,26 @@ const ProfessionalSkills: React.FC = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {skills.map((skill, idx) => (
-            <div key={idx} className="skill-card h-48 cursor-pointer reveal-on-scroll">
-              <div className="skill-card-inner relative w-full h-full bg-pop-surface border border-pop-border rounded-2xl shadow-sm hover:shadow-lg hover:border-pop-primary transition-all">
+            <div key={idx} className="h-48 cursor-pointer reveal-on-scroll">
+              <SpotlightCard className="skill-card-inner relative w-full h-full bg-pop-surface border border-pop-border rounded-2xl shadow-sm hover:shadow-lg transition-all group overflow-hidden">
                 
-                {/* Front */}
-                <div className="skill-card-front">
+                {/* Front (Visible by default) */}
+                <div className="absolute inset-0 flex flex-col justify-center items-center p-4 text-center transition-opacity duration-300 group-hover:opacity-0">
                   <div className="mb-4 p-3 bg-pop-surface-2 rounded-full">
                     {skill.icon}
                   </div>
                   <h3 className="font-bold text-pop-text-main">{skill.title}</h3>
                 </div>
 
-                {/* Back */}
-                <div className="skill-card-back rounded-2xl">
+                {/* Back (Visible on hover via simple opacity fade for cleaner spotlight effect) */}
+                <div className="absolute inset-0 flex flex-col justify-center items-center p-4 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-pop-surface-2">
                    <h3 className="font-bold text-pop-primary text-sm mb-2">{skill.title}</h3>
                    <p className="text-xs text-pop-text-muted leading-relaxed">
                      {skill.desc}
                    </p>
                 </div>
 
-              </div>
+              </SpotlightCard>
             </div>
           ))}
         </div>

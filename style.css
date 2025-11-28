@@ -25,6 +25,9 @@
   --blob-3: #bae6fd;
 
   --fog-color: rgba(255, 255, 255, 0.6);
+  
+  /* Spotlight Color (RGB for rgba usage) */
+  --spotlight-rgb: 79, 70, 229; 
 }
 
 /* DARK MODE OVERRIDES */
@@ -53,11 +56,16 @@
   --blob-3: #172554; /* Blue 900 */
 
   --fog-color: rgba(15, 23, 42, 0.2);
+  
+  /* Spotlight Color (RGB for rgba usage) */
+  --spotlight-rgb: 129, 140, 248;
 }
 
 /* Base Transition for EVERYTHING */
 *, *::before, *::after {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
+  /* HIDE DEFAULT CURSOR GLOBALLY */
+  cursor: none !important;
 }
 
 /* Utilities using Variables */
@@ -82,14 +90,10 @@
 }
 
 /* Animations */
+/* GSAP controls this now, but we set initial state */
 .reveal-on-scroll {
-  opacity: 0;
-  transform: translateY(60px) scale(0.9);
-  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.reveal-on-scroll.active {
-  opacity: 1;
-  transform: translateY(0) scale(1);
+  opacity: 0; 
+  /* transform is handled by GSAP */
 }
 
 .animate-spin-slow {
@@ -289,31 +293,76 @@
   z-index: 15;
 }
 
-/* Professional Skills Card Hover */
-.skill-card {
-  perspective: 1000px;
-}
-.skill-card-inner {
-  transition: transform 0.6s;
-  transform-style: preserve-3d;
-}
-.skill-card:hover .skill-card-inner {
-  transform: rotateY(180deg);
+/* Spotlight Effect Styles */
+.spotlight-card {
+  position: relative;
+  overflow: hidden;
+  /* Ensures gradient doesn't bleed */
 }
 
-.skill-card-front, .skill-card-back {
-  backface-visibility: hidden;
+.spotlight-card::before {
+  content: "";
   position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 1.5rem;
-  text-align: center;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(
+    800px circle at var(--mouse-x) var(--mouse-y),
+    rgba(var(--spotlight-rgb), 0.06),
+    transparent 40%
+  );
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  z-index: 2;
 }
 
-.skill-card-back {
-  transform: rotateY(180deg);
-  background: var(--bg-surface-2);
+.spotlight-card:hover::before {
+  opacity: 1;
+}
+
+/* CUSTOM CURSOR */
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--accent-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+}
+
+.custom-cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 4px;
+  background-color: var(--accent-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+}
+
+.custom-cursor.hovering {
+  width: 50px;
+  height: 50px;
+  background-color: rgba(var(--spotlight-rgb), 0.1);
+  border-color: transparent;
+}
+
+.click-particle {
+  position: fixed;
+  width: 6px;
+  height: 6px;
+  background-color: var(--accent-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
 }

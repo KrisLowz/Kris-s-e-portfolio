@@ -3,28 +3,14 @@ import { PROJECTS } from '../constants';
 import { Award, Star, ArrowUpRight } from 'lucide-react';
 import { Project } from '../types';
 import ProjectModal from './ProjectModal';
+import SpotlightCard from './SpotlightCard';
 
 const Projects: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    // 1. Elastic Entrance Animation
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('active');
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-
-    const elements = document.querySelectorAll('.reveal-on-scroll');
-    elements.forEach((el) => observer.observe(el));
-
-    // 2. 3D Tilt Effect Logic
+    // 3D Tilt Effect Logic for Mouse Movement
     const handleTilt = (e: MouseEvent) => {
       const card = e.currentTarget as HTMLElement;
       const rect = card.getBoundingClientRect();
@@ -34,8 +20,8 @@ const Projects: React.FC = () => {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
       
-      const rotateX = ((y - centerY) / centerY) * -10; // Max rotation deg
-      const rotateY = ((x - centerX) / centerX) * 10;
+      const rotateX = ((y - centerY) / centerY) * -5; // Subtler tilt
+      const rotateY = ((x - centerX) / centerX) * 5;
 
       card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
     };
@@ -45,14 +31,13 @@ const Projects: React.FC = () => {
       card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
     };
 
-    const cards = document.querySelectorAll('.glass-card');
+    const cards = document.querySelectorAll('.tilt-enabled');
     cards.forEach(card => {
       card.addEventListener('mousemove', handleTilt as EventListener);
       card.addEventListener('mouseleave', resetTilt as EventListener);
     });
 
     return () => {
-      observer.disconnect();
       cards.forEach(card => {
         card.removeEventListener('mousemove', handleTilt as EventListener);
         card.removeEventListener('mouseleave', resetTilt as EventListener);
@@ -82,10 +67,10 @@ const Projects: React.FC = () => {
 
         <div className="grid md:grid-cols-2 gap-10 perspective-1000">
           {PROJECTS.map((project, idx) => (
-            <div 
+            <SpotlightCard 
               key={project.id}
-              className="reveal-on-scroll glass-card rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group transition-all duration-100 ease-out"
               onClick={() => openModal(project)}
+              className="reveal-on-scroll tilt-enabled rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group bg-pop-surface/40 border border-pop-border"
             >
               {/* Image Area */}
               <div className="relative h-64 overflow-hidden bg-pop-surface-2 tilt-card-inner">
@@ -111,7 +96,7 @@ const Projects: React.FC = () => {
               </div>
 
               {/* Content Area */}
-              <div className="p-8 flex flex-col flex-1 tilt-card-inner bg-pop-surface/50">
+              <div className="p-8 flex flex-col flex-1 tilt-card-inner">
                 <div className="flex justify-between items-start mb-4">
                   <div>
                     <h3 className="text-2xl font-bold text-pop-text-main mb-1 group-hover:text-pop-primary transition-colors">
@@ -136,7 +121,7 @@ const Projects: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </div>
+            </SpotlightCard>
           ))}
         </div>
       </div>
