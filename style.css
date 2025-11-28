@@ -23,6 +23,8 @@
   --blob-1: #d1fae5;
   --blob-2: #e9d5ff;
   --blob-3: #bae6fd;
+
+  --fog-color: rgba(255, 255, 255, 0.6);
 }
 
 /* DARK MODE OVERRIDES */
@@ -49,6 +51,8 @@
   --blob-1: #312e81; /* Indigo 900 */
   --blob-2: #134e4a; /* Teal 900 */
   --blob-3: #172554; /* Blue 900 */
+
+  --fog-color: rgba(15, 23, 42, 0.6);
 }
 
 /* Base Transition for EVERYTHING */
@@ -181,19 +185,53 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to visible for z-index layering */
 }
 
+/* Enhanced Background Text */
 .solar-bg-text {
   position: absolute;
-  font-size: 10vw;
+  font-size: 15vw;
   font-weight: 900;
   color: var(--text-muted);
-  opacity: 0.05;
-  letter-spacing: 10px;
-  z-index: 0;
+  opacity: 0.15; /* Increased Opacity */
+  letter-spacing: -5px;
+  z-index: 1; /* Lowest level inside container */
   white-space: nowrap;
-  mask-image: linear-gradient(to right, transparent, black 20%, black 80%, transparent);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Fog Atmosphere */
+.fog-wrapper {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 2; /* Above text, below rings */
+  pointer-events: none;
+}
+
+.fog-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, var(--fog-color) 40%, transparent 100%);
+  filter: blur(40px);
+  animation: drift 40s linear infinite;
+  opacity: 0.4;
+}
+
+.fog-layer.layer-2 {
+  animation-duration: 60s;
+  animation-direction: reverse;
+  opacity: 0.2;
+}
+
+@keyframes drift {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0%); }
 }
 
 .orbit-ring {
@@ -203,6 +241,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 10; /* Above fog */
 }
 
 .planet {
@@ -219,7 +258,12 @@
 .planet:hover {
   border-color: var(--accent-primary);
   transform: scale(1.2);
-  z-index: 10;
+  z-index: 20;
+}
+
+/* Devicon icon styling */
+.planet i {
+  font-size: 24px;
 }
 
 .sun-core {
@@ -233,5 +277,5 @@
   justify-content: center;
   align-items: center;
   color: white;
-  z-index: 5;
+  z-index: 15;
 }

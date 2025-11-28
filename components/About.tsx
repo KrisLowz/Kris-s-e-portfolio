@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { Code2, Smartphone, Database, Terminal, Cpu, Layers, Globe, Server, Command } from 'lucide-react';
+import { Code2 } from 'lucide-react';
 
 declare global {
   interface Window {
     gsap: any;
+    ScrollTrigger: any;
   }
 }
 
@@ -11,16 +12,28 @@ const About: React.FC = () => {
   const [avatarPopped, setAvatarPopped] = useState(false);
   const solarSystemRef = useRef<HTMLDivElement>(null);
 
-  const skills = [
-    { name: 'HTML', icon: Globe, ring: 1 },
-    { name: 'CSS', icon: Layers, ring: 1 },
-    { name: 'JS', icon: Code2, ring: 1 },
-    { name: 'Python', icon: Terminal, ring: 2 },
-    { name: 'Kotlin', icon: Smartphone, ring: 2 },
-    { name: 'SQL', icon: Database, ring: 2 },
-    { name: 'Django', icon: Server, ring: 3 },
-    { name: 'Firebase', icon: Cpu, ring: 3 },
-    { name: 'Oracle', icon: Command, ring: 3 },
+  // Devicon Skills
+  const innerRingSkills = [
+    { name: 'HTML5', iconClass: 'devicon-html5-plain colored' },
+    { name: 'CSS3', iconClass: 'devicon-css3-plain colored' },
+    { name: 'JavaScript', iconClass: 'devicon-javascript-plain colored' },
+    { name: 'Python', iconClass: 'devicon-python-plain colored' },
+    { name: 'Java', iconClass: 'devicon-java-plain colored' },
+    { name: 'C++', iconClass: 'devicon-cplusplus-plain colored' },
+    { name: 'C#', iconClass: 'devicon-csharp-plain colored' },
+    { name: 'SQL', iconClass: 'devicon-mysql-plain colored' },
+  ];
+
+  const outerRingSkills = [
+    { name: 'Django', iconClass: 'devicon-django-plain colored' },
+    { name: 'Flask', iconClass: 'devicon-flask-original colored' },
+    { name: 'PostgreSQL', iconClass: 'devicon-postgresql-plain colored' },
+    { name: 'Firebase', iconClass: 'devicon-firebase-plain colored' },
+    { name: 'Kotlin', iconClass: 'devicon-kotlin-plain colored' },
+    { name: 'Flutter', iconClass: 'devicon-flutter-plain colored' },
+    { name: 'Android', iconClass: 'devicon-android-plain colored' },
+    { name: 'Git', iconClass: 'devicon-git-plain colored' },
+    { name: 'VS Code', iconClass: 'devicon-vscode-plain colored' },
   ];
 
   const handleAvatarClick = () => {
@@ -29,29 +42,32 @@ const About: React.FC = () => {
   };
 
   useEffect(() => {
+    if (window.gsap && window.ScrollTrigger) {
+      window.gsap.registerPlugin(window.ScrollTrigger);
+    }
+    
     if (!window.gsap) return;
 
     // Animate Solar System
-    // Ring rotations
-    window.gsap.to('.orbit-ring-1', { rotation: 360, duration: 20, repeat: -1, ease: 'linear' });
-    window.gsap.to('.orbit-ring-2', { rotation: -360, duration: 30, repeat: -1, ease: 'linear' });
-    window.gsap.to('.orbit-ring-3', { rotation: 360, duration: 40, repeat: -1, ease: 'linear' });
+    window.gsap.to('.orbit-ring-1', { rotation: 360, duration: 30, repeat: -1, ease: 'linear' });
+    window.gsap.to('.orbit-ring-2', { rotation: -360, duration: 45, repeat: -1, ease: 'linear' });
 
-    // Counter-rotate planets so icons stay upright
-    window.gsap.to('.planet-inner-1', { rotation: -360, duration: 20, repeat: -1, ease: 'linear' });
-    window.gsap.to('.planet-inner-2', { rotation: 360, duration: 30, repeat: -1, ease: 'linear' });
-    window.gsap.to('.planet-inner-3', { rotation: -360, duration: 40, repeat: -1, ease: 'linear' });
+    // Counter-rotate planets
+    window.gsap.to('.planet-inner-1', { rotation: -360, duration: 30, repeat: -1, ease: 'linear' });
+    window.gsap.to('.planet-inner-2', { rotation: 360, duration: 45, repeat: -1, ease: 'linear' });
 
     // Background Reveal Animation
     window.gsap.fromTo('.solar-bg-text', 
       { opacity: 0, scale: 0.8 },
       { 
-        opacity: 0.05, 
+        opacity: 0.15, 
         scale: 1, 
-        duration: 2, 
+        duration: 1.5, 
         scrollTrigger: {
           trigger: '.solar-system-container',
-          start: 'top center'
+          start: 'top 70%',
+          end: 'bottom center',
+          scrub: 1
         }
       }
     );
@@ -87,22 +103,16 @@ const About: React.FC = () => {
                  className={`relative w-24 h-24 cursor-pointer avatar-float ${avatarPopped ? 'pop-effect' : ''}`}
                  onClick={handleAvatarClick}
                >
-                 {/* Thought Bubble */}
                  <div className={`absolute -top-10 -right-10 bg-pop-surface shadow-lg border border-pop-border rounded-xl px-3 py-2 text-xs font-bold text-pop-text-main transition-opacity duration-300 ${avatarPopped ? 'opacity-100' : 'opacity-0'}`}>
                    Let's Code! 🚀
                  </div>
-                 
-                 {/* Avatar Image (DiceBear) */}
                  <img 
                    src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" 
                    alt="Avatar" 
                    className="w-full h-full rounded-full border-4 border-pop-surface shadow-xl"
                  />
-                 
-                 {/* Status Dot */}
                  <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-4 border-pop-surface rounded-full"></div>
                </div>
-               
                <div>
                  <p className="font-bold text-pop-text-main text-sm">Click me!</p>
                  <p className="text-pop-text-muted text-xs">I love building cool stuff.</p>
@@ -112,68 +122,64 @@ const About: React.FC = () => {
 
           {/* Skills Solar System */}
           <div className="solar-system-container" ref={solarSystemRef}>
-            <h1 className="solar-bg-text">FULLSTACK</h1>
+            {/* Fog Atmosphere */}
+            <div className="fog-wrapper">
+              <div className="fog-layer"></div>
+              <div className="fog-layer layer-2"></div>
+            </div>
+
+            {/* Background Text - BOLD & VISIBLE */}
+            <h1 className="solar-bg-text">SKILLS</h1>
             
             {/* Sun Core */}
             <div className="sun-core">
               <Code2 className="w-8 h-8 text-white animate-pulse" />
             </div>
 
-            {/* Ring 1 */}
-            <div className="orbit-ring orbit-ring-1 w-[200px] h-[200px]">
-               {skills.filter(s => s.ring === 1).map((skill, i) => (
-                 <div 
-                   key={skill.name}
-                   className="planet"
-                   style={{ 
-                     width: '40px', 
-                     height: '40px',
-                     transform: `rotate(${i * 120}deg) translate(100px) rotate(-${i * 120}deg)` // Static initial position
-                   }}
-                 >
-                   <div className="planet-inner-1 p-2" title={skill.name}>
-                     <skill.icon className="w-5 h-5 text-pop-primary" />
+            {/* Ring 1 (Inner) */}
+            <div className="orbit-ring orbit-ring-1 w-[260px] h-[260px]">
+               {innerRingSkills.map((skill, i) => {
+                 const count = innerRingSkills.length;
+                 const angle = (360 / count) * i;
+                 return (
+                   <div 
+                     key={skill.name}
+                     className="planet"
+                     style={{ 
+                       width: '44px', 
+                       height: '44px',
+                       transform: `rotate(${angle}deg) translate(130px) rotate(-${angle}deg)`
+                     }}
+                   >
+                     <div className="planet-inner-1 flex items-center justify-center w-full h-full" title={skill.name}>
+                       <i className={`${skill.iconClass} text-xl`} />
+                     </div>
                    </div>
-                 </div>
-               ))}
+                 );
+               })}
             </div>
 
-            {/* Ring 2 */}
-            <div className="orbit-ring orbit-ring-2 w-[340px] h-[340px]">
-               {skills.filter(s => s.ring === 2).map((skill, i) => (
-                 <div 
-                   key={skill.name}
-                   className="planet"
-                   style={{ 
-                     width: '50px', 
-                     height: '50px',
-                     transform: `rotate(${i * 120 + 45}deg) translate(170px) rotate(-${i * 120 + 45}deg)`
-                   }}
-                 >
-                   <div className="planet-inner-2 p-2.5" title={skill.name}>
-                     <skill.icon className="w-6 h-6 text-pop-secondary" />
+            {/* Ring 2 (Outer) */}
+            <div className="orbit-ring orbit-ring-2 w-[420px] h-[420px]">
+               {outerRingSkills.map((skill, i) => {
+                 const count = outerRingSkills.length;
+                 const angle = (360 / count) * i;
+                 return (
+                   <div 
+                     key={skill.name}
+                     className="planet"
+                     style={{ 
+                       width: '50px', 
+                       height: '50px',
+                       transform: `rotate(${angle + 20}deg) translate(210px) rotate(-${angle + 20}deg)`
+                     }}
+                   >
+                     <div className="planet-inner-2 flex items-center justify-center w-full h-full" title={skill.name}>
+                       <i className={`${skill.iconClass} text-2xl`} />
+                     </div>
                    </div>
-                 </div>
-               ))}
-            </div>
-
-             {/* Ring 3 */}
-             <div className="orbit-ring orbit-ring-3 w-[480px] h-[480px]">
-               {skills.filter(s => s.ring === 3).map((skill, i) => (
-                 <div 
-                   key={skill.name}
-                   className="planet"
-                   style={{ 
-                     width: '45px', 
-                     height: '45px',
-                     transform: `rotate(${i * 120 + 90}deg) translate(240px) rotate(-${i * 120 + 90}deg)`
-                   }}
-                 >
-                   <div className="planet-inner-3 p-2" title={skill.name}>
-                     <skill.icon className="w-5 h-5 text-emerald-500" />
-                   </div>
-                 </div>
-               ))}
+                 );
+               })}
             </div>
 
           </div>
