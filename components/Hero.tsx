@@ -71,9 +71,13 @@ const Hero: React.FC = () => {
             </MagneticButton>
             
             <MagneticButton className="px-8 py-4 bg-pop-surface text-pop-text-main font-bold rounded-full shadow-md border border-pop-border hover:border-pop-primary transition-all flex items-center gap-2">
-              <span onClick={() => alert("Resume downloading...")} className="flex items-center gap-2">
-                 Download CV <Download className="w-4 h-4" />
-              </span>
+              <a 
+                href="https://drive.google.com/file/d/1o6RSy9MJDvYwHtKJq0QmLbf6vui4sNPp/view?usp=drive_link" 
+                download 
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                Download CV <Download className="w-4 h-4" />
+              </a>
             </MagneticButton>
           </div>
 
