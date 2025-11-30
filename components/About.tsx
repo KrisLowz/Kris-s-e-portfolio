@@ -91,10 +91,10 @@ const About: React.FC = () => {
             <div className="space-y-6 text-pop-text-muted text-lg leading-relaxed mb-8">
               <p>
                 I'm a software developer who believes that great code should be invisible to the user. 
-                Whether it's a mobile app or an enterprise ERP, the experience should be fluid, intuitive, and reliable.
+                Whether it's a mobile app or website/webpage, the experience should be fluid, intuitive, and reliable.
               </p>
               <p>
-                Currently finishing my degree at <strong>Swinburne University</strong>, I've already helped businesses solve real-world logistic challenges through my award-winning work.
+                Currently final semester (Internship) of my degree at <strong>Swinburne University of Technology</strong>, I've already helped businesses solve real-world logistic challenges through my award-winning work.
               </p>
             </div>
 
