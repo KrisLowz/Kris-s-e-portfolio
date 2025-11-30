@@ -8,7 +8,7 @@ export const PROFILE = {
   email: "horuslow0218@gmail.com", // Placeholder
   social: {
     github: "https://github.com/KrisLowz",
-    linkedin: "www.linkedin.com/in/lowcheefei"
+    linkedin: "https://www.linkedin.com/in/lowcheefei/"
   }
 };
 
