@@ -36,7 +36,7 @@ const Contact: React.FC = () => {
                   <div className="p-2 bg-white/10 rounded-full">
                     <MapPin className="w-5 h-5" />
                   </div>
-                  <span className="font-medium">Melbourne, Australia</span>
+                  <span className="font-medium">Petaling Jaya, Selangor.</span>
                 </div>
               </div>
             </div>
