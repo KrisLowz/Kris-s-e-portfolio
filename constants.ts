@@ -5,10 +5,10 @@ export const PROFILE = {
   title: "Software Developer",
   headline: "Bridging Mobile Innovation with Enterprise Solutions",
   bio: `I am a Computer Science graduate from Swinburne University (Class of 2025) specializing in Software Development. With a strong foundation in both mobile application development and enterprise ERP implementation, I bridge the gap between user-centric design and robust backend systems. My passion lies in solving real-world inefficiencies through technology, demonstrated by my award-winning final year project.`,
-  email: "cheefei.low@example.com", // Placeholder
+  email: "horuslow0218@gmail.com", // Placeholder
   social: {
-    github: "https://github.com",
-    linkedin: "https://linkedin.com"
+    github: "https://github.com/KrisLowz",
+    linkedin: "www.linkedin.com/in/lowcheefei"
   }
 };
 
@@ -93,17 +93,17 @@ export const PROJECTS: Project[] = [
 export const EXPERIENCE: ExperienceItem[] = [
   {
     id: "one-erp",
-    role: "Intern - Software Implementation",
-    company: "ONE ERP SOLUTIONS",
-    period: "2023 - 2024",
+    role: "Intern - ERP Consultant",
+    company: "ONE ERP SOLUTIONS SDN BHD",
+    period: "Jan - March 2023",
     description: "Contributed to the implementation lifecycle of Oracle JD Edwards (JDE) ERP systems.",
     skills: ["Oracle JDE", "Database Management", "Client Communication"]
   },
   {
     id: "ds-home",
-    role: "Logistic Administrator",
+    role: "Logistic Admin",
     company: "DS HOME",
-    period: "2022 - 2023",
+    period: "2019 - 2020",
     description: "Managed inventory logistics and optimized delivery schedules to ensure timely fulfillment.",
     skills: ["Logistics Management", "Data Entry", "Scheduling"]
   }
