@@ -12,29 +12,14 @@ export const PROFILE = {
   }
 };
 
-export const SKILLS: SkillCategory[] = [
-  {
-    title: "Languages",
-    skills: ["Kotlin", "Python", "JavaScript", "TypeScript", "HTML5", "CSS3", "SQL"]
-  },
-  {
-    title: "Frameworks & Tools",
-    skills: ["Django", "React", "Firebase", "MySQL Workbench", "Git", "Tailwind CSS"]
-  },
-  {
-    title: "Enterprise Systems",
-    skills: ["Oracle JD Edwards (JDE)", "ERP Implementation", "System Integration"]
-  }
-];
-
 export const PROJECTS: Project[] = [
   {
     id: "trackpoint",
     title: "TrackPoint",
-    subtitle: "Sales Performance & GPS Tracker",
+    subtitle: "Sales Performance Tracker",
     description: "A mobile solution developed for HuaChang Growmax to modernize their order management and logistics tracking.",
     tags: ["Kotlin", "Firebase", "Android", "Google Maps API"],
-    image: "https://picsum.photos/800/450?grayscale",
+    image: "src/assets/TrackPoint.png",
     achievements: [
       "🏆 Awarded 'Best Project on Display' at ICT Tradeshow 2025.",
       "Solved critical client inefficiency by digitizing paper-based order tracking.",
@@ -61,10 +46,10 @@ export const PROJECTS: Project[] = [
   {
     id: "cinemate",
     title: "Cinemate",
-    subtitle: "AI-Powered Movie Recommendation",
+    subtitle: "Movie Recommendation System",
     description: "A sophisticated web application that provides personalized movie suggestions using sentiment analysis and external data sources.",
     tags: ["Python", "Django", "JavaScript", "TMDB API", "NLP"],
-    image: "https://picsum.photos/800/451?grayscale",
+    image: "src/assets/Cinemate.png",
     achievements: [
       "⭐ Achieved Grade A for technical complexity and user experience.",
       "Integrated TMDB API for real-time movie metadata.",
@@ -98,15 +83,15 @@ export const EXPERIENCE: ExperienceItem[] = [
     period: "Jan - March 2023",
     description: "Contributed to the implementation lifecycle of Oracle JD Edwards (JDE) ERP systems.",
     skills: ["Oracle JDE", "Database Management", "Client Communication"]
-  },
-  {
-    id: "ds-home",
-    role: "Logistic Admin",
-    company: "DS HOME",
-    period: "2019 - 2020",
-    description: "Managed inventory logistics and optimized delivery schedules to ensure timely fulfillment.",
-    skills: ["Logistics Management", "Data Entry", "Scheduling"]
   }
+  // {
+  //   id: "ds-home",
+  //   role: "Logistic Admin",
+  //   company: "DS HOME",
+  //   period: "2019 - 2020",
+  //   description: "Managed inventory logistics and optimized delivery schedules to ensure timely fulfillment.",
+  //   skills: ["Logistics Management", "Data Entry", "Scheduling"]
+  // }
 ];
 
 export const SYSTEM_INSTRUCTION = `

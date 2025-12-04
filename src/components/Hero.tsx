@@ -5,6 +5,12 @@ import MagneticButton from './MagneticButton';
 
 declare var Typed: any;
 
+// Example: display a local image placed in `src/assets`
+// 1. Put your image file at `src/assets/profile.jpg` (or any name)
+// 2. Import it like this (uncomment the next line after you add the file):
+// import profileImg from '../assets/profile.jpg';
+// 3. Use it in JSX: <img src={profileImg} alt="Profile" className="w-48 h-48 rounded-full" />
+
 const Hero: React.FC = () => {
   const [loaded, setLoaded] = useState(false);
   const typeTarget = useRef<HTMLSpanElement>(null);

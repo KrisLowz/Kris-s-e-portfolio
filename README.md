@@ -18,3 +18,20 @@ View your app in AI Studio: https://ai.studio/apps/drive/1s3B32V8ka9CG5WwcAfrtac
 2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
 3. Run the app:
    `npm run dev`
+
+<!-- ### Using Local Images
+
+To add and display a local image in the app:
+
+- **Place the image:** put your image file under `src/assets/` (create the folder if missing).
+- **Import in a component:** inside a component (for example `src/components/Hero.tsx`) add:
+
+```tsx
+import profileImg from '../assets/profile.jpg';
+
+// Then in JSX:
+<img src={profileImg} alt="Profile" className="w-48 h-48 rounded-full" />
+```
+
+- **Tip:** Vite handles static imports, so importing the file as shown will return a URL string that works in the `src` attribute. -->
+
