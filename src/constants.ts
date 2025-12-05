@@ -19,7 +19,8 @@ export const PROJECTS: Project[] = [
     subtitle: "Sales Performance Tracker",
     description: "A mobile solution developed for HuaChang Growmax to modernize their order management and logistics tracking.",
     tags: ["Kotlin", "Firebase", "Android", "Google Maps API"],
-    image: "src/assets/TrackPoint.png",
+    // Serve images from the `public/assets` folder in production
+    image: "/assets/TrackPoint.png",
     achievements: [
       "🏆 Awarded 'Best Project on Display' at ICT Tradeshow 2025.",
       "Solved critical client inefficiency by digitizing paper-based order tracking.",
@@ -49,7 +50,7 @@ export const PROJECTS: Project[] = [
     subtitle: "Movie Recommendation System",
     description: "A sophisticated web application that provides personalized movie suggestions using sentiment analysis and external data sources.",
     tags: ["Python", "Django", "JavaScript", "TMDB API", "NLP"],
-    image: "src/assets/Cinemate.png",
+    image: "/assets/Cinemate.png",
     achievements: [
       "⭐ Achieved Grade A for technical complexity and user experience.",
       "Integrated TMDB API for real-time movie metadata.",

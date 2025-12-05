@@ -19,19 +19,18 @@ View your app in AI Studio: https://ai.studio/apps/drive/1s3B32V8ka9CG5WwcAfrtac
 3. Run the app:
    `npm run dev`
 
-<!-- ### Using Local Images
+### Using Local Images (Recommended for production)
 
-To add and display a local image in the app:
+For images that must load correctly on your live site, put them in the `public/assets` folder. Files in `public` are served statically at the website root, so they will work in both local dev and production builds.
 
-- **Place the image:** put your image file under `src/assets/` (create the folder if missing).
-- **Import in a component:** inside a component (for example `src/components/Hero.tsx`) add:
+- **Place the image:** add your files under `public/assets/`, e.g. `public/assets/TrackPoint.png`.
+- **Reference the image in code:** use an absolute path from the site root, e.g. `/assets/TrackPoint.png`.
 
-```tsx
-import profileImg from '../assets/profile.jpg';
+Example (in `src/constants.ts`):
 
-// Then in JSX:
-<img src={profileImg} alt="Profile" className="w-48 h-48 rounded-full" />
+```ts
+image: "/assets/TrackPoint.png",
 ```
 
-- **Tip:** Vite handles static imports, so importing the file as shown will return a URL string that works in the `src` attribute. -->
+If you prefer bundling images with the app (not in `public`), keep them in `src/assets` and import them directly in components. Bundled imports are resolved by Vite during build, but paths like `src/assets/...` in runtime strings will not work on deployed hosts.
 
