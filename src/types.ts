@@ -15,6 +15,7 @@ export interface Project {
   description: string;
   tags: string[];
   image: string;
+  screenshots?: string[];
   achievements: string[];
   overview: string;
   challenges: string[];

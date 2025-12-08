@@ -21,6 +21,21 @@ export const PROJECTS: Project[] = [
     tags: ["Kotlin", "Firebase", "Android", "Google Maps API"],
     // Serve images from the `public/assets` folder in production
     image: "/assets/TrackPoint.png",
+    screenshots: [
+      "/assets/TrackPoint_01_Login.png",
+      "/assets/TrackPoint_02_Dashboard.png",
+      "/assets/TrackPoint_03_Orders.png",
+      "/assets/TrackPoint_04_OrderDetails.png",
+      "/assets/TrackPoint_05_Map.png",
+      "/assets/TrackPoint_06_GPSTracking.png",
+      "/assets/TrackPoint_07_Delivery.png",
+      "/assets/TrackPoint_08_Analytics.png",
+      "/assets/TrackPoint_09_Reports.png",
+      "/assets/TrackPoint_10_Settings.png",
+      "/assets/TrackPoint_11_Profile.png",
+      "/assets/TrackPoint_12_Notifications.png",
+      "/assets/TrackPoint_13_SyncStatus.png"
+    ],
     achievements: [
       "🏆 Awarded 'Best Project on Display' at ICT Tradeshow 2025.",
       "Solved critical client inefficiency by digitizing paper-based order tracking.",
@@ -51,6 +66,25 @@ export const PROJECTS: Project[] = [
     description: "A sophisticated web application that provides personalized movie suggestions using sentiment analysis and external data sources.",
     tags: ["Python", "Django", "JavaScript", "TMDB API", "NLP"],
     image: "/assets/Cinemate.png",
+    screenshots: [
+      "/assets/Cinemate_01_Homepage.png",
+      "/assets/Cinemate_02_Search.png",
+      "/assets/Cinemate_03_Recommendations.png",
+      "/assets/Cinemate_04_MovieDetail.png",
+      "/assets/Cinemate_05_Reviews.png",
+      "/assets/Cinemate_06_SentimentAnalysis.png",
+      "/assets/Cinemate_07_WishList.png",
+      "/assets/Cinemate_08_UserProfile.png",
+      "/assets/Cinemate_09_Settings.png",
+      "/assets/Cinemate_10_About.png",
+      "/assets/Cinemate_11_Dashboard.png",
+      "/assets/Cinemate_12_Analytics.png",
+      "/assets/Cinemate_13_TrendingMovies.png",
+      "/assets/Cinemate_14_GenreFilter.png",
+      "/assets/Cinemate_15_SocialSharing.png",
+      "/assets/Cinemate_16_Notifications.png",
+      "/assets/Cinemate_17_HelpSupport.png"
+    ],
     achievements: [
       "⭐ Achieved Grade A for technical complexity and user experience.",
       "Integrated TMDB API for real-time movie metadata.",
@@ -72,6 +106,53 @@ export const PROJECTS: Project[] = [
       { category: "Backend", tools: ["Python", "Django MTV", "SQLite"] },
       { category: "AI / ML", tools: ["NLTK", "TextBlob", "Scikit-learn"] },
       { category: "Data Sources", tools: ["TMDB API", "RESTful Services"] }
+    ]
+  },
+  {
+    id: "splashaquatics",
+    title: "Splash Aquatics",
+    subtitle: "Online Aquarium Store",
+    description: "A full-stack e-commerce platform for aquarium enthusiasts to purchase supplies and manage their aquatic setups.",
+    tags: ["Python", "Flask", "JavaScript", "CSS", "MySQL"],
+    image: "/assets/SplashAquatics.png",
+    screenshots: [
+      "/assets/SplashAquatics_01_Homepage.png",
+      "/assets/SplashAquatics_02_Classes.png",
+      "/assets/SplashAquatics_03_Schedule.png",
+      "/assets/SplashAquatics_04_Instructors.png",
+      "/assets/SplashAquatics_05_About.png",
+      "/assets/SplashAquatics_06_ClassDetail.png",
+      "/assets/SplashAquatics_07_Booking.png",
+      "/assets/SplashAquatics_08_MemberProfile.png",
+      "/assets/SplashAquatics_09_Pricing.png",
+      "/assets/SplashAquatics_10_Reviews.png",
+      "/assets/SplashAquatics_11_Gallery.png",
+      "/assets/SplashAquatics_12_Contact.png",
+      "/assets/SplashAquatics_13_FAQ.png",
+      "/assets/SplashAquatics_14_Payment.png",
+      "/assets/SplashAquatics_15_Confirmation.png"
+    ],
+    achievements: [
+      "⭐ Achieved Distinction grade from the Managing Software Project subject.",
+      "Innovated a user-friendly interface tailored for aquarium hobbyists.",
+      "Fish tank builder feature enhanced user engagement, fish compatibility checks improved customer satisfaction."
+    ],
+    overview: "Splashaquatics is a comprehensive online store designed for aquarium enthusiasts, offering a wide range of products and tools to manage aquatic setups effectively. The platform combines e-commerce functionality with specialized features like a fish tank builder to enhance user experience.",
+    challenges: [
+      "Customers found it difficult to select compatible fish and equipment for their aquariums.",
+      "Lack of an intuitive interface led to lower user engagement and higher bounce rates.",
+      "Managing inventory and ensuring timely delivery was complex and prone to errors."
+    ],
+    solutions: [
+      "Developed a fish tank builder tool that allows users to design their aquariums and receive compatibility recommendations for fish and equipment.",
+      "Implemented a clean, responsive UI using Flask and JavaScript to enhance user experience and engagement.",
+      "Optimized inventory management and streamlined delivery processes to reduce errors and improve efficiency."
+    ],
+    techStackDetails: [
+      { category: "Frontend", tools: ["HTML5", "CSS", "JavaScript"] },
+      { category: "Backend", tools: ["Python", "Flask", "MySQL"] },
+      { category: "AI / ML", tools: ["Custom Algorithms", "Chatbot"] },
+      { category: "Data Sources", tools: ["RESTful Services"] }
     ]
   }
 ];

@@ -108,7 +108,7 @@ const About: React.FC = () => {
                    Let's Code! 🚀
                  </div>
                  <img 
-                   src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix&backgroundColor=b6e3f4" 
+                   src="/assets/ME.png" 
                    alt="Avatar" 
                    className="w-full h-full rounded-full border-4 border-pop-surface shadow-xl"
                  />
