@@ -14,6 +14,9 @@ import MeteorShower from './components/MeteorShower';
 import FogBackground from './components/FogBackground';
 import ProfessionalSkills from './components/ProfessionalSkills';
 import CustomCursor from './components/CustomCursor';
+import ScrollProgressBar from './components/ScrollProgressBar';
+import SectionHoverGlow from './components/SectionHoverGlow';
+import ScrollRippleEffect from './components/ScrollRippleEffect';
 
 declare global {
   interface Window {
@@ -56,6 +59,9 @@ const App: React.FC = () => {
   return (
     <main className="relative min-h-screen text-pop-text-main font-sans selection:bg-pop-primary selection:text-white transition-colors duration-300 cursor-none">
       <CustomCursor />
+      <ScrollProgressBar />
+      <SectionHoverGlow />
+      <ScrollRippleEffect />
       <FogBackground />
       <MeshBackground />
       <WireframeGlobe />
