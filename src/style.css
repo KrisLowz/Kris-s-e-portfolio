@@ -93,6 +93,11 @@
   transform: translateZ(20px);
 }
 
+/* Deeper pop layer for badges/accents that should float above a tilting card. */
+.tilt-pop {
+  transform: translateZ(45px);
+}
+
 /* 3D scene DOM fallback: theme-aware gradient backdrop. Shown when the WebGL
    scene is gated off (reduced-motion / no-WebGL / low-power / mobile), and
    painted behind the canvas so there is never a blank flash before init.

@@ -63,7 +63,7 @@ const About: React.FC = () => {
           </div>
 
           {/* Skills Solar System */}
-          <div className="solar-system-container">
+          <div data-speed="1.12" className="solar-system-container">
             
             {/* Background Text - BOLD & VISIBLE */}
             <h1 className="solar-bg-text">SKILLS</h1>

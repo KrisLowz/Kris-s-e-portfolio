@@ -28,7 +28,7 @@ const ProjectsShowcase: React.FC = () => {
     <section id="projects" data-tint="#c084fc" className="py-32 relative">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
-        <div className="mb-20 text-center">
+        <div data-speed="0.88" className="mb-20 text-center">
           <div data-anim="pop" data-scramble className="inline-block px-4 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-bold mb-4">
             Featured Work
           </div>
@@ -62,7 +62,7 @@ const ProjectsShowcase: React.FC = () => {
                   />
                   
                   {/* Floating Badge */}
-                  <div className="absolute top-4 right-4 flex gap-2">
+                  <div className="tilt-pop absolute top-4 right-4 flex gap-2">
                     {project.id === 'trackpoint' && (
                       <span className="px-3 py-1 bg-white/90 backdrop-blur text-yellow-600 shadow-sm text-xs font-bold rounded-full flex items-center gap-1">
                         <Award className="w-3 h-3" /> Awarded
