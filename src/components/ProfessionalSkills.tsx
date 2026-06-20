@@ -42,36 +42,38 @@ const skills = [
 
 const ProfessionalSkills: React.FC = () => {
   return (
-    <section className="py-20 relative">
+    <section data-tint="#a78bfa" className="py-20 relative">
       <div className="max-w-6xl mx-auto px-6">
-        <div className="text-center mb-16 reveal-on-scroll">
-           <div className="inline-block px-4 py-1 bg-pop-surface-2 border border-pop-border rounded-full text-xs font-bold mb-4 tracking-wide uppercase text-pop-text-muted">
+        <div className="text-center mb-16">
+           <div data-anim="pop" className="inline-block px-4 py-1 bg-pop-surface-2 border border-pop-border rounded-full text-xs font-bold mb-4 tracking-wide uppercase text-pop-text-muted">
              Beyond the Code
            </div>
-           <h2 className="text-3xl md:text-4xl font-extrabold text-pop-text-main">
+           <h2 data-anim="words" className="text-3xl md:text-4xl font-extrabold text-pop-text-main">
              Professional Skills
            </h2>
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div data-stagger="0.08" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {skills.map((skill, idx) => (
-            <div key={idx} className="h-48 cursor-pointer reveal-on-scroll">
+            <div key={idx} data-anim="scale" className="h-48 cursor-pointer [perspective:1200px]">
               <SpotlightCard className="skill-card-inner relative w-full h-full bg-pop-surface border border-pop-border rounded-2xl shadow-sm hover:shadow-lg transition-all group overflow-hidden">
-                
-                {/* Front (Visible by default) */}
-                <div className="absolute inset-0 flex flex-col justify-center items-center p-4 text-center transition-opacity duration-300 group-hover:opacity-0">
-                  <div className="mb-4 p-3 bg-pop-surface-2 rounded-full">
-                    {skill.icon}
-                  </div>
-                  <h3 className="font-bold text-pop-text-main">{skill.title}</h3>
-                </div>
 
-                {/* Back (Visible on hover via simple opacity fade for cleaner spotlight effect) */}
-                <div className="absolute inset-0 flex flex-col justify-center items-center p-4 text-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-pop-surface-2">
-                   <h3 className="font-bold text-pop-primary text-sm mb-2">{skill.title}</h3>
-                   <p className="text-xs text-pop-text-muted leading-relaxed">
-                     {skill.desc}
-                   </p>
+                <div className="skill-flip relative w-full h-full">
+                  {/* Front face */}
+                  <div className="skill-face absolute inset-0 flex flex-col justify-center items-center p-4 text-center">
+                    <div data-anim="pop" data-delay="0.15" className="mb-4 p-3 bg-pop-surface-2 rounded-full">
+                      {skill.icon}
+                    </div>
+                    <h3 className="font-bold text-pop-text-main">{skill.title}</h3>
+                  </div>
+
+                  {/* Back face (revealed by the 3D flip on hover) */}
+                  <div className="skill-face skill-face-back absolute inset-0 flex flex-col justify-center items-center p-4 text-center bg-pop-surface-2 rounded-2xl">
+                     <h3 className="font-bold text-pop-primary text-sm mb-2">{skill.title}</h3>
+                     <p className="text-xs text-pop-text-muted leading-relaxed">
+                       {skill.desc}
+                     </p>
+                  </div>
                 </div>
 
               </SpotlightCard>

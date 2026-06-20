@@ -1,48 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PROJECTS } from '../constants';
 import { Award, Star, ArrowUpRight } from 'lucide-react';
 import { Project } from '../types';
 import ProjectModal from './ProjectModal';
 import SpotlightCard from './SpotlightCard';
+import { applyTilt } from '../animations';
 
 const ProjectsShowcase: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 3D Tilt Effect Logic for Mouse Movement
-    const handleTilt = (e: MouseEvent) => {
-      const card = e.currentTarget as HTMLElement;
-      const rect = card.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      
-      const centerX = rect.width / 2;
-      const centerY = rect.height / 2;
-      
-      const rotateX = ((y - centerY) / centerY) * -5;
-      const rotateY = ((x - centerX) / centerX) * 5;
-
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-    };
-
-    const resetTilt = (e: MouseEvent) => {
-      const card = e.currentTarget as HTMLElement;
-      card.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)';
-    };
-
-    const cards = document.querySelectorAll('.tilt-enabled');
-    cards.forEach(card => {
-      card.addEventListener('mousemove', handleTilt as EventListener);
-      card.addEventListener('mouseleave', resetTilt as EventListener);
-    });
-
-    return () => {
-      cards.forEach(card => {
-        card.removeEventListener('mousemove', handleTilt as EventListener);
-        card.removeEventListener('mouseleave', resetTilt as EventListener);
-      });
-    };
+    // 3D pointer tilt per card (gsap quickTo, see animations/tilt.ts).
+    const cards = gridRef.current?.querySelectorAll<HTMLElement>('[data-project-card]') ?? [];
+    const cleanups = Array.from(cards).map((card) => applyTilt(card));
+    return () => cleanups.forEach((fn) => fn());
   }, []);
 
   const openDetailModal = (project: Project) => {
@@ -51,28 +24,29 @@ const ProjectsShowcase: React.FC = () => {
   };
 
   return (
-    <section id="projects" className="py-32 relative">
+    <section id="projects" data-tint="#c084fc" className="py-32 relative">
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
-        <div className="mb-20 text-center reveal-on-scroll">
-          <div className="inline-block px-4 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-bold mb-4">
+        <div className="mb-20 text-center">
+          <div data-anim="pop" className="inline-block px-4 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-bold mb-4">
             Featured Work
           </div>
-          <h2 className="text-4xl md:text-5xl font-extrabold text-pop-text-main mb-6">
+          <h2 data-anim="words" className="text-4xl md:text-5xl font-extrabold text-pop-text-main mb-6">
             Selected Projects
           </h2>
-          <p className="text-pop-text-muted max-w-2xl mx-auto text-lg">
+          <p data-anim="fade-up" className="text-pop-text-muted max-w-2xl mx-auto text-lg">
             A curation of my best work in mobile and web development. Click any project to view details or screenshots.
           </p>
         </div>
 
         {/* Projects Grid */}
-        <div className="grid md:grid-cols-2 gap-10 perspective-1000">
+        <div ref={gridRef} data-projects-grid className="grid md:grid-cols-2 gap-10 [perspective:1200px]">
           {PROJECTS.map((project) => (
-            <SpotlightCard 
+            <SpotlightCard
               key={project.id}
+              data-project-card=""
               onClick={() => openDetailModal(project)}
-              className="reveal-on-scroll tilt-enabled rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group bg-pop-surface/40 border border-pop-border"
+              className="rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group bg-pop-surface/40 border border-pop-border"
             >
                 {/* Image Area */}
                 <div className="relative h-64 overflow-hidden bg-pop-surface-2 tilt-card-inner">

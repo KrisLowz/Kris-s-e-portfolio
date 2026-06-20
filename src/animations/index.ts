@@ -18,15 +18,15 @@ import { runIntro, revertIntroSplits } from './intro';
 
 export { CONFIG } from './config';
 export { applyMagnetic } from './magnetic';
+export { applyTilt } from './tilt';
 export { gsap } from './register';
-
-let booted = false;
 
 export function useSiteAnimations() {
   useLayoutEffect(() => {
-    if (booted) return; // guard against StrictMode double-invoke
-    booted = true;
-
+    // Everything is created inside this gsap.context and reverted in cleanup, so
+    // a React StrictMode mount→revert→remount cycle re-initialises cleanly. (No
+    // persistent "handled" DOM state — see engine.ts — which is what makes the
+    // revert/recreate idempotent.)
     const ctx = gsap.context(() => {
       initSmoothScroll();
       initEngine();
@@ -48,7 +48,6 @@ export function useSiteAnimations() {
     window.addEventListener('resize', onResize);
 
     return () => {
-      booted = false;
       ctx.revert();
       revertSplits();
       revertIntroSplits();

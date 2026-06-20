@@ -101,7 +101,9 @@ html.anim-ready [data-anim] {
 }
 /* clip / draw effects manage their own visibility, so keep them painted. */
 html.anim-ready [data-anim="clip"],
-html.anim-ready [data-anim="draw"] {
+html.anim-ready [data-anim="clip-left"],
+html.anim-ready [data-anim="draw"],
+html.anim-ready [data-anim="draw-y"] {
   opacity: 1;
 }
 
@@ -397,6 +399,22 @@ html.anim-ready .reveal-on-scroll {
 
 .spotlight-card:hover::before {
   opacity: 1;
+}
+
+/* Skill card 3D flip (replaces the old opacity crossfade). */
+.skill-flip {
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.group:hover .skill-flip {
+  transform: rotateY(180deg);
+}
+.skill-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.skill-face-back {
+  transform: rotateY(180deg);
 }
 
 /* CUSTOM CURSOR */

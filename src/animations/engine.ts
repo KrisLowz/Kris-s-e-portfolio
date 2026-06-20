@@ -33,10 +33,12 @@ type AnimType =
   | 'scale'
   | 'pop'
   | 'clip'
+  | 'clip-left'
   | 'chars'
   | 'words'
   | 'lines'
-  | 'draw';
+  | 'draw'
+  | 'draw-y';
 
 function num(el: HTMLElement, attr: string, fallback: number): number {
   const v = el.getAttribute(attr);
@@ -84,10 +86,26 @@ function effectVars(el: HTMLElement, type: AnimType) {
           delay,
         },
       };
+    case 'clip-left':
+      return {
+        from: { autoAlpha: 1, clipPath: 'inset(0 100% 0 0)' },
+        to: {
+          autoAlpha: 1,
+          clipPath: 'inset(0 0% 0 0)',
+          duration: d || dur(CONFIG.duration.clip),
+          ease: CONFIG.ease.expo,
+          delay,
+        },
+      };
     case 'draw':
       return {
         from: { scaleX: 0, transformOrigin: 'left center', autoAlpha: 1 },
         to: { scaleX: 1, duration: d || dur(0.8), ease: CONFIG.ease.inOut, delay },
+      };
+    case 'draw-y':
+      return {
+        from: { scaleY: 0, transformOrigin: 'top center', autoAlpha: 1 },
+        to: { scaleY: 1, duration: d || dur(0.9), ease: CONFIG.ease.inOut, delay },
       };
     case 'fade-up':
     default:
@@ -141,7 +159,7 @@ function buildSplitReveal(el: HTMLElement, type: 'chars' | 'words' | 'lines') {
 }
 
 /** A stagger container: reveal its [data-anim] children with one trigger. */
-function buildStaggerContainer(container: HTMLElement) {
+function buildStaggerContainer(container: HTMLElement, claimed: Set<HTMLElement>) {
   const stagger = num(container, 'data-stagger', CONFIG.stagger.cards);
   const kids = Array.from(
     container.querySelectorAll<HTMLElement>(':scope [data-anim]')
@@ -154,7 +172,7 @@ function buildStaggerContainer(container: HTMLElement) {
     const type = (k.getAttribute('data-anim') || 'fade-up') as AnimType;
     const { from } = effectVars(k, type);
     gsap.set(k, from);
-    k.setAttribute('data-anim-handled', '');
+    claimed.add(k);
   });
 
   ScrollTrigger.create({
@@ -180,7 +198,6 @@ function buildStaggerContainer(container: HTMLElement) {
 /** Single-element reveal. */
 function buildReveal(el: HTMLElement) {
   const type = (el.getAttribute('data-anim') || 'fade-up') as AnimType;
-  el.setAttribute('data-anim-handled', '');
 
   if (type === 'chars' || type === 'words' || type === 'lines') {
     buildSplitReveal(el, type);
@@ -307,21 +324,25 @@ export function initEngine() {
   }
 
   if (CONFIG.toggles.reveals) {
-    // Stagger containers first; they mark their children as handled.
+    // Track elements claimed by stagger containers in a per-run Set (NOT a DOM
+    // attribute — an attribute would persist across gsap.context revert/recreate,
+    // e.g. React StrictMode remount, and silently skip every reveal on re-init).
+    const claimed = new Set<HTMLElement>();
+
     gsap
       .utils.toArray<HTMLElement>('[data-stagger]')
-      .forEach((c) => buildStaggerContainer(c));
+      .forEach((c) => buildStaggerContainer(c, claimed));
 
     gsap
       .utils.toArray<HTMLElement>('[data-anim]')
-      .filter((el) => !el.hasAttribute('data-anim-handled'))
+      .filter((el) => !claimed.has(el))
       .forEach((el) => buildReveal(el));
 
     // Legacy `.reveal-on-scroll` elements (not yet migrated) → default fade-up,
     // so nothing the CSS hid is ever left permanently invisible.
     gsap
       .utils.toArray<HTMLElement>('.reveal-on-scroll')
-      .filter((el) => !el.hasAttribute('data-anim-handled') && !el.hasAttribute('data-anim'))
+      .filter((el) => !claimed.has(el) && !el.hasAttribute('data-anim'))
       .forEach((el) => {
         el.setAttribute('data-anim', 'fade-up');
         buildReveal(el);
