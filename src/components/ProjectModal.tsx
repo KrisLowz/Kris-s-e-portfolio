@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, CheckCircle, AlertTriangle, Layers, ExternalLink, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react';
 import { Project } from '../types';
+import { gsap, getLenis, CONFIG } from '../animations';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -9,8 +11,12 @@ interface ProjectModalProps {
 }
 
 const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose }) => {
+  const [render, setRender] = useState(false);
   const [isGalleryMode, setIsGalleryMode] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const galleryImgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
@@ -20,25 +26,71 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
     return () => window.removeEventListener('keydown', handleEsc);
   }, [onClose]);
 
+  // Mount on open; stay mounted through the exit animation.
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-      // Reset to details page when modal closes
-      setIsGalleryMode(false);
-      setCurrentImageIndex(0);
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-    };
+    if (isOpen) setRender(true);
   }, [isOpen]);
 
-  // Reset gallery mode when project changes
+  // Reset gallery view when the project changes or the modal (re)opens.
   useEffect(() => {
     setIsGalleryMode(false);
     setCurrentImageIndex(0);
-  }, [project?.id]);
+  }, [project?.id, isOpen]);
+
+  // Open / close animation + scroll lock (pauses Lenis, not just body overflow).
+  useLayoutEffect(() => {
+    if (!render) return;
+    const lenis = getLenis();
+
+    if (isOpen) {
+      lenis?.stop();
+      document.body.style.overflow = 'hidden';
+      if (CONFIG.reducedMotion) {
+        gsap.set([backdropRef.current, panelRef.current], { autoAlpha: 1, clearProps: 'transform' });
+        return;
+      }
+      gsap.killTweensOf([backdropRef.current, panelRef.current]);
+      gsap.fromTo(backdropRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.3, ease: 'power2.out' });
+      gsap.fromTo(
+        panelRef.current,
+        { autoAlpha: 0, y: 40, scale: 0.96 },
+        { autoAlpha: 1, y: 0, scale: 1, duration: 0.5, ease: 'power3.out' }
+      );
+      const blocks = panelRef.current?.querySelectorAll('[data-modal-block]');
+      if (blocks?.length) {
+        gsap.fromTo(
+          blocks,
+          { autoAlpha: 0, y: 24 },
+          { autoAlpha: 1, y: 0, duration: 0.5, stagger: 0.07, delay: 0.15, ease: 'power3.out' }
+        );
+      }
+    } else {
+      const finish = () => {
+        lenis?.start();
+        document.body.style.overflow = 'unset';
+        setRender(false);
+      };
+      if (CONFIG.reducedMotion) {
+        finish();
+        return;
+      }
+      gsap.killTweensOf([backdropRef.current, panelRef.current]);
+      const tl = gsap.timeline({ onComplete: finish });
+      tl.to(panelRef.current, { autoAlpha: 0, y: 30, scale: 0.97, duration: 0.3, ease: 'power2.in' }, 0)
+        .to(backdropRef.current, { autoAlpha: 0, duration: 0.3, ease: 'power2.in' }, 0);
+    }
+  }, [isOpen, render]);
+
+  // Crossfade the gallery main image when the index changes.
+  useLayoutEffect(() => {
+    if (galleryImgRef.current && !CONFIG.reducedMotion) {
+      gsap.fromTo(
+        galleryImgRef.current,
+        { autoAlpha: 0, scale: 1.03 },
+        { autoAlpha: 1, scale: 1, duration: 0.4, ease: 'power2.out' }
+      );
+    }
+  }, [currentImageIndex, isGalleryMode]);
 
   const nextImage = () => {
     if (project?.screenshots) {
@@ -48,23 +100,24 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
 
   const prevImage = () => {
     if (project?.screenshots) {
-      setCurrentImageIndex((prev) => 
+      setCurrentImageIndex((prev) =>
         prev === 0 ? project.screenshots!.length - 1 : prev - 1
       );
     }
   };
 
-  if (!isOpen || !project) return null;
+  if (!render || !project) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-6">
       <div
-        className="absolute inset-0 bg-pop-text-main/20 backdrop-blur-sm transition-opacity duration-300"
+        ref={backdropRef}
+        className="absolute inset-0 bg-pop-text-main/20 backdrop-blur-sm"
         onClick={onClose}
       />
-      
-      <div className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-pop-surface rounded-3xl shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col custom-scrollbar">
-        
+
+      <div ref={panelRef} className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto bg-pop-surface rounded-3xl shadow-2xl flex flex-col custom-scrollbar">
+
         {/* Close Button */}
         <button
           onClick={onClose}
@@ -94,6 +147,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
               {(project.id === 'cinemate' || project.id === 'splashaquatics') ? (
                 <div className="w-full max-w-3xl rounded-2xl overflow-hidden bg-pop-surface-2 flex items-center justify-center border-2 border-pop-border" style={{height: '450px'}}>
                   <img
+                    ref={galleryImgRef}
                     src={project.screenshots[currentImageIndex]}
                     alt={`Screenshot ${currentImageIndex + 1}`}
                     className="w-full h-full object-contain"
@@ -103,6 +157,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                 /* Mobile projects - narrower, taller */
                 <div className="w-80 rounded-2xl overflow-hidden bg-pop-surface-2 flex items-center justify-center border-2 border-pop-border" style={{height: '700px'}}>
                   <img
+                    ref={galleryImgRef}
                     src={project.screenshots[currentImageIndex]}
                     alt={`Screenshot ${currentImageIndex + 1}`}
                     className="w-full h-full object-contain"
@@ -156,7 +211,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
         ) : (
           <>
             {/* Header Image Section */}
-            <div className="relative h-64 sm:h-80 w-full flex-shrink-0">
+            <div data-modal-block className="relative h-64 sm:h-80 w-full flex-shrink-0">
               <img
                 src={project.image}
                 alt={project.title}
@@ -174,7 +229,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
               
               {/* Screenshots Button - if screenshots exist */}
               {project.screenshots && project.screenshots.length > 0 && (
-                <div className="flex flex-col gap-3">
+                <div data-modal-block className="flex flex-col gap-3">
                   <button
                     onClick={() => {
                       setIsGalleryMode(true);
@@ -213,7 +268,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
               )}
               
               {/* Overview */}
-              <section>
+              <section data-modal-block>
                 <h3 className="text-xl font-bold text-pop-text-main mb-4">Overview</h3>
                 <p className="text-pop-text-muted leading-relaxed text-lg">
                   {project.overview}
@@ -221,7 +276,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
               </section>
 
               {/* Challenges vs Solutions */}
-              <div className="grid md:grid-cols-2 gap-8">
+              <div data-modal-block className="grid md:grid-cols-2 gap-8">
                 <section className="bg-red-50 dark:bg-red-900/20 p-6 rounded-2xl border border-red-100 dark:border-red-900/30">
                   <div className="flex items-center gap-2 mb-4 text-red-600 dark:text-red-400">
                     <AlertTriangle className="w-5 h-5" />
@@ -254,7 +309,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
           </div>
 
           {/* Tech Stack Grid */}
-          <section>
+          <section data-modal-block>
              <div className="flex items-center gap-2 mb-6 border-b border-pop-border pb-4">
                 <Layers className="w-5 h-5 text-pop-primary" />
                 <h3 className="text-xl font-bold text-pop-text-main">Tech Stack</h3>
@@ -279,10 +334,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
           </section>
 
           {/* External Link Footer */}
-          {project.link && (
-            <div className="pt-8 mt-8 border-t border-pop-border flex justify-end">
+          {(project as Project & { link?: string }).link && (
+            <div data-modal-block className="pt-8 mt-8 border-t border-pop-border flex justify-end">
               <a
-                href={project.link}
+                href={(project as Project & { link?: string }).link}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="px-8 py-4 bg-pop-primary text-white font-bold rounded-xl shadow-lg shadow-pop-primary/30 hover:bg-pop-primary/90 transition-colors flex items-center gap-2"
@@ -295,7 +350,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
           </>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

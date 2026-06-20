@@ -19,7 +19,8 @@ import { runIntro, revertIntroSplits } from './intro';
 export { CONFIG } from './config';
 export { applyMagnetic } from './magnetic';
 export { applyTilt } from './tilt';
-export { gsap } from './register';
+export { getLenis } from './smooth';
+export { gsap, ScrollTrigger } from './register';
 
 export function useSiteAnimations() {
   useLayoutEffect(() => {

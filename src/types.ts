@@ -34,7 +34,6 @@ export interface ExperienceItem {
 
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
+  role: 'user' | 'model';
+  text: string;
 }

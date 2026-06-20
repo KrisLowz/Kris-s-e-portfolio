@@ -1,73 +1,59 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
+import { gsap, ScrollTrigger, CONFIG } from '../animations';
 
-interface RippleEffect {
-  id: number;
-  x: number;
-  y: number;
-}
-
+/**
+ * Spawns an expanding ripple every ~200px scrolled. Rebuilt on GSAP (transform/
+ * opacity tween, one shared CSS class) — the old version injected a duplicate
+ * <style> keyframe block into every ripple and re-rendered React per spawn.
+ * Disabled under reduced motion.
+ */
 const ScrollRippleEffect: React.FC = () => {
-  const [ripples, setRipples] = useState<RippleEffect[]>([]);
-  const lastScrollRef = useRef(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScroll = window.scrollY;
-      const scrollDelta = Math.abs(currentScroll - lastScrollRef.current);
+  useLayoutEffect(() => {
+    if (CONFIG.reducedMotion || !CONFIG.toggles.scrollRipples) return;
+    const container = containerRef.current;
+    if (!container) return;
 
-      // Create ripple every 200px of scroll
-      if (scrollDelta > 200) {
-        const newRipple: RippleEffect = {
-          id: Math.random(),
-          x: Math.random() * window.innerWidth,
-          y: Math.random() * window.innerHeight * 0.3 + window.innerHeight * 0.3,
-        };
-        setRipples(prev => [...prev, newRipple]);
-
-        setTimeout(() => {
-          setRipples(prev => prev.filter(r => r.id !== newRipple.id));
-        }, 1200);
-
-        lastScrollRef.current = currentScroll;
-      }
+    let last = 0;
+    const spawn = () => {
+      const el = document.createElement('div');
+      el.className = 'scroll-ripple';
+      el.style.left = `${Math.random() * window.innerWidth}px`;
+      el.style.top = `${window.innerHeight * 0.3 + Math.random() * window.innerHeight * 0.3}px`;
+      container.appendChild(el);
+      gsap.fromTo(
+        el,
+        { scale: 1, autoAlpha: 0.6 },
+        {
+          scale: 3,
+          autoAlpha: 0,
+          duration: 1.2,
+          ease: 'power2.out',
+          onComplete: () => el.remove(),
+        }
+      );
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const st = ScrollTrigger.create({
+      start: 0,
+      end: 'max',
+      onUpdate: (self) => {
+        const cur = self.scroll();
+        if (Math.abs(cur - last) > 200) {
+          last = cur;
+          spawn();
+        }
+      },
+    });
+
+    return () => {
+      st.kill();
+      container.querySelectorAll('.scroll-ripple').forEach((n) => n.remove());
+    };
   }, []);
 
-  return (
-    <>
-      {ripples.map(ripple => (
-        <div
-          key={ripple.id}
-          className="fixed pointer-events-none"
-          style={{
-            left: `${ripple.x}px`,
-            top: `${ripple.y}px`,
-            width: '20px',
-            height: '20px',
-            border: '2px solid rgba(59, 130, 246, 0.6)',
-            borderRadius: '50%',
-            animation: `ripple-expand 1.2s ease-out forwards`,
-          }}
-        >
-          <style>{`
-            @keyframes ripple-expand {
-              0% {
-                transform: translate(-50%, -50%) scale(1);
-                opacity: 1;
-              }
-              100% {
-                transform: translate(-50%, -50%) scale(3);
-                opacity: 0;
-              }
-            }
-          `}</style>
-        </div>
-      ))}
-    </>
-  );
+  return <div ref={containerRef} className="fixed inset-0 pointer-events-none z-30" aria-hidden="true" />;
 };
 
 export default ScrollRippleEffect;

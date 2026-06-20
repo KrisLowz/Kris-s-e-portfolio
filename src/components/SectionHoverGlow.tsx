@@ -1,54 +1,61 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useLayoutEffect } from 'react';
+import { gsap, CONFIG } from '../animations';
 
+/**
+ * Soft accent glow that trails the cursor across the page (fine-pointer only).
+ * Rebuilt with gsap.quickTo + an idle-fade — the old version was dead code
+ * (no [data-glow-section] targets existed) and re-rendered React on every
+ * mousemove. Subtle by design; sits behind content.
+ */
 const SectionHoverGlow: React.FC = () => {
-  const [hoveredSection, setHoveredSection] = useState<string | null>(null);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (CONFIG.reducedMotion || CONFIG.isTouch || !window.matchMedia('(pointer: fine)').matches) {
+      return;
+    }
+
+    gsap.set(el, { xPercent: -50, yPercent: -50, autoAlpha: 0 });
+    const xTo = gsap.quickTo(el, 'x', { duration: 0.7, ease: 'power3' });
+    const yTo = gsap.quickTo(el, 'y', { duration: 0.7, ease: 'power3' });
+
+    let visible = false;
+    let idle: number | undefined;
+
+    const onMove = (e: MouseEvent) => {
+      xTo(e.clientX);
+      yTo(e.clientY);
+      if (!visible) {
+        visible = true;
+        gsap.to(el, { autoAlpha: 1, duration: 0.6, ease: 'power2.out' });
+      }
+      window.clearTimeout(idle);
+      idle = window.setTimeout(() => {
+        visible = false;
+        gsap.to(el, { autoAlpha: 0, duration: 0.8, ease: 'power2.out' });
+      }, 500);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-
-  useEffect(() => {
-    const sections = document.querySelectorAll('[data-glow-section]');
-    
-    sections.forEach((section) => {
-      section.addEventListener('mouseenter', () => {
-        const sectionId = section.getAttribute('data-glow-section');
-        setHoveredSection(sectionId);
-      });
-      
-      section.addEventListener('mouseleave', () => {
-        setHoveredSection(null);
-      });
-    });
-
+    window.addEventListener('mousemove', onMove, { passive: true });
     return () => {
-      sections.forEach((section) => {
-        section.removeEventListener('mouseenter', () => {});
-        section.removeEventListener('mouseleave', () => {});
-      });
+      window.removeEventListener('mousemove', onMove);
+      window.clearTimeout(idle);
     };
   }, []);
-
-  if (!hoveredSection) return null;
 
   return (
     <div
-      className="fixed pointer-events-none z-30"
+      ref={ref}
+      aria-hidden="true"
+      className="fixed top-0 left-0 pointer-events-none z-[1]"
       style={{
-        left: `${mousePos.x - 150}px`,
-        top: `${mousePos.y - 150}px`,
-        width: '300px',
-        height: '300px',
-        background: 'radial-gradient(circle, rgba(59, 130, 246, 0.2) 0%, transparent 70%)',
+        width: '500px',
+        height: '500px',
+        background: 'radial-gradient(circle, rgba(var(--spotlight-rgb), 0.12) 0%, transparent 65%)',
         borderRadius: '50%',
-        filter: 'blur(40px)',
-        transition: 'all 0.1s ease-out',
+        filter: 'blur(50px)',
       }}
     />
   );
