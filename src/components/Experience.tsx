@@ -1,5 +1,6 @@
 import React from 'react';
 import { EXPERIENCE } from '../constants';
+import { emitWorldFocus, emitWorldBlur } from '../scene/worldEvents';
 
 const Experience: React.FC = () => {
   return (
@@ -14,7 +15,13 @@ const Experience: React.FC = () => {
 
         <div className="space-y-8">
           {EXPERIENCE.map((exp, idx) => (
-            <div key={exp.id} className="group relative pl-8 border-l-2 border-pop-border pb-8 last:pb-0">
+            <div
+              key={exp.id}
+              data-exp-id={exp.id}
+              onMouseEnter={() => emitWorldFocus({ type: 'experience', id: exp.id })}
+              onMouseLeave={() => emitWorldBlur({ type: 'experience', id: exp.id })}
+              className="group relative pl-8 border-l-2 border-pop-border pb-8 last:pb-0"
+            >
 
               {/* Accent line that draws downward over the static border track */}
               <span data-anim="draw-y" className="absolute -left-[2px] top-0 w-[2px] h-full bg-pop-primary" />

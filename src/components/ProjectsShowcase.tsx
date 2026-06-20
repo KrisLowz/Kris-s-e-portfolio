@@ -5,6 +5,7 @@ import { Project } from '../types';
 import ProjectModal from './ProjectModal';
 import SpotlightCard from './SpotlightCard';
 import { applyTilt } from '../animations';
+import { emitWorldFocus, emitWorldBlur } from '../scene/worldEvents';
 
 const ProjectsShowcase: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -45,7 +46,10 @@ const ProjectsShowcase: React.FC = () => {
             <SpotlightCard
               key={project.id}
               data-project-card=""
+              data-project-id={project.id}
               onClick={() => openDetailModal(project)}
+              onMouseEnter={() => emitWorldFocus({ type: 'project', id: project.id })}
+              onMouseLeave={() => emitWorldBlur({ type: 'project', id: project.id })}
               className="rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group bg-pop-surface/55 backdrop-blur-md border border-pop-border"
             >
                 {/* Image Area */}
