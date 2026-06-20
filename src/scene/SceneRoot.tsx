@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { useThree } from '@react-three/fiber';
 import CameraRig from './CameraRig';
 import CoreObject from './objects/CoreObject';
 import ParticleField from './objects/ParticleField';
@@ -6,22 +8,30 @@ import MeteorField from './objects/MeteorField';
 import SkillNodes from './objects/SkillNodes';
 import ExperiencePath from './objects/ExperiencePath';
 import ProjectMonoliths from './objects/ProjectMonoliths';
+import Nebula from './objects/Nebula';
 import { useThemeColors } from './hooks/useThemeColors';
 
 /**
- * The in-canvas scene graph. Pulls the live theme colors once and passes them
- * (by reference) to every object, then composes the persistent cosmic world:
- * camera flight + star field + orbit rings + glowing core + meteors.
- *
- * The canvas is left transparent (no scene.background) so the theme-aware DOM
- * nebula gradient (SceneFallback / `.scene-fallback`) shows through behind the
- * 3D, giving colored depth instead of flat black.
+ * The in-canvas scene graph. The background is an OPAQUE theme color (not a
+ * transparent canvas) so additive blending composites correctly on every GPU;
+ * the Nebula clouds restore colored depth. All glow is baked into the materials
+ * (halos + additive), independent of the optional bloom pass.
  */
 export default function SceneRoot() {
   const theme = useThemeColors();
+  const scene = useThree((s) => s.scene);
+
+  useEffect(() => {
+    scene.background = theme.bg;
+    return () => {
+      scene.background = null;
+    };
+  }, [scene, theme]);
+
   return (
     <>
       <CameraRig />
+      <Nebula theme={theme} />
       <ParticleField theme={theme} />
       <OrbitRings theme={theme} />
       <SkillNodes theme={theme} />

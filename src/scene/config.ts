@@ -43,14 +43,25 @@ export const CURVE = {
  * DOM gradient fallback.
  */
 export const SCENE = {
-  core: { radius: 1.7, intensity: 3.2, displace: 0.16 },
-  particles: { count: 5000, innerRadius: 5, shell: 28, size: 0.7 },
+  // intensity is LDR-friendly now (glow is baked, not bloom-dependent); the halo
+  // is the soft aura around the core. Sizes are WORLD units (billboard quads).
+  core: {
+    radius: 1.7,
+    intensity: 1.5,
+    displace: 0.16,
+    haloScale: 5.5,
+    haloFalloff: 2.2,
+    haloStrength: 0.95,
+  },
+  particles: { count: 5000, innerRadius: 5, shell: 28, size: 0.1 },
   rings: [
     { count: 700, radius: 3.0, thickness: 0.14, tilt: 0.5 },
     { count: 550, radius: 4.2, thickness: 0.12, tilt: -0.35 },
     { count: 450, radius: 5.4, thickness: 0.1, tilt: 0.9 },
   ],
-  ringSize: 0.07,
+  ringSize: 0.06,
   meteors: { count: 3 },
-  bloom: { intensity: 1.3, threshold: 0.8, smoothing: 0.2 },
+  // Bloom is an OPTIONAL enhancement, only mounted when the GPU can render to a
+  // float buffer; the scene must look correct without it.
+  bloom: { intensity: 1.1, threshold: 0.8, smoothing: 0.2 },
 } as const;

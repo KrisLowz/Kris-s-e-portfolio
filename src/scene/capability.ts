@@ -44,6 +44,24 @@ export function isLowPower(): boolean {
 }
 
 /**
+ * True only if the GPU can render to a float/half-float color buffer, which the
+ * postprocessing bloom pass requires. Integrated GPUs often can't — there bloom
+ * is skipped and the baked-in glow (halos + additive) carries the look. Without
+ * this gate, an unsupported HDR target makes the whole scene clamp to black.
+ */
+export function supportsFloatBloom(): boolean {
+  if (typeof document === 'undefined') return false;
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2');
+    if (!gl) return false;
+    return !!gl.getExtension('EXT_color_buffer_float');
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Master gate. The scene mounts only when the central kill-switch is on, motion
  * is allowed, the device isn't mobile or low-power, and WebGL is available.
  * Pure read — safe to call once at mount.

@@ -1,15 +1,19 @@
 import { useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Billboard } from '@react-three/drei';
+import * as THREE from 'three';
 import vert from '../shaders/core.vert';
 import frag from '../shaders/core.frag';
+import haloVert from '../shaders/halo.vert';
+import haloFrag from '../shaders/halo.frag';
 import { SCENE } from '../config';
 import type { ThemeColors } from '../hooks/useThemeColors';
 
 /**
- * The central glowing energy core — a shader sphere with a fresnel HDR rim that
- * bloom picks up, gently pulsing/displacing over time. `toneMapped={false}` so
- * the >1 emissive colors survive into the bloom pass. Theme colors are passed
- * by reference, so the orb recolors live with the light/dark toggle.
+ * The central glowing core — a luminous LDR shader sphere wrapped in a soft
+ * additive "halo" billboard that fakes the bloom aura. The glow no longer
+ * depends on the postprocessing bloom pass, so it looks right on every GPU
+ * (bloom, when available, just adds extra sheen).
  */
 export default function CoreObject({ theme }: { theme: ThemeColors }) {
   const uniforms = useMemo(
@@ -23,19 +27,40 @@ export default function CoreObject({ theme }: { theme: ThemeColors }) {
     [theme]
   );
 
+  const haloUniforms = useMemo(
+    () => ({
+      uColor: { value: theme.primary },
+      uFalloff: { value: SCENE.core.haloFalloff },
+      uStrength: { value: SCENE.core.haloStrength },
+    }),
+    [theme]
+  );
+
   useFrame((_, delta) => {
     uniforms.uTime.value += delta;
   });
 
   return (
-    <mesh>
-      <sphereGeometry args={[SCENE.core.radius, 96, 96]} />
-      <shaderMaterial
-        vertexShader={vert}
-        fragmentShader={frag}
-        uniforms={uniforms}
-        toneMapped={false}
-      />
-    </mesh>
+    <group>
+      <Billboard>
+        <mesh scale={SCENE.core.haloScale}>
+          <planeGeometry args={[1, 1]} />
+          <shaderMaterial
+            vertexShader={haloVert}
+            fragmentShader={haloFrag}
+            uniforms={haloUniforms}
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            toneMapped={false}
+          />
+        </mesh>
+      </Billboard>
+
+      <mesh>
+        <sphereGeometry args={[SCENE.core.radius, 96, 96]} />
+        <shaderMaterial vertexShader={vert} fragmentShader={frag} uniforms={uniforms} toneMapped={false} />
+      </mesh>
+    </group>
   );
 }

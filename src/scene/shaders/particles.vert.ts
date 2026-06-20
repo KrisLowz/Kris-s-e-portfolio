@@ -1,24 +1,39 @@
-/** Particle vertex shader: slow drift + per-point twinkle, size-attenuated. */
+/**
+ * Instanced billboard vertex shader. Each particle is a camera-facing quad
+ * (NOT a gl.POINTS sprite — those render as squares on some Intel drivers).
+ * `position`/`uv` come from a unit plane; `aOffset`/`aScale`/`aPhase` are
+ * per-instance. The quad is built in world space facing the camera, so it works
+ * identically on every GPU.
+ */
 export default /* glsl */ `
 uniform float uTime;
 uniform float uSize;
+uniform float uDrift;
 
+attribute vec3 aOffset;
 attribute float aScale;
 attribute float aPhase;
 
+varying vec2 vUv;
 varying float vTwinkle;
 
 void main() {
-  vec3 pos = position;
+  vUv = uv;
 
-  // Very slow drift so the field feels alive without distracting.
-  pos.x += sin(uTime * 0.05 + aPhase) * 0.25;
-  pos.y += cos(uTime * 0.04 + aPhase) * 0.25;
+  vec3 offset = aOffset;
+  offset.x += sin(uTime * 0.05 + aPhase) * uDrift;
+  offset.y += cos(uTime * 0.04 + aPhase) * uDrift;
 
-  vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-  gl_Position = projectionMatrix * mv;
+  // World-space center of this instance (modelMatrix carries any parent rotation).
+  vec3 center = (modelMatrix * vec4(offset, 1.0)).xyz;
 
-  vTwinkle = 0.55 + 0.45 * sin(uTime * 1.5 + aPhase);
-  gl_PointSize = clamp(uSize * aScale * (100.0 / -mv.z), 1.0, 26.0);
+  // Camera basis vectors → billboard the quad toward the camera.
+  vec3 camRight = vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+  vec3 camUp = vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+  float size = uSize * aScale;
+  vec3 worldPos = center + (camRight * position.x + camUp * position.y) * size;
+
+  vTwinkle = 0.6 + 0.4 * sin(uTime * 1.5 + aPhase);
+  gl_Position = projectionMatrix * viewMatrix * vec4(worldPos, 1.0);
 }
 `;
