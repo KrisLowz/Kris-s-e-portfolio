@@ -42,7 +42,7 @@ export const CURVE = {
  */
 export const SCENE = {
   core: { radius: 1.7, intensity: 3.2, displace: 0.16 },
-  particles: { count: 20000, innerRadius: 5, shell: 28, size: 0.6 },
+  particles: { count: 12000, innerRadius: 5, shell: 28, size: 0.6 },
   rings: [
     { count: 1500, radius: 3.0, thickness: 0.14, tilt: 0.5 },
     { count: 1200, radius: 4.2, thickness: 0.12, tilt: -0.35 },
