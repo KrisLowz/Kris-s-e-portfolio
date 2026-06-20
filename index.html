@@ -11,11 +11,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Devicon CDN -->
-    <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+    <!-- Devicon CDN (used only by the below-fold skills icons → load async so it
+         doesn't block first paint). -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" /></noscript>
 
-    <!-- GSAP, ScrollTrigger, SplitText, Typed.js and Lenis now load from npm via Vite
-         (src/animations/*) — no CDN script tags. -->
+    <!-- GSAP, ScrollTrigger, SplitText, Typed.js, Lenis and Tailwind now build
+         from npm via Vite (no CDN scripts / no runtime Tailwind compile). -->
 
     <!-- No-FOUC guard: mark the document animation-ready ONLY when motion is
          allowed and JS runs. CSS then hides [data-anim] elements pre-reveal.
@@ -29,45 +31,6 @@
         } catch (e) {}
       })();
     </script>
-
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-        theme: {
-          extend: {
-            colors: {
-              'pop-bg': 'var(--bg-primary)',
-              'pop-surface': 'var(--bg-surface)',
-              'pop-surface-2': 'var(--bg-surface-2)',
-              'pop-text-main': 'var(--text-main)',
-              'pop-text-muted': 'var(--text-muted)',
-              'pop-border': 'var(--border-color)',
-              'pop-primary': 'var(--accent-primary)',
-              'pop-secondary': 'var(--accent-secondary)',
-            },
-            fontFamily: {
-              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-            },
-            animation: {
-              'blob': 'blob 10s infinite',
-            },
-            keyframes: {
-              blob: {
-                '0%': { transform: 'translate(0px, 0px) scale(1)' },
-                '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
-                '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
-                '100%': { transform: 'translate(0px, 0px) scale(1)' },
-              }
-            }
-          }
-        }
-      }
-    </script>
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="style.css">
   </head>
   <body class="bg-pop-bg text-pop-text-main antialiased overflow-x-hidden selection:bg-pop-primary selection:text-white transition-colors duration-300">
     <div id="root"></div>

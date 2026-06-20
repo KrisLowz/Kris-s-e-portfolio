@@ -59,13 +59,13 @@ export function runIntro(): Promise<void> {
       gsap.set(bar, { scaleX: 0, transformOrigin: 'left center' });
 
       master
-        .to(logo, { scale: 1, rotation: 0, duration: 0.7, ease: CONFIG.ease.pop })
-        .to(word, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.6, ease: 'power2.out' }, '-=0.3')
-        .to(bar, { scaleX: 1, duration: 0.9, ease: 'power2.inOut' }, '-=0.2')
-        .to([logo, word], { autoAlpha: 0, y: -20, duration: 0.4, ease: 'power2.in' }, '+=0.1')
+        .to(logo, { scale: 1, rotation: 0, duration: 0.5, ease: CONFIG.ease.pop })
+        .to(word, { autoAlpha: 1, y: 0, filter: 'blur(0px)', duration: 0.4, ease: 'power2.out' }, '-=0.25')
+        .to(bar, { scaleX: 1, duration: 0.5, ease: 'power2.inOut' }, '-=0.15')
+        .to([logo, word], { autoAlpha: 0, y: -20, duration: 0.3, ease: 'power2.in' }, '+=0.05')
         .to(preloader, {
           yPercent: -100,
-          duration: 0.9,
+          duration: 0.7,
           ease: 'expo.inOut',
           onComplete: () => gsap.set(preloader, { display: 'none' }),
         }, '-=0.1');

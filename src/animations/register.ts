@@ -6,14 +6,12 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import { Observer } from 'gsap/Observer';
-import { Flip } from 'gsap/Flip';
 
 let registered = false;
 
 export function registerGsap() {
   if (registered) return;
-  gsap.registerPlugin(ScrollTrigger, SplitText, Observer, Flip);
+  gsap.registerPlugin(ScrollTrigger, SplitText);
   registered = true;
 }
 
@@ -26,4 +24,4 @@ if (import.meta.env.DEV) {
   (window as unknown as Record<string, unknown>).ScrollTrigger = ScrollTrigger;
 }
 
-export { gsap, ScrollTrigger, SplitText, Observer, Flip };
+export { gsap, ScrollTrigger, SplitText };

@@ -1,11 +1,8 @@
-import { GoogleGenAI } from "@google/genai";
 import { SYSTEM_INSTRUCTION } from "../constants";
 
-// Initialize Gemini Client
 // Note: In a real production app, you might proxy this through a backend to hide the key,
 // but for a client-side demo/portfolio, we use the env var directly as per instructions.
-const apiKey = process.env.API_KEY || ''; 
-const ai = new GoogleGenAI({ apiKey });
+const apiKey = process.env.API_KEY || '';
 
 export const sendMessageToGemini = async (history: {role: string, parts: {text: string}[]}[], newMessage: string): Promise<string> => {
   if (!apiKey) {
@@ -13,8 +10,12 @@ export const sendMessageToGemini = async (history: {role: string, parts: {text: 
   }
 
   try {
+    // Code-split: the @google/genai SDK only loads when the visitor actually
+    // sends a chat message, keeping it out of the initial bundle.
+    const { GoogleGenAI } = await import("@google/genai");
+    const ai = new GoogleGenAI({ apiKey });
     const model = "gemini-2.5-flash";
-    
+
     const chat = ai.chats.create({
       model: model,
       config: {
