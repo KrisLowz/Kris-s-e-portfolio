@@ -89,11 +89,88 @@
   transform: translateZ(20px);
 }
 
-/* Animations */
-/* GSAP controls this now, but we set initial state */
-.reveal-on-scroll {
-  opacity: 0; 
-  /* transform is handled by GSAP */
+/* ============================================================================
+   ANIMATION LAYER (GSAP + Lenis) — see src/animations/
+   ========================================================================= */
+
+/* No-FOUC: hide animated elements ONLY when the document is animation-ready
+   (class added synchronously by the inline script in index.html, and only when
+   motion is allowed). If JS fails or reduced-motion is on, nothing is hidden. */
+html.anim-ready [data-anim] {
+  opacity: 0;
+}
+/* clip / draw effects manage their own visibility, so keep them painted. */
+html.anim-ready [data-anim="clip"],
+html.anim-ready [data-anim="draw"] {
+  opacity: 1;
+}
+
+/* Masked line/word/char containers created by SplitText. */
+.anim-line {
+  overflow: hidden;
+}
+
+/* Lenis smooth scroll. */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+/* Per-section tint layer (created by the engine), behind all content. */
+#section-tint {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-color: transparent;
+}
+
+/* Animated nav link underline + active state. */
+nav a[href^="#"].nav-underline {
+  position: relative;
+}
+nav a[href^="#"].nav-underline::after {
+  content: "";
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 4px;
+  height: 2px;
+  background: var(--accent-primary);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+nav a[href^="#"].nav-underline:hover::after,
+nav a[href^="#"].nav-active::after {
+  transform: scaleX(1);
+}
+
+/* Legacy fallback: any leftover .reveal-on-scroll still hides pre-JS only when
+   animation-ready, and the engine maps it to data-anim during migration. */
+html.anim-ready .reveal-on-scroll {
+  opacity: 0;
+}
+
+/* Respect reduced motion: stop every ambient CSS keyframe loop and show all. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  [data-anim] {
+    opacity: 1 !important;
+  }
 }
 
 .animate-spin-slow {

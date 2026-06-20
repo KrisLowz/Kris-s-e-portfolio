@@ -1,16 +1,8 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { Code2 } from 'lucide-react';
-
-declare global {
-  interface Window {
-    gsap: any;
-    ScrollTrigger: any;
-  }
-}
 
 const About: React.FC = () => {
   const [avatarPopped, setAvatarPopped] = useState(false);
-  const solarSystemRef = useRef<HTMLDivElement>(null);
 
   // Devicon Skills
   const innerRingSkills = [
@@ -42,64 +34,31 @@ const About: React.FC = () => {
     setTimeout(() => setAvatarPopped(false), 500); // Reset animation
   };
 
-  useEffect(() => {
-    if (window.gsap && window.ScrollTrigger) {
-      window.gsap.registerPlugin(window.ScrollTrigger);
-    }
-    
-    if (!window.gsap) return;
-
-    // Animate Solar System
-    window.gsap.to('.orbit-ring-1', { rotation: 360, duration: 30, repeat: -1, ease: 'linear' });
-    window.gsap.to('.orbit-ring-2', { rotation: -360, duration: 45, repeat: -1, ease: 'linear' });
-
-    // Counter-rotate planets
-    window.gsap.to('.planet-inner-1', { rotation: -360, duration: 30, repeat: -1, ease: 'linear' });
-    window.gsap.to('.planet-inner-2', { rotation: 360, duration: 45, repeat: -1, ease: 'linear' });
-
-    // Background Reveal Animation
-    window.gsap.fromTo('.solar-bg-text', 
-      { opacity: 0, scale: 0.8 },
-      { 
-        opacity: 0.15, 
-        scale: 1, 
-        duration: 1.5, 
-        scrollTrigger: {
-          trigger: '.solar-system-container',
-          start: 'top 70%',
-          end: 'bottom center',
-          scrub: 1
-        }
-      }
-    );
-
-  }, []);
-
   return (
-    <section id="about" className="py-20 relative overflow-hidden">
+    <section id="about" data-tint="#818cf8" className="py-20 relative overflow-hidden">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          
+
           {/* Text Content */}
-          <div className="reveal-on-scroll z-10">
-            <div className="inline-block px-4 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-bold mb-4">
+          <div className="z-10">
+            <div data-anim="pop" className="inline-block px-4 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-bold mb-4">
               About Me
             </div>
-            <h2 className="text-4xl font-extrabold text-pop-text-main mb-6">
+            <h2 data-anim="words" className="text-4xl font-extrabold text-pop-text-main mb-6">
               Engineering with <br /> <span className="text-pop-primary">Purpose & Precision</span>
             </h2>
-            <div className="space-y-6 text-pop-text-muted text-lg leading-relaxed mb-8">
-              <p>
-                I'm a software developer who believes that great code should be invisible to the user. 
+            <div data-stagger="0.15" className="space-y-6 text-pop-text-muted text-lg leading-relaxed mb-8">
+              <p data-anim="fade-up">
+                I'm a software developer who believes that great code should be invisible to the user.
                 Whether it's a mobile app or website/webpage, the experience should be fluid, intuitive, and reliable.
               </p>
-              <p>
+              <p data-anim="fade-up">
                 Currently final semester (Internship) of my degree at <strong>Swinburne University of Technology</strong>, I've already helped businesses solve real-world logistic challenges through my award-winning work.
               </p>
             </div>
 
             {/* Interactive Avatar */}
-            <div className="flex items-center gap-6 mt-12">
+            <div data-anim="scale" className="flex items-center gap-6 mt-12">
                <div 
                  className={`relative w-24 h-24 cursor-pointer avatar-float ${avatarPopped ? 'pop-effect' : ''}`}
                  onClick={handleAvatarClick}
@@ -122,7 +81,7 @@ const About: React.FC = () => {
           </div>
 
           {/* Skills Solar System */}
-          <div className="solar-system-container" ref={solarSystemRef}>
+          <div className="solar-system-container">
             
             {/* Background Text - BOLD & VISIBLE */}
             <h1 className="solar-bg-text">SKILLS</h1>

@@ -1,19 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Menu, X, Code2 } from 'lucide-react';
 import { PROFILE } from '../constants';
 import ThemeToggle from './ThemeToggle';
 
 const Navigation: React.FC = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  // Scroll-driven behaviour (glass morph, auto-hide, active link) is handled by
+  // animations/nav.ts via the data-nav-pill / nav-underline hooks below.
 
   const navLinks = [
     { name: 'About', href: '#about' },
@@ -23,14 +17,11 @@ const Navigation: React.FC = () => {
 
   return (
     <nav className="fixed w-full top-0 z-50 flex justify-center py-6 px-4">
-      <div className={`
-        relative w-full max-w-5xl rounded-full transition-all duration-300
-        flex items-center justify-between px-6 py-3
-        ${isScrolled 
-          ? 'glass-panel' 
-          : 'bg-transparent'}
-      `}>
-        
+      <div
+        data-nav-pill
+        className="relative w-full max-w-5xl rounded-full transition-[background,box-shadow,border] duration-300 flex items-center justify-between px-6 py-3 bg-transparent"
+      >
+
         {/* Logo */}
         <a href="#" className="flex items-center gap-2 group">
           <div className="p-2 bg-pop-primary text-white rounded-full group-hover:rotate-12 transition-transform duration-300 shadow-md shadow-pop-primary/30">
@@ -47,7 +38,7 @@ const Navigation: React.FC = () => {
             <a
               key={link.name}
               href={link.href}
-              className="px-5 py-2 text-sm font-semibold text-pop-text-main hover:text-pop-primary hover:bg-pop-surface/50 rounded-full transition-all"
+              className="nav-underline px-5 py-2 text-sm font-semibold text-pop-text-main hover:text-pop-primary rounded-full transition-colors"
             >
               {link.name}
             </a>

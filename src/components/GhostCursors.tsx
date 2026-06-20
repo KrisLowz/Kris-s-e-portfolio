@@ -1,15 +1,10 @@
 import React, { useEffect, useRef } from 'react';
 import { MousePointer2 } from 'lucide-react';
-
-declare global {
-  interface Window {
-    gsap: any;
-  }
-}
+import { gsap, CONFIG } from '../animations';
 
 const GhostCursors: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   const users = [
     { id: 1, name: 'Recruiter @ TechCorp', color: '#f87171', initialX: 100, initialY: 100 }, // Red-400
     { id: 2, name: 'Visitor from SG', color: '#34d399', initialX: 800, initialY: 300 }, // Emerald-400
@@ -17,7 +12,11 @@ const GhostCursors: React.FC = () => {
   ];
 
   useEffect(() => {
-    if (!window.gsap || !containerRef.current) return;
+    // The overlay is hidden below md and these loops never stop, so skip them
+    // entirely on touch / small screens / reduced motion (perf + correctness).
+    if (!containerRef.current || CONFIG.isMobile || CONFIG.isTouch || CONFIG.reducedMotion) {
+      return;
+    }
 
     users.forEach(user => {
       const cursor = document.getElementById(`cursor-${user.id}`);
@@ -27,8 +26,8 @@ const GhostCursors: React.FC = () => {
         const x = Math.random() * (window.innerWidth - 100);
         const y = Math.random() * (window.innerHeight - 100);
         const duration = 2 + Math.random() * 3;
-        
-        window.gsap.to(cursor, {
+
+        gsap.to(cursor, {
           x: x,
           y: y,
           duration: duration,
@@ -42,7 +41,7 @@ const GhostCursors: React.FC = () => {
     });
 
     return () => {
-      window.gsap.killTweensOf(".ghost-cursor");
+      gsap.killTweensOf(".ghost-cursor");
     };
   }, []);
 

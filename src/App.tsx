@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import Navigation from './components/Navigation';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -17,47 +17,17 @@ import CustomCursor from './components/CustomCursor';
 import ScrollProgressBar from './components/ScrollProgressBar';
 import SectionHoverGlow from './components/SectionHoverGlow';
 import ScrollRippleEffect from './components/ScrollRippleEffect';
-
-declare global {
-  interface Window {
-    gsap: any;
-    ScrollTrigger: any;
-  }
-}
+import Preloader from './components/Preloader';
+import { useSiteAnimations } from './animations';
 
 const App: React.FC = () => {
-  useEffect(() => {
-    // GLOBAL SCROLL TRIGGER LOGIC
-    // This handles the "Bi-Directional" (Reversible) animation for all elements with class .reveal-on-scroll
-    if (window.gsap && window.ScrollTrigger) {
-      window.gsap.registerPlugin(window.ScrollTrigger);
-
-      const elements = document.querySelectorAll('.reveal-on-scroll');
-      
-      elements.forEach((el) => {
-        // Reset any previous state
-        window.gsap.set(el, { y: 60, opacity: 0 });
-
-        window.gsap.to(el, {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 85%",
-            end: "bottom 15%",
-            // play on enter, reverse on leave, play on enter back, reverse on leave back
-            toggleActions: "play reverse play reverse", 
-            markers: false
-          }
-        });
-      });
-    }
-  }, []);
+  // Boots the entire GSAP + Lenis animation layer (reveals, parallax, pins,
+  // intro, cursor, smooth scroll) inside one self-cleaning gsap.context.
+  useSiteAnimations();
 
   return (
     <main className="relative min-h-screen text-pop-text-main font-sans selection:bg-pop-primary selection:text-white transition-colors duration-300 cursor-none">
+      <Preloader />
       <CustomCursor />
       <ScrollProgressBar />
       <SectionHoverGlow />
@@ -66,9 +36,9 @@ const App: React.FC = () => {
       <MeshBackground />
       <WireframeGlobe />
       <MeteorShower />
-      
+
       <GhostCursors />
-      
+
       <Navigation />
       <Hero />
       <About />
@@ -76,7 +46,7 @@ const App: React.FC = () => {
       <Experience />
       <ProjectsShowcase />
       <Contact />
-      
+
       <ReactionButton />
       <AIChatBot />
     </main>

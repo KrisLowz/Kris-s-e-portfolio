@@ -1,69 +1,61 @@
 import React, { useRef, useEffect } from 'react';
-
-declare global {
-  interface Window {
-    gsap: any;
-  }
-}
+import { applyMagnetic } from '../animations';
 
 interface MagneticButtonProps {
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
-  strength?: number; // How strong the pull is
+  strength?: number;
+  /** When provided, renders an <a> instead of a <button> (valid for CTAs). */
+  href?: string;
+  download?: boolean;
+  target?: string;
+  rel?: string;
+  ariaLabel?: string;
 }
 
-const MagneticButton: React.FC<MagneticButtonProps> = ({ 
-  children, 
-  className = "", 
-  onClick, 
-  strength = 30 
+/**
+ * Button (or link) that magnetically follows the cursor. Magnetism, pressed-state
+ * feedback and elastic spring-back all live in animations/magnetic.ts (gsap
+ * quickTo, honours `strength`, auto-disabled on touch / reduced motion).
+ */
+const MagneticButton: React.FC<MagneticButtonProps> = ({
+  children,
+  className = '',
+  onClick,
+  strength = 30,
+  href,
+  download,
+  target,
+  rel,
+  ariaLabel,
 }) => {
-  const btnRef = useRef<HTMLButtonElement>(null);
+  const ref = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
 
   useEffect(() => {
-    const btn = btnRef.current;
-    if (!btn || !window.gsap) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - (rect.left + rect.width / 2);
-      const y = e.clientY - (rect.top + rect.height / 2);
-
-      window.gsap.to(btn, {
-        x: x * 0.3, // Movement multiplier
-        y: y * 0.3,
-        rotate: x * 0.05,
-        duration: 0.5,
-        ease: "power3.out"
-      });
-    };
-
-    const handleMouseLeave = () => {
-      window.gsap.to(btn, {
-        x: 0,
-        y: 0,
-        rotate: 0,
-        duration: 1.2,
-        ease: "elastic.out(1, 0.3)" // Bouncy return
-      });
-    };
-
-    btn.addEventListener('mousemove', handleMouseMove);
-    btn.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      btn.removeEventListener('mousemove', handleMouseMove);
-      btn.removeEventListener('mouseleave', handleMouseLeave);
-    };
+    if (!ref.current) return;
+    return applyMagnetic(ref.current, strength);
   }, [strength]);
 
+  if (href) {
+    return (
+      <a
+        ref={ref}
+        href={href}
+        download={download}
+        target={target}
+        rel={rel}
+        aria-label={ariaLabel}
+        className={className}
+        onClick={onClick}
+      >
+        {children}
+      </a>
+    );
+  }
+
   return (
-    <button 
-      ref={btnRef} 
-      className={className} 
-      onClick={onClick}
-    >
+    <button ref={ref} className={className} onClick={onClick} aria-label={ariaLabel}>
       {children}
     </button>
   );

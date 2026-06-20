@@ -1,17 +1,12 @@
 import React, { useRef } from 'react';
 import { Heart } from 'lucide-react';
-
-declare global {
-  interface Window {
-    gsap: any;
-  }
-}
+import { gsap } from '../animations';
 
 const ReactionButton: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const triggerReaction = () => {
-    if (!containerRef.current || !window.gsap) return;
+    if (!containerRef.current) return;
 
     // Create emoji element
     const emoji = document.createElement('div');
@@ -27,7 +22,7 @@ const ReactionButton: React.FC = () => {
     containerRef.current.appendChild(emoji);
 
     // Animate using GSAP
-    window.gsap.fromTo(emoji, 
+    gsap.fromTo(emoji,
       {
         x: randomX,
         y: 0,

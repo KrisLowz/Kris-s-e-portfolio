@@ -21,7 +21,7 @@ const WireframeGlobe: React.FC = () => {
               key={`meridian-${i}`}
               cx="250"
               cy="250"
-              rx={240 * Math.cos((i * 15 * Math.PI) / 180)}
+              rx={Math.abs(240 * Math.cos((i * 15 * Math.PI) / 180))}
               ry="240"
               fill="none"
               stroke="var(--globe-color)"
@@ -38,7 +38,7 @@ const WireframeGlobe: React.FC = () => {
               cx="250"
               cy="250"
               rx="240"
-              ry={240 * Math.cos(((i + 1) * 10 * Math.PI) / 180)}
+              ry={Math.abs(240 * Math.cos(((i + 1) * 10 * Math.PI) / 180))}
               fill="none"
               stroke="var(--globe-color)"
               strokeWidth="1.5"
