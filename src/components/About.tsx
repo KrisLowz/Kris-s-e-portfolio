@@ -1,130 +1,90 @@
 import React, { useState } from 'react';
-import { Code2 } from 'lucide-react';
-import { SKILLS } from '../constants';
-import { emitWorldFocus, emitWorldBlur } from '../scene/worldEvents';
+import { Brain, Target, MessageCircle, Briefcase, Clock, Users, Zap } from 'lucide-react';
+import ConstellationCluster, { ConstNode } from './ConstellationCluster';
 
+// Soft skills, reintegrated as a "how I work" trait constellation.
+const TRAITS: ConstNode[] = [
+  { id: 'trait-problem', label: 'Problem Solving', icon: <Brain /> },
+  { id: 'trait-critical', label: 'Critical Thinking', icon: <Target /> },
+  { id: 'trait-comm', label: 'Communication', icon: <MessageCircle /> },
+  { id: 'trait-pm', label: 'Project Mgmt', icon: <Briefcase /> },
+  { id: 'trait-time', label: 'Time Mgmt', icon: <Clock /> },
+  { id: 'trait-team', label: 'Teamwork', icon: <Users /> },
+  { id: 'trait-adapt', label: 'Adaptability', icon: <Zap /> },
+];
+
+/**
+ * About in the Living Constellation language: a frameless luminous bio readout
+ * (soft scrim for legibility, no card), a glowing avatar "portal", and a "How I
+ * Work" trait constellation reintegrating the old soft skills.
+ */
 const About: React.FC = () => {
-  const [avatarPopped, setAvatarPopped] = useState(false);
-
-  // Tech-stack skills come from the shared SKILLS source so each DOM planet and
-  // its 3D constellation star share one id (see constants.ts / SkillNodes).
-  const innerRingSkills = SKILLS.filter((s) => s.ring === 'inner');
-  const outerRingSkills = SKILLS.filter((s) => s.ring === 'outer');
-
-  const handleAvatarClick = () => {
-    setAvatarPopped(true);
-    setTimeout(() => setAvatarPopped(false), 500); // Reset animation
-  };
+  const [popped, setPopped] = useState(false);
 
   return (
-    <section id="about" data-tint="#818cf8" className="py-20 relative overflow-hidden">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="grid lg:grid-cols-2 gap-16 items-center">
-
-          {/* Text Content */}
-          <div data-tilt="3" className="z-10 cosmic-panel p-8 md:p-10">
-            <div data-anim="pop" data-scramble className="inline-block px-4 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-bold mb-4">
+    <section id="about" data-tint="#818cf8" className="relative overflow-hidden py-28">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          {/* Frameless bio readout */}
+          <div className="about-readout relative z-10">
+            <p
+              data-anim="pop"
+              data-scramble
+              className="mb-3 text-[11px] font-bold uppercase tracking-[0.35em] text-pop-primary/80"
+            >
               About Me
-            </div>
-            <h2 data-anim="words" className="text-4xl font-extrabold text-pop-text-main mb-6">
-              Engineering with <br /> <span className="text-pop-primary">Purpose & Precision</span>
+            </p>
+            <h2
+              data-anim="words"
+              className="const-title mb-6 text-4xl font-extrabold leading-tight text-pop-text-main md:text-5xl"
+            >
+              Engineering with <br />
+              <span className="text-gradient-flow bg-gradient-to-r from-pop-primary via-pop-secondary to-pop-primary bg-clip-text text-transparent">
+                Purpose &amp; Precision
+              </span>
             </h2>
-            <div data-stagger="0.15" className="space-y-6 text-pop-text-muted text-lg leading-relaxed mb-8">
+            <div
+              data-stagger="0.15"
+              className="mb-8 max-w-xl space-y-5 text-lg leading-relaxed text-pop-text-muted"
+            >
               <p data-anim="fade-up">
-                I'm a software developer who believes that great code should be invisible to the user.
-                Whether it's a mobile app or website/webpage, the experience should be fluid, intuitive, and reliable.
+                I'm a software developer who believes that great code should be invisible to the
+                user. Whether it's a mobile app or a website, the experience should be fluid,
+                intuitive, and reliable.
               </p>
               <p data-anim="fade-up">
-                Currently final semester (Internship) of my degree at <strong>Swinburne University of Technology</strong>, I've already helped businesses solve real-world logistic challenges through my award-winning work.
+                Currently in my final semester (Internship) at{' '}
+                <strong className="text-pop-text-main">Swinburne University of Technology</strong>,
+                I've already helped businesses solve real-world logistics challenges through my
+                award-winning work.
               </p>
             </div>
 
-            {/* Interactive Avatar */}
-            <div data-anim="scale" className="flex items-center gap-6 mt-12">
-               <div 
-                 className={`relative w-24 h-24 cursor-pointer avatar-float ${avatarPopped ? 'pop-effect' : ''}`}
-                 onClick={handleAvatarClick}
-               >
-                 <div className={`absolute -top-10 -right-10 bg-pop-surface shadow-lg border border-pop-border rounded-xl px-3 py-2 text-xs font-bold text-pop-text-main transition-opacity duration-300 ${avatarPopped ? 'opacity-100' : 'opacity-0'}`}>
-                   Let's Code! 🚀
-                 </div>
-                 <img 
-                   src="/assets/ME.png" 
-                   alt="Avatar" 
-                   className="w-full h-full rounded-full border-4 border-pop-surface shadow-xl"
-                 />
-                 <div className="absolute bottom-1 right-1 w-6 h-6 bg-green-500 border-4 border-pop-surface rounded-full"></div>
-               </div>
-               <div>
-                 <p className="font-bold text-pop-text-main text-sm">Click me!</p>
-                 <p className="text-pop-text-muted text-xs">I love building cool stuff.</p>
-               </div>
+            <div data-anim="scale" className="flex items-center gap-5">
+              <button
+                type="button"
+                onClick={() => {
+                  setPopped(true);
+                  setTimeout(() => setPopped(false), 500);
+                }}
+                className={`about-portal ${popped ? 'popped' : ''}`}
+                aria-label="Low Chee Fei avatar"
+              >
+                <img src="/assets/ME.png" alt="Low Chee Fei" />
+              </button>
+              <div>
+                <p className="text-sm font-bold text-pop-text-main">Low Chee Fei</p>
+                <p className="text-xs text-pop-text-muted">Class of 2025 · Swinburne</p>
+              </div>
             </div>
           </div>
 
-          {/* Skills Solar System */}
-          <div data-speed="1.12" className="solar-system-container">
-            
-            {/* Background Text - BOLD & VISIBLE */}
-            <h1 className="solar-bg-text">SKILLS</h1>
-            
-            {/* Sun Core */}
-            <div className="sun-core">
-              <Code2 className="w-8 h-8 text-white animate-pulse" />
-            </div>
-
-            {/* Ring 1 (Inner) */}
-            <div className="orbit-ring orbit-ring-1 w-[260px] h-[260px]">
-               {innerRingSkills.map((skill, i) => {
-                 const count = innerRingSkills.length;
-                 const angle = (360 / count) * i;
-                 return (
-                   <div
-                     key={skill.id}
-                     data-skill-id={skill.id}
-                     onMouseEnter={() => emitWorldFocus({ type: 'skill', id: skill.id })}
-                     onMouseLeave={() => emitWorldBlur({ type: 'skill', id: skill.id })}
-                     className="planet"
-                     style={{
-                       width: '44px',
-                       height: '44px',
-                       transform: `rotate(${angle}deg) translate(130px) rotate(-${angle}deg)`
-                     }}
-                   >
-                     <div className="planet-inner-1 flex items-center justify-center w-full h-full" title={skill.name}>
-                       <i className={`${skill.iconClass} text-xl`} />
-                     </div>
-                   </div>
-                 );
-               })}
-            </div>
-
-            {/* Ring 2 (Outer) */}
-            <div className="orbit-ring orbit-ring-2 w-[420px] h-[420px]">
-               {outerRingSkills.map((skill, i) => {
-                 const count = outerRingSkills.length;
-                 const angle = (360 / count) * i;
-                 return (
-                   <div
-                     key={skill.id}
-                     data-skill-id={skill.id}
-                     onMouseEnter={() => emitWorldFocus({ type: 'skill', id: skill.id })}
-                     onMouseLeave={() => emitWorldBlur({ type: 'skill', id: skill.id })}
-                     className="planet"
-                     style={{
-                       width: '50px',
-                       height: '50px',
-                       transform: `rotate(${angle + 20}deg) translate(210px) rotate(-${angle + 20}deg)`
-                     }}
-                   >
-                     <div className="planet-inner-2 flex items-center justify-center w-full h-full" title={skill.name}>
-                       <i className={`${skill.iconClass} text-2xl`} />
-                     </div>
-                   </div>
-                 );
-               })}
-            </div>
-
+          {/* "How I work" trait constellation */}
+          <div className="relative">
+            <p className="mb-2 text-center text-[11px] font-bold uppercase tracking-[0.35em] text-pop-secondary/70">
+              How I Work
+            </p>
+            <ConstellationCluster nodes={TRAITS} gradientId="traits-grad" density={2.4} />
           </div>
         </div>
       </div>
