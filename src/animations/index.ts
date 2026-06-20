@@ -16,6 +16,7 @@ import { initNav } from './nav';
 import { initCursor, destroyCursor } from './cursor';
 import { runIntro, revertIntroSplits } from './intro';
 import { initScrollProgress } from './scroll';
+import { initInteractions, destroyInteractions } from './interactions';
 
 export { CONFIG } from './config';
 export { applyMagnetic } from './magnetic';
@@ -35,6 +36,7 @@ export function useSiteAnimations() {
       initPins();
       initNav();
       initScrollProgress();
+      initInteractions();
       initCursor();
       runIntro().then(() => ScrollTrigger.refresh());
     });
@@ -54,6 +56,7 @@ export function useSiteAnimations() {
       ctx.revert();
       revertSplits();
       revertIntroSplits();
+      destroyInteractions();
       destroyCursor();
       destroySmoothScroll();
       window.removeEventListener('load', onLoad);

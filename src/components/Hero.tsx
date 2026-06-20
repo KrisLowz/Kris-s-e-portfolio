@@ -100,10 +100,10 @@ const Hero: React.FC = () => {
 
         {/* Social Proof */}
         <div className="mt-16 flex items-center justify-center gap-6">
-          <a data-hero-social href={PROFILE.social.github} aria-label="GitHub" className="p-3 bg-pop-surface border border-pop-border rounded-full text-pop-text-muted hover:text-pop-text-main hover:border-pop-primary hover:shadow-lg transition-all">
+          <a data-hero-social data-magnetic="18" href={PROFILE.social.github} aria-label="GitHub" className="p-3 bg-pop-surface border border-pop-border rounded-full text-pop-text-muted hover:text-pop-text-main hover:border-pop-primary hover:shadow-lg transition-shadow">
             <Github className="w-6 h-6" />
           </a>
-          <a data-hero-social href={PROFILE.social.linkedin} aria-label="LinkedIn" className="p-3 bg-pop-surface border border-pop-border rounded-full text-pop-text-muted hover:text-pop-primary hover:border-pop-primary hover:shadow-lg transition-all">
+          <a data-hero-social data-magnetic="18" href={PROFILE.social.linkedin} aria-label="LinkedIn" className="p-3 bg-pop-surface border border-pop-border rounded-full text-pop-text-muted hover:text-pop-primary hover:border-pop-primary hover:shadow-lg transition-shadow">
             <Linkedin className="w-6 h-6" />
           </a>
         </div>

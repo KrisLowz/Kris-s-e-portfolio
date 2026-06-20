@@ -41,7 +41,7 @@ const Contact: React.FC = () => {
               </div>
             </div>
 
-            <form data-anim="fade-up" data-delay="0.15" className="bg-pop-surface p-8 rounded-3xl text-pop-text-main shadow-xl" onSubmit={(e) => e.preventDefault()}>
+            <form data-anim="fade-up" data-delay="0.15" data-tilt="4" className="bg-pop-surface p-8 rounded-3xl text-pop-text-main shadow-xl" onSubmit={(e) => e.preventDefault()}>
               <div className="space-y-4">
                 <div>
                   <label htmlFor="contact-name" className="block text-sm font-bold text-pop-text-main mb-2">Name</label>

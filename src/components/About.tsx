@@ -22,7 +22,7 @@ const About: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
 
           {/* Text Content */}
-          <div className="z-10 cosmic-panel p-8 md:p-10">
+          <div data-tilt="3" className="z-10 cosmic-panel p-8 md:p-10">
             <div data-anim="pop" className="inline-block px-4 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-bold mb-4">
               About Me
             </div>
