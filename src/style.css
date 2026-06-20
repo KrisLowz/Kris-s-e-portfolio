@@ -264,6 +264,15 @@ html.anim-ready .reveal-on-scroll {
   transition: background-color 1s ease;
 }
 
+/* Desync the three mesh blobs (these utility classes were referenced in
+   MeshBackground but never defined, so all blobs pulsed in sync). */
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+.animation-delay-4000 {
+  animation-delay: 4s;
+}
+
 /* --- NEW ANIMATIONS FOR ABOUT SECTION --- */
 
 /* Avatar Float */

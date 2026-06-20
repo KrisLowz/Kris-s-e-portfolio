@@ -1,15 +1,20 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 const MeteorShower: React.FC = () => {
-  // Generate a consistent set of meteors so they don't re-render chaotically
-  const meteors = [...Array(10)].map((_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    top: `${Math.random() * 50}%`,
-    delay: `${Math.random() * 5}s`,
-    duration: `${2 + Math.random() * 3}s`,
-    width: `${100 + Math.random() * 200}px`
-  }));
+  // Generate ONCE (useMemo) so re-renders don't reshuffle every meteor's
+  // position/timing mid-view.
+  const meteors = useMemo(
+    () =>
+      [...Array(10)].map((_, i) => ({
+        id: i,
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 50}%`,
+        delay: `${Math.random() * 5}s`,
+        duration: `${2 + Math.random() * 3}s`,
+        width: `${100 + Math.random() * 200}px`,
+      })),
+    []
+  );
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[-5] overflow-hidden">

@@ -24,10 +24,11 @@ const Hero: React.FC = () => {
       });
     };
 
-    // Sync the typewriter to the intro choreography (the headline reveal fires
-    // `intro:type`). Under reduced motion the intro is skipped, so start now.
+    // Under reduced motion, show a static name instead of the typewriter loop.
+    // Otherwise sync the typewriter to the intro (the headline reveal fires
+    // `intro:type`).
     if (CONFIG.reducedMotion) {
-      startTyping();
+      if (typeTarget.current) typeTarget.current.textContent = PROFILE.name;
     } else {
       window.addEventListener('intro:type', startTyping, { once: true });
     }
