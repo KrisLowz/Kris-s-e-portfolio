@@ -3,6 +3,7 @@ import CoreObject from './objects/CoreObject';
 import ParticleField from './objects/ParticleField';
 import OrbitRings from './objects/OrbitRings';
 import MeteorField from './objects/MeteorField';
+import SkillNodes from './objects/SkillNodes';
 import { useThemeColors } from './hooks/useThemeColors';
 
 /**
@@ -21,6 +22,7 @@ export default function SceneRoot() {
       <CameraRig />
       <ParticleField theme={theme} />
       <OrbitRings theme={theme} />
+      <SkillNodes theme={theme} />
       <CoreObject theme={theme} />
       <MeteorField theme={theme} />
     </>

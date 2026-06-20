@@ -1,4 +1,4 @@
-import { Project, ExperienceItem, SkillCategory } from './types';
+import { Project, ExperienceItem, SkillCategory, Skill } from './types';
 
 export const PROFILE = {
   name: "Low Chee Fei",
@@ -11,6 +11,32 @@ export const PROFILE = {
     linkedin: "https://www.linkedin.com/in/lowcheefei/"
   }
 };
+
+/**
+ * Single source of truth for the tech stack — drives both the About "solar
+ * system" (DOM) and the 3D skill constellation, keyed by stable `id` so a
+ * hovered chip and its 3D star stay in sync. `ring` preserves the original
+ * inner/outer grouping in About.
+ */
+export const SKILLS: Skill[] = [
+  { id: 'skill-html5', name: 'HTML5', iconClass: 'devicon-html5-plain colored', ring: 'inner' },
+  { id: 'skill-css3', name: 'CSS3', iconClass: 'devicon-css3-plain colored', ring: 'inner' },
+  { id: 'skill-javascript', name: 'JavaScript', iconClass: 'devicon-javascript-plain colored', ring: 'inner' },
+  { id: 'skill-python', name: 'Python', iconClass: 'devicon-python-plain colored', ring: 'inner' },
+  { id: 'skill-java', name: 'Java', iconClass: 'devicon-java-plain colored', ring: 'inner' },
+  { id: 'skill-cpp', name: 'C++', iconClass: 'devicon-cplusplus-plain colored', ring: 'inner' },
+  { id: 'skill-csharp', name: 'C#', iconClass: 'devicon-csharp-plain colored', ring: 'inner' },
+  { id: 'skill-sql', name: 'SQL', iconClass: 'devicon-mysql-plain colored', ring: 'inner' },
+  { id: 'skill-figma', name: 'Figma', iconClass: 'devicon-figma-plain colored', ring: 'outer' },
+  { id: 'skill-tailwind', name: 'Tailwind CSS', iconClass: 'devicon-tailwindcss-original colored', ring: 'outer' },
+  { id: 'skill-postgresql', name: 'PostgreSQL', iconClass: 'devicon-postgresql-plain colored', ring: 'outer' },
+  { id: 'skill-firebase', name: 'Firebase', iconClass: 'devicon-firebase-plain colored', ring: 'outer' },
+  { id: 'skill-kotlin', name: 'Kotlin', iconClass: 'devicon-kotlin-plain colored', ring: 'outer' },
+  { id: 'skill-flutter', name: 'Flutter', iconClass: 'devicon-flutter-plain colored', ring: 'outer' },
+  { id: 'skill-android', name: 'Android', iconClass: 'devicon-android-plain colored', ring: 'outer' },
+  { id: 'skill-git', name: 'Git', iconClass: 'devicon-git-plain colored', ring: 'outer' },
+  { id: 'skill-vscode', name: 'VS Code', iconClass: 'devicon-vscode-plain colored', ring: 'outer' },
+];
 
 export const PROJECTS: Project[] = [
   {

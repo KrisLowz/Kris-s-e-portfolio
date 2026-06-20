@@ -1,33 +1,15 @@
 import React, { useState } from 'react';
 import { Code2 } from 'lucide-react';
+import { SKILLS } from '../constants';
+import { emitWorldFocus, emitWorldBlur } from '../scene/worldEvents';
 
 const About: React.FC = () => {
   const [avatarPopped, setAvatarPopped] = useState(false);
 
-  // Devicon Skills
-  const innerRingSkills = [
-    { name: 'HTML5', iconClass: 'devicon-html5-plain colored' },
-    { name: 'CSS3', iconClass: 'devicon-css3-plain colored' },
-    { name: 'JavaScript', iconClass: 'devicon-javascript-plain colored' },
-    { name: 'Python', iconClass: 'devicon-python-plain colored' },
-    { name: 'Java', iconClass: 'devicon-java-plain colored' },
-    { name: 'C++', iconClass: 'devicon-cplusplus-plain colored' },
-    { name: 'C#', iconClass: 'devicon-csharp-plain colored' },
-    { name: 'SQL', iconClass: 'devicon-mysql-plain colored' },
-  ];
-
-  // SWAPPED ICONS HERE: Django -> Figma, Flask -> Tailwind CSS
-  const outerRingSkills = [
-    { name: 'Figma', iconClass: 'devicon-figma-plain colored' },
-    { name: 'Tailwind CSS', iconClass: 'devicon-tailwindcss-original colored' },
-    { name: 'PostgreSQL', iconClass: 'devicon-postgresql-plain colored' },
-    { name: 'Firebase', iconClass: 'devicon-firebase-plain colored' },
-    { name: 'Kotlin', iconClass: 'devicon-kotlin-plain colored' },
-    { name: 'Flutter', iconClass: 'devicon-flutter-plain colored' },
-    { name: 'Android', iconClass: 'devicon-android-plain colored' },
-    { name: 'Git', iconClass: 'devicon-git-plain colored' },
-    { name: 'VS Code', iconClass: 'devicon-vscode-plain colored' },
-  ];
+  // Tech-stack skills come from the shared SKILLS source so each DOM planet and
+  // its 3D constellation star share one id (see constants.ts / SkillNodes).
+  const innerRingSkills = SKILLS.filter((s) => s.ring === 'inner');
+  const outerRingSkills = SKILLS.filter((s) => s.ring === 'outer');
 
   const handleAvatarClick = () => {
     setAvatarPopped(true);
@@ -97,11 +79,14 @@ const About: React.FC = () => {
                  const count = innerRingSkills.length;
                  const angle = (360 / count) * i;
                  return (
-                   <div 
-                     key={skill.name}
+                   <div
+                     key={skill.id}
+                     data-skill-id={skill.id}
+                     onMouseEnter={() => emitWorldFocus({ type: 'skill', id: skill.id })}
+                     onMouseLeave={() => emitWorldBlur({ type: 'skill', id: skill.id })}
                      className="planet"
-                     style={{ 
-                       width: '44px', 
+                     style={{
+                       width: '44px',
                        height: '44px',
                        transform: `rotate(${angle}deg) translate(130px) rotate(-${angle}deg)`
                      }}
@@ -120,11 +105,14 @@ const About: React.FC = () => {
                  const count = outerRingSkills.length;
                  const angle = (360 / count) * i;
                  return (
-                   <div 
-                     key={skill.name}
+                   <div
+                     key={skill.id}
+                     data-skill-id={skill.id}
+                     onMouseEnter={() => emitWorldFocus({ type: 'skill', id: skill.id })}
+                     onMouseLeave={() => emitWorldBlur({ type: 'skill', id: skill.id })}
                      className="planet"
-                     style={{ 
-                       width: '50px', 
+                     style={{
+                       width: '50px',
                        height: '50px',
                        transform: `rotate(${angle + 20}deg) translate(210px) rotate(-${angle + 20}deg)`
                      }}

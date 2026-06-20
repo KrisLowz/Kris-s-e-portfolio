@@ -3,6 +3,13 @@ export interface SkillCategory {
   skills: string[];
 }
 
+export interface Skill {
+  id: string;
+  name: string;
+  iconClass: string;
+  ring: 'inner' | 'outer';
+}
+
 export interface TechStackItem {
   category: string;
   tools: string[];
