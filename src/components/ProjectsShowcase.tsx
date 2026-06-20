@@ -1,21 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PROJECTS } from '../constants';
-import { Award, Star, ArrowUpRight } from 'lucide-react';
+import { Award, Star } from 'lucide-react';
 import { Project } from '../types';
 import ProjectModal from './ProjectModal';
-import SpotlightCard from './SpotlightCard';
 import { applyTilt } from '../animations';
 import { emitWorldFocus, emitWorldBlur } from '../scene/worldEvents';
 
+/**
+ * Projects as glowing "portals" floating in the cosmos — a framed viewport into
+ * each project with luminous title and tech "moon" tags. Frameless (no card
+ * chrome), tilts toward the cursor, fires world:focus so the matching 3D
+ * project monolith brightens, and opens the existing ProjectModal on click.
+ */
 const ProjectsShowcase: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 3D pointer tilt per card (gsap quickTo, see animations/tilt.ts).
     const cards = gridRef.current?.querySelectorAll<HTMLElement>('[data-project-card]') ?? [];
-    const cleanups = Array.from(cards).map((card) => applyTilt(card));
+    const cleanups = Array.from(cards).map((card) => applyTilt(card, 5));
     return () => cleanups.forEach((fn) => fn());
   }, []);
 
@@ -25,93 +29,67 @@ const ProjectsShowcase: React.FC = () => {
   };
 
   return (
-    <section id="projects" data-tint="#c084fc" className="py-32 relative">
-      <div className="max-w-6xl mx-auto px-6">
-        {/* Section Header */}
-        <div data-speed="0.88" className="mb-20 text-center">
-          <div data-anim="pop" data-scramble className="inline-block px-4 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-bold mb-4">
+    <section id="projects" data-tint="#c084fc" className="relative overflow-hidden py-28">
+      <div className="mx-auto max-w-6xl px-6">
+        <div className="const-heading relative z-10 mb-16 text-center">
+          <p
+            data-anim="pop"
+            data-scramble
+            className="mb-3 text-[11px] font-bold uppercase tracking-[0.35em] text-pop-secondary/80"
+          >
             Featured Work
-          </div>
-          <h2 data-anim="words" className="text-4xl md:text-5xl font-extrabold text-pop-text-main mb-6">
-            Selected Projects
+          </p>
+          <h2 data-anim="words" className="const-title text-4xl font-extrabold text-pop-text-main md:text-5xl">
+            Project Portals
           </h2>
-          <p data-anim="fade-up" className="text-pop-text-muted max-w-2xl mx-auto text-lg">
-            A curation of my best work in mobile and web development. Click any project to view details or screenshots.
+          <p data-anim="fade-up" className="mx-auto mt-3 max-w-xl text-sm text-pop-text-muted/80">
+            Step through any portal to explore the build.
           </p>
         </div>
 
-        {/* Projects Grid */}
-        <div ref={gridRef} data-projects-grid className="grid md:grid-cols-2 gap-10 [perspective:1200px]">
+        <div ref={gridRef} data-projects-grid className="project-grid grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
           {PROJECTS.map((project) => (
-            <SpotlightCard
+            <button
               key={project.id}
+              type="button"
               data-project-card=""
               data-project-id={project.id}
               onClick={() => openDetailModal(project)}
               onMouseEnter={() => emitWorldFocus({ type: 'project', id: project.id })}
               onMouseLeave={() => emitWorldBlur({ type: 'project', id: project.id })}
-              className="rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group bg-pop-surface/55 backdrop-blur-md border border-pop-border"
+              className="project-portal group"
             >
-                {/* Image Area */}
-                <div className="relative h-64 overflow-hidden bg-pop-surface-2 tilt-card-inner">
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    loading="lazy"
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  />
-                  
-                  {/* Floating Badge */}
-                  <div className="tilt-pop absolute top-4 right-4 flex gap-2">
-                    {project.id === 'trackpoint' && (
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur text-yellow-600 shadow-sm text-xs font-bold rounded-full flex items-center gap-1">
-                        <Award className="w-3 h-3" /> Awarded
-                      </span>
-                    )}
-                    {(project.id === 'cinemate' || project.id === 'splashaquatics') && (
-                      <span className="px-3 py-1 bg-white/90 backdrop-blur text-indigo-600 shadow-sm text-xs font-bold rounded-full flex items-center gap-1">
-                        <Star className="w-3 h-3" /> Grade A
-                      </span>
-                    )}
-                  </div>
-                </div>
-
-                {/* Content Area */}
-                <div className="p-8 flex flex-col flex-1 tilt-card-inner">
-                  <div className="flex justify-between items-start mb-4">
-                    <div>
-                      <h3 className="text-2xl font-bold text-pop-text-main mb-1 group-hover:text-pop-primary transition-colors">
-                        {project.title}
-                      </h3>
-                      <p className="text-pop-text-muted font-medium">{project.subtitle}</p>
-                    </div>
-                    <div className="p-2 bg-pop-surface-2 rounded-full text-pop-text-muted group-hover:bg-pop-primary group-hover:text-white transition-all">
-                      <ArrowUpRight className="w-5 h-5" />
-                    </div>
-                  </div>
-                  
-                  <p className="text-pop-text-muted mb-6 leading-relaxed flex-1">
-                    {project.description}
-                  </p>
-
-                  <div className="flex flex-wrap gap-2 pt-6 border-t border-pop-border">
-                    {project.tags.map((tag) => (
-                      <span key={tag} className="px-3 py-1 text-xs font-semibold text-pop-text-muted bg-pop-surface-2 rounded-lg">
-                        {tag}
-                      </span>
-                    ))}
+              <div className="portal-frame">
+                <img src={project.image} alt={project.title} loading="lazy" className="portal-img" />
+                <span className="portal-sheen" aria-hidden="true" />
+                {project.id === 'trackpoint' && (
+                  <span className="portal-badge tilt-pop">
+                    <Award className="h-3 w-3" /> Awarded
+                  </span>
+                )}
+                {(project.id === 'cinemate' || project.id === 'splashaquatics') && (
+                  <span className="portal-badge tilt-pop">
+                    <Star className="h-3 w-3" /> Grade A
+                  </span>
+                )}
+              </div>
+              <div className="portal-info tilt-card-inner">
+                <h3 className="portal-title const-title">{project.title}</h3>
+                <p className="portal-sub">{project.subtitle}</p>
+                <div className="portal-moons">
+                  {project.tags.map((tag) => (
+                    <span key={tag} className="portal-moon">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
-            </SpotlightCard>
+            </button>
           ))}
         </div>
       </div>
 
-      <ProjectModal 
-        project={selectedProject} 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-      />
+      <ProjectModal project={selectedProject} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </section>
   );
 };

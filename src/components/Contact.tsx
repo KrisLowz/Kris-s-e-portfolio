@@ -1,70 +1,95 @@
 import React from 'react';
 import { PROFILE } from '../constants';
-import { Mail, MapPin, Send, MessageSquare } from 'lucide-react';
+import { Mail, MapPin, Send, Radio } from 'lucide-react';
 import MagneticButton from './MagneticButton';
 
+/**
+ * Contact as a "transmission console" — frameless luminous contact nodes and a
+ * glowing signal form. No solid card; everything floats in the cosmos.
+ */
 const Contact: React.FC = () => {
   return (
-    <footer id="contact" className="relative pt-32 pb-10">
-      <div className="max-w-5xl mx-auto px-6">
-        
-        <div data-anim="fade-up" data-duration="1.1" className="bg-pop-primary rounded-[3rem] p-10 md:p-16 text-white relative overflow-hidden shadow-2xl">
-          {/* Decor */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-black opacity-20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-
-          <div className="relative z-10 grid md:grid-cols-2 gap-12">
-            <div>
-              <div data-anim="pop" className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur rounded-full text-xs font-bold mb-6">
-                <MessageSquare className="w-3 h-3" /> Let's Chat
-              </div>
-              <h2 data-anim="lines" className="text-4xl font-extrabold mb-6 leading-tight">
-                Have an idea? <br/> Let's build it together.
-              </h2>
-              <p data-anim="fade-up" className="text-indigo-100 mb-8 text-lg">
-                I'm currently available for freelance projects and full-time roles.
-              </p>
-
-              <div data-stagger="0.1" className="space-y-4">
-                <a data-anim="fade-up" href={`mailto:${PROFILE.email}`} className="flex items-center gap-3 text-indigo-100 hover:text-white transition-colors">
-                  <div className="p-2 bg-white/10 rounded-full">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <span className="font-medium">{PROFILE.email}</span>
-                </a>
-                <div data-anim="fade-up" className="flex items-center gap-3 text-indigo-100">
-                  <div className="p-2 bg-white/10 rounded-full">
-                    <MapPin className="w-5 h-5" />
-                  </div>
-                  <span className="font-medium">Petaling Jaya, Selangor.</span>
-                </div>
-              </div>
-            </div>
-
-            <form data-anim="fade-up" data-delay="0.15" data-tilt="4" className="bg-pop-surface p-8 rounded-3xl text-pop-text-main shadow-xl" onSubmit={(e) => e.preventDefault()}>
-              <div className="space-y-4">
-                <div>
-                  <label htmlFor="contact-name" className="block text-sm font-bold text-pop-text-main mb-2">Name</label>
-                  <input id="contact-name" name="name" type="text" className="w-full bg-pop-surface-2 border border-pop-border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all text-pop-text-main" placeholder="John Doe" />
-                </div>
-                <div>
-                  <label htmlFor="contact-email" className="block text-sm font-bold text-pop-text-main mb-2">Email</label>
-                  <input id="contact-email" name="email" type="email" className="w-full bg-pop-surface-2 border border-pop-border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all text-pop-text-main" placeholder="john@example.com" />
-                </div>
-                <div>
-                  <label htmlFor="contact-message" className="block text-sm font-bold text-pop-text-main mb-2">Message</label>
-                  <textarea id="contact-message" name="message" rows={3} className="w-full bg-pop-surface-2 border border-pop-border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all text-pop-text-main" placeholder="Tell me about your project..."></textarea>
-                </div>
-                <MagneticButton className="btn-shine w-full py-4 bg-pop-text-main text-pop-surface font-bold rounded-xl hover:bg-black dark:hover:bg-white transition-colors flex justify-center items-center gap-2">
-                  Send Message <Send className="w-4 h-4" />
-                </MagneticButton>
-              </div>
-            </form>
-          </div>
+    <footer id="contact" className="relative overflow-hidden pb-12 pt-28">
+      <div className="mx-auto max-w-5xl px-6">
+        <div className="const-heading relative z-10 mb-14 text-center">
+          <p
+            data-anim="pop"
+            data-scramble
+            className="mb-3 text-[11px] font-bold uppercase tracking-[0.35em] text-pop-primary/80"
+          >
+            Transmission
+          </p>
+          <h2 data-anim="words" className="const-title text-4xl font-extrabold text-pop-text-main md:text-5xl">
+            Send a Signal
+          </h2>
+          <p data-anim="fade-up" className="mt-3 text-sm text-pop-text-muted/80">
+            Open for full-time roles &amp; freelance missions.
+          </p>
         </div>
 
-        <div data-anim="fade-up" className="mt-16 text-center text-pop-text-muted text-sm font-medium">
-          <p>&copy; 2025 Low Chee Fei. Designed with ♥ and React.</p>
+        <div className="grid items-start gap-12 md:grid-cols-2">
+          <div data-anim="fade-up" className="space-y-6">
+            <a href={`mailto:${PROFILE.email}`} className="contact-node group">
+              <span className="contact-icon">
+                <Mail className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="contact-label">Email</span>
+                <span className="contact-value">{PROFILE.email}</span>
+              </span>
+            </a>
+            <div className="contact-node">
+              <span className="contact-icon">
+                <MapPin className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="contact-label">Based in</span>
+                <span className="contact-value">Petaling Jaya, Selangor</span>
+              </span>
+            </div>
+            <div className="contact-node">
+              <span className="contact-icon online">
+                <Radio className="h-5 w-5" />
+              </span>
+              <span>
+                <span className="contact-label">Status</span>
+                <span className="contact-value">Available · 2025</span>
+              </span>
+            </div>
+          </div>
+
+          <form
+            data-anim="fade-up"
+            data-delay="0.15"
+            className="console"
+            onSubmit={(e) => e.preventDefault()}
+          >
+            <div className="console-field">
+              <label htmlFor="c-name">Name</label>
+              <input id="c-name" name="name" type="text" autoComplete="name" placeholder="Your name" />
+            </div>
+            <div className="console-field">
+              <label htmlFor="c-email">Email</label>
+              <input
+                id="c-email"
+                name="email"
+                type="email"
+                autoComplete="email"
+                placeholder="you@example.com"
+              />
+            </div>
+            <div className="console-field">
+              <label htmlFor="c-msg">Message</label>
+              <textarea id="c-msg" name="message" rows={3} placeholder="Tell me about your mission..." />
+            </div>
+            <MagneticButton className="transmit-btn btn-shine">
+              Transmit <Send className="h-4 w-4" />
+            </MagneticButton>
+          </form>
+        </div>
+
+        <div data-anim="fade-up" className="mt-20 text-center text-xs text-pop-text-muted/60">
+          <p>© 2025 Low Chee Fei · Charted with ♥ in React &amp; three.js</p>
         </div>
       </div>
     </footer>

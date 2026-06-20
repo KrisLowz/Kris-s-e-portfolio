@@ -48,15 +48,29 @@ const Hero: React.FC = () => {
     >
       {/* Readability scrim: softly tames the core's glow behind the hero text. */}
       <div className="hero-scrim" aria-hidden="true" />
+
+      {/* Floating identity constellation around the central name-star. */}
+      <div className="hero-constellation" aria-hidden="true">
+        <span className="hero-node" style={{ top: '24%', left: '9%', animationDelay: '0s' }}>
+          <span className="dot" /> Mobile Dev
+        </span>
+        <span className="hero-node" style={{ top: '33%', right: '8%', animationDelay: '1.2s' }}>
+          <span className="dot" /> Enterprise ERP
+        </span>
+        <span className="hero-node" style={{ bottom: '28%', left: '13%', animationDelay: '0.6s' }}>
+          <span className="dot" /> 🏆 Award-winning
+        </span>
+        <span className="hero-node" style={{ bottom: '24%', right: '11%', animationDelay: '1.8s' }}>
+          <span className="dot" /> UI/UX Design
+        </span>
+      </div>
+
       <div
         data-hero-content
         className="max-w-4xl mx-auto px-6 w-full relative z-10 text-center flex flex-col items-center"
       >
         {/* Status Badge */}
-        <div
-          data-hero-badge
-          className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm font-bold text-pop-primary bg-pop-surface rounded-full shadow-sm border border-pop-border hover:shadow-md transition-all cursor-default"
-        >
+        <div data-hero-badge className="hero-status mb-8 cursor-default">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
@@ -91,7 +105,7 @@ const Hero: React.FC = () => {
             <MagneticButton
               href="https://drive.google.com/file/d/1o6RSy9MJDvYwHtKJq0QmLbf6vui4sNPp/view?usp=drive_link"
               download
-              className="px-8 py-4 bg-pop-surface text-pop-text-main font-bold rounded-full shadow-md border border-pop-border hover:border-pop-primary transition-all flex items-center gap-2 cursor-pointer"
+              className="btn-cv px-8 py-4 font-bold rounded-full flex items-center gap-2 cursor-pointer"
             >
               Download CV <Download className="w-4 h-4" />
             </MagneticButton>
