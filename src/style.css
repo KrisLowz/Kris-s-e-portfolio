@@ -399,12 +399,12 @@
     0 18px 50px -18px color-mix(in srgb, var(--accent-primary) 50%, transparent);
   transition: box-shadow 0.45s ease, border-color 0.45s ease, transform 0.45s ease;
 }
-/* Taller-than-frame wrapper so the image can parallax WITHIN its mask. */
+/* Wider-than-frame wrapper so the image can parallax horizontally WITHIN its mask. */
 .portal-img-wrap {
   position: absolute;
-  inset: -8% 0;
-  width: 100%;
-  height: 116%;
+  inset: 0 -10%;
+  width: 120%;
+  height: 100%;
 }
 .portal-img {
   width: 100%;
@@ -492,6 +492,77 @@
 .project-portal:hover .portal-moon {
   border-color: color-mix(in srgb, var(--accent-secondary) 55%, transparent);
   color: var(--text-main);
+}
+
+/* --- Projects: pinned horizontal scroll-driven gallery --- */
+.proj-section.horizontal {
+  height: 100vh;
+  overflow: hidden;
+}
+.proj-section.horizontal .proj-track {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: max-content;
+  height: 100vh;
+  gap: 5vw;
+  padding: 0 9vw;
+  will-change: transform;
+}
+.proj-panel {
+  flex: 0 0 auto;
+  width: min(440px, 82vw);
+}
+.proj-intro,
+.proj-outro {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: min(460px, 82vw);
+}
+.proj-scroll-hint {
+  animation: scroll-hint 1.6s ease-in-out infinite;
+}
+@keyframes scroll-hint {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(8px); }
+}
+.portal-enter {
+  flex: none;
+  display: inline-flex;
+  padding: 8px;
+  border-radius: 999px;
+  color: var(--text-muted);
+  background: color-mix(in srgb, var(--bg-surface) 40%, transparent);
+  border: 1px solid var(--glass-border);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+.project-portal:hover .portal-enter {
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+/* Fallback (mobile / reduced motion): a normal vertical grid. */
+.proj-section:not(.horizontal) .proj-track {
+  display: grid;
+  gap: 2.5rem;
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 6rem 1.5rem;
+}
+@media (min-width: 768px) {
+  .proj-section:not(.horizontal) .proj-track {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+.proj-section:not(.horizontal) .proj-panel {
+  width: auto;
+}
+.proj-section:not(.horizontal) .proj-intro,
+.proj-section:not(.horizontal) .proj-outro {
+  grid-column: 1 / -1;
+  align-items: center;
+  text-align: center;
 }
 
 /* --- Contact: transmission console --- */
