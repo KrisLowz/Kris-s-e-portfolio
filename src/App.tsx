@@ -30,16 +30,11 @@ const App: React.FC = () => {
   // Resolve the WebGL gate once on mount (reads window/CONFIG/WebGL support).
   const [renderScene] = React.useState(shouldRenderScene);
 
-  // Recover from a lost WebGL context (GPU crash/reset, tab backgrounding) by
-  // remounting the canvas with a fresh context. Capped so a hopelessly
-  // overloaded GPU degrades to the DOM gradient instead of remounting forever.
-  const [sceneKey, setSceneKey] = React.useState(0);
-  const sceneFailsRef = React.useRef(0);
-  const handleContextLost = React.useCallback(() => {
-    if (sceneFailsRef.current >= 2) return; // give up; SceneFallback gradient stays
-    sceneFailsRef.current += 1;
-    window.setTimeout(() => setSceneKey((k) => k + 1), 500);
-  }, []);
+  // If the WebGL context is ever lost (GPU crash on a weak device), silently
+  // drop the canvas so the always-present DOM gradient shows through. NO remount
+  // loop — remounting the canvas was the black-flash. A clean, stable degrade.
+  const [sceneCrashed, setSceneCrashed] = React.useState(false);
+  const handleContextLost = React.useCallback(() => setSceneCrashed(true), []);
 
   return (
     <main className="relative min-h-screen text-pop-text-main font-sans selection:bg-pop-primary selection:text-white transition-colors duration-300 cursor-none">
@@ -52,14 +47,14 @@ const App: React.FC = () => {
           SceneFallback always paints a theme-aware backdrop; the canvas mounts
           on top only on capable, motion-OK desktops. */}
       <SceneFallback />
-      {renderScene && (
+      {renderScene && !sceneCrashed && (
         <Suspense fallback={null}>
           <div
             className="fixed inset-0 pointer-events-none"
             style={{ zIndex: -50 }}
             aria-hidden="true"
           >
-            <CosmicCanvas key={sceneKey} onContextLost={handleContextLost} />
+            <CosmicCanvas onContextLost={handleContextLost} />
           </div>
         </Suspense>
       )}

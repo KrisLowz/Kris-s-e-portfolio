@@ -36,19 +36,21 @@ export const CURVE = {
 } as const;
 
 /**
- * Visual tunables for the cosmic world. Counts are desktop targets; the
- * PerformanceMonitor (Phase 7) scales DPR/bloom under load, and the whole scene
- * is gated off on mobile/low-power in favour of the DOM fallback.
+ * Visual tunables for the cosmic world. Counts are kept deliberately modest so
+ * the scene runs on integrated GPUs without losing the WebGL context. The
+ * canvas renders at a fixed DPR of 1 (no MSAA, no dynamic resolution) for
+ * stability; the whole scene is gated off on mobile/low-power in favour of the
+ * DOM gradient fallback.
  */
 export const SCENE = {
   core: { radius: 1.7, intensity: 3.2, displace: 0.16 },
-  particles: { count: 12000, innerRadius: 5, shell: 28, size: 0.6 },
+  particles: { count: 5000, innerRadius: 5, shell: 28, size: 0.7 },
   rings: [
-    { count: 1500, radius: 3.0, thickness: 0.14, tilt: 0.5 },
-    { count: 1200, radius: 4.2, thickness: 0.12, tilt: -0.35 },
-    { count: 1000, radius: 5.4, thickness: 0.1, tilt: 0.9 },
+    { count: 700, radius: 3.0, thickness: 0.14, tilt: 0.5 },
+    { count: 550, radius: 4.2, thickness: 0.12, tilt: -0.35 },
+    { count: 450, radius: 5.4, thickness: 0.1, tilt: 0.9 },
   ],
-  ringSize: 0.06,
-  meteors: { count: 6 },
+  ringSize: 0.07,
+  meteors: { count: 3 },
   bloom: { intensity: 1.3, threshold: 0.8, smoothing: 0.2 },
 } as const;
