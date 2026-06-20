@@ -15,6 +15,7 @@ import { initPins } from './pins';
 import { initNav } from './nav';
 import { initCursor, destroyCursor } from './cursor';
 import { runIntro, revertIntroSplits } from './intro';
+import { initScrollProgress } from './scroll';
 
 export { CONFIG } from './config';
 export { applyMagnetic } from './magnetic';
@@ -33,6 +34,7 @@ export function useSiteAnimations() {
       initEngine();
       initPins();
       initNav();
+      initScrollProgress();
       initCursor();
       runIntro().then(() => ScrollTrigger.refresh());
     });

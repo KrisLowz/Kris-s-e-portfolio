@@ -27,6 +27,7 @@ export interface AnimConfig {
 
   /** Master on/off switches per effect system. */
   toggles: {
+    scene3d: boolean;
     preloader: boolean;
     smoothScroll: boolean;
     reveals: boolean;
@@ -106,6 +107,7 @@ export const CONFIG: AnimConfig = {
   isMobile,
 
   toggles: {
+    scene3d: true,
     preloader: true,
     smoothScroll: true,
     reveals: true,

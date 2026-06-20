@@ -34,6 +34,11 @@ export function initSmoothScroll(): Lenis | null {
   gsap.ticker.add(rafId);
   gsap.ticker.lagSmoothing(0);
 
+  // Dev-only: expose for debugging (mirrors register.ts exposing gsap).
+  if (import.meta.env.DEV) {
+    (window as unknown as Record<string, unknown>).lenis = lenis;
+  }
+
   // Intercept in-page anchor links so they ease-scroll with a nav offset.
   anchorHandler = (e: Event) => {
     const target = e.target as HTMLElement;

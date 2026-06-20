@@ -93,6 +93,22 @@
   transform: translateZ(20px);
 }
 
+/* 3D scene DOM fallback: theme-aware gradient backdrop. Shown when the WebGL
+   scene is gated off (reduced-motion / no-WebGL / low-power / mobile), and
+   painted behind the canvas so there is never a blank flash before init.
+   Colors come from the theme vars, so it adapts to light/dark automatically. */
+.scene-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: -60;
+  pointer-events: none;
+  background:
+    radial-gradient(55% 45% at 72% 18%, color-mix(in srgb, var(--blob-2) 55%, transparent), transparent 70%),
+    radial-gradient(50% 45% at 18% 82%, color-mix(in srgb, var(--blob-3) 50%, transparent), transparent 72%),
+    radial-gradient(75% 65% at 50% 50%, color-mix(in srgb, var(--accent-primary) 14%, transparent), transparent 78%),
+    var(--bg-primary);
+}
+
 /* ============================================================================
    ANIMATION LAYER (GSAP + Lenis) — see src/animations/
    ========================================================================= */

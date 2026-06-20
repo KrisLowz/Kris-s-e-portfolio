@@ -41,6 +41,7 @@ const Hero: React.FC = () => {
 
   return (
     <section
+      id="hero"
       data-hero
       data-tint="#6366f1"
       className="relative min-h-screen flex items-center pt-20 overflow-hidden"
