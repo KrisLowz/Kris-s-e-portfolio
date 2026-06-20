@@ -8,7 +8,7 @@ import Contact from './components/Contact';
 import AIChatBot from './components/AIChatBot';
 import GhostCursors from './components/GhostCursors';
 import ReactionButton from './components/ReactionButton';
-import ProfessionalSkills from './components/ProfessionalSkills';
+import SkillsConstellation from './components/SkillsConstellation';
 import CustomCursor from './components/CustomCursor';
 import ScrollProgressBar from './components/ScrollProgressBar';
 import SectionHoverGlow from './components/SectionHoverGlow';
@@ -69,7 +69,7 @@ const App: React.FC = () => {
       <Navigation />
       <Hero />
       <About />
-      <ProfessionalSkills />
+      <SkillsConstellation />
       <Experience />
       <ProjectsShowcase />
       <Contact />
