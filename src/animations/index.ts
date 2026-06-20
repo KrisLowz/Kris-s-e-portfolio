@@ -17,6 +17,7 @@ import { initCursor, destroyCursor } from './cursor';
 import { runIntro, revertIntroSplits } from './intro';
 import { initScrollProgress } from './scroll';
 import { initInteractions, destroyInteractions } from './interactions';
+import { initScramble, destroyScramble } from './scramble';
 
 export { CONFIG } from './config';
 export { applyMagnetic } from './magnetic';
@@ -37,6 +38,7 @@ export function useSiteAnimations() {
       initNav();
       initScrollProgress();
       initInteractions();
+      initScramble();
       initCursor();
       runIntro().then(() => ScrollTrigger.refresh());
     });
@@ -57,6 +59,7 @@ export function useSiteAnimations() {
       revertSplits();
       revertIntroSplits();
       destroyInteractions();
+      destroyScramble();
       destroyCursor();
       destroySmoothScroll();
       window.removeEventListener('load', onLoad);

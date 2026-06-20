@@ -7,7 +7,7 @@ const Experience: React.FC = () => {
     <section id="experience" data-tint="#2dd4bf" className="py-32 relative">
       <div className="max-w-3xl mx-auto px-6">
         <div className="text-center mb-16">
-          <div data-anim="pop" className="inline-block px-4 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-full text-sm font-bold mb-4">
+          <div data-anim="pop" data-scramble className="inline-block px-4 py-1 bg-teal-100 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 rounded-full text-sm font-bold mb-4">
             Career Journey
           </div>
           <h2 data-anim="words" className="text-4xl font-extrabold text-pop-text-main">Experience</h2>

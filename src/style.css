@@ -146,6 +146,49 @@
 }
 
 /* ============================================================================
+   KINETIC TYPOGRAPHY & MICRO-INTERACTIONS
+   ========================================================================= */
+
+/* Continuously flowing gradient for clip-text headings. */
+.text-gradient-flow {
+  background-size: 220% auto;
+  animation: gradient-flow 6s linear infinite;
+}
+@keyframes gradient-flow {
+  to {
+    background-position: 220% center;
+  }
+}
+
+/* Shine sweep across a button on hover. */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform 0.75s ease;
+  pointer-events: none;
+}
+.btn-shine:hover::after {
+  transform: translateX(130%);
+}
+
+/* Monospace feel while a label is mid-scramble so width doesn't jump. */
+[data-scramble] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================================
    ANIMATION LAYER (GSAP + Lenis) — see src/animations/
    ========================================================================= */
 

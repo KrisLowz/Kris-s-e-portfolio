@@ -45,7 +45,7 @@ const ProfessionalSkills: React.FC = () => {
     <section id="skills" data-tint="#a78bfa" className="py-20 relative">
       <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
-           <div data-anim="pop" className="inline-block px-4 py-1 bg-pop-surface-2 border border-pop-border rounded-full text-xs font-bold mb-4 tracking-wide uppercase text-pop-text-muted">
+           <div data-anim="pop" data-scramble className="inline-block px-4 py-1 bg-pop-surface-2 border border-pop-border rounded-full text-xs font-bold mb-4 tracking-wide uppercase text-pop-text-muted">
              Beyond the Code
            </div>
            <h2 data-anim="words" className="text-3xl md:text-4xl font-extrabold text-pop-text-main">

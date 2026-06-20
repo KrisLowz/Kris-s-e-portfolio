@@ -29,7 +29,7 @@ const ProjectsShowcase: React.FC = () => {
       <div className="max-w-6xl mx-auto px-6">
         {/* Section Header */}
         <div className="mb-20 text-center">
-          <div data-anim="pop" className="inline-block px-4 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-bold mb-4">
+          <div data-anim="pop" data-scramble className="inline-block px-4 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-sm font-bold mb-4">
             Featured Work
           </div>
           <h2 data-anim="words" className="text-4xl md:text-5xl font-extrabold text-pop-text-main mb-6">

@@ -23,7 +23,7 @@ const About: React.FC = () => {
 
           {/* Text Content */}
           <div data-tilt="3" className="z-10 cosmic-panel p-8 md:p-10">
-            <div data-anim="pop" className="inline-block px-4 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-bold mb-4">
+            <div data-anim="pop" data-scramble className="inline-block px-4 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-full text-sm font-bold mb-4">
               About Me
             </div>
             <h2 data-anim="words" className="text-4xl font-extrabold text-pop-text-main mb-6">

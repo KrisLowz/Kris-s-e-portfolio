@@ -67,7 +67,7 @@ const Hero: React.FC = () => {
         {/* Main Headline with Typewriter */}
         <h1 className="text-5xl md:text-7xl font-extrabold text-pop-text-main tracking-tight leading-[1.1] mb-8 min-h-[160px] md:min-h-[auto]">
           <span data-hero-headline className="inline-block">Hi, I am</span> <br />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pop-primary to-pop-secondary">
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-pop-primary via-pop-secondary to-pop-primary text-gradient-flow">
             <span ref={typeTarget}></span>
           </span>
         </h1>
@@ -81,7 +81,7 @@ const Hero: React.FC = () => {
           <div data-hero-cta>
             <MagneticButton
               href="#projects"
-              className="px-8 py-4 bg-pop-primary text-white font-bold rounded-full shadow-lg shadow-pop-primary/30 flex items-center gap-2 hover:bg-opacity-90 transition-colors"
+              className="btn-shine px-8 py-4 bg-pop-primary text-white font-bold rounded-full shadow-lg shadow-pop-primary/30 flex items-center gap-2 hover:bg-opacity-90 transition-colors"
             >
               View Work <ArrowRight className="w-4 h-4" />
             </MagneticButton>

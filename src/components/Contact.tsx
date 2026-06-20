@@ -55,7 +55,7 @@ const Contact: React.FC = () => {
                   <label htmlFor="contact-message" className="block text-sm font-bold text-pop-text-main mb-2">Message</label>
                   <textarea id="contact-message" name="message" rows={3} className="w-full bg-pop-surface-2 border border-pop-border rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-pop-primary/50 transition-all text-pop-text-main" placeholder="Tell me about your project..."></textarea>
                 </div>
-                <MagneticButton className="w-full py-4 bg-pop-text-main text-pop-surface font-bold rounded-xl hover:bg-black dark:hover:bg-white transition-colors flex justify-center items-center gap-2">
+                <MagneticButton className="btn-shine w-full py-4 bg-pop-text-main text-pop-surface font-bold rounded-xl hover:bg-black dark:hover:bg-white transition-colors flex justify-center items-center gap-2">
                   Send Message <Send className="w-4 h-4" />
                 </MagneticButton>
               </div>
