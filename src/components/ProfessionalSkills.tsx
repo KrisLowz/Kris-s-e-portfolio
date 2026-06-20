@@ -56,7 +56,7 @@ const ProfessionalSkills: React.FC = () => {
         <div data-stagger="0.08" className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {skills.map((skill, idx) => (
             <div key={idx} data-anim="scale" className="h-48 cursor-pointer [perspective:1200px]">
-              <SpotlightCard className="skill-card-inner relative w-full h-full bg-pop-surface border border-pop-border rounded-2xl shadow-sm hover:shadow-lg transition-all group overflow-hidden">
+              <SpotlightCard className="skill-card-inner relative w-full h-full bg-pop-surface/55 backdrop-blur-md border border-pop-border rounded-2xl shadow-lg hover:shadow-xl transition-all group overflow-hidden">
 
                 <div className="skill-flip relative w-full h-full">
                   {/* Front face */}

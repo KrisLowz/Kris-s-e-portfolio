@@ -46,6 +46,8 @@ const Hero: React.FC = () => {
       data-tint="#6366f1"
       className="relative min-h-screen flex items-center pt-20 overflow-hidden"
     >
+      {/* Readability scrim: softly tames the core's glow behind the hero text. */}
+      <div className="hero-scrim" aria-hidden="true" />
       <div
         data-hero-content
         className="max-w-4xl mx-auto px-6 w-full relative z-10 text-center flex flex-col items-center"

@@ -11,12 +11,12 @@
  * (core, rings, monoliths) lands in later phases.
  */
 export const CAMERA_WAYPOINTS: ReadonlyArray<readonly [number, number, number]> = [
-  [0, 0.2, 6.5], // Hero — establishing shot, core haloing behind the text
-  [2.2, 0.5, 5.5], // About — drift in and around
-  [3.0, 0.0, 4.0], // Skills — settle among the orbiting ring
-  [0.4, 1.4, 3.0], // Experience — fly along the path
-  [-2.4, 0.2, 4.2], // Projects — approach the monoliths
-  [0, 0.4, 8], // Contact — pull back, arrival
+  [0, 0.2, 6.5], // Hero — close, core as centerpiece behind the text
+  [2.0, 0.4, 7.5], // About — pulled back so the core is a backdrop, not a wall
+  [2.6, -0.2, 8.0], // Skills — orbit to the side
+  [0.3, 1.2, 8.5], // Experience — furthest back, card sits over softer glow
+  [-2.4, 0.2, 7.5], // Projects — approach the monoliths
+  [0, 0.4, 9.5], // Contact — pull back, arrival
 ];
 
 export const CAMERA = {

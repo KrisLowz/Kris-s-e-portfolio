@@ -110,6 +110,42 @@
 }
 
 /* ============================================================================
+   COSMIC GLASS — readability over the 3D world (full-bleed glass restyle)
+   ========================================================================= */
+
+/* Soft radial scrim behind hero content: tames the core's glow directly behind
+   the text without a hard edge. Theme-aware (darkens in dark, lightens in light). */
+.hero-scrim {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(960px, 94vw);
+  height: min(660px, 82vh);
+  z-index: 1;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in srgb, var(--bg-primary) 76%, transparent) 0%,
+    color-mix(in srgb, var(--bg-primary) 44%, transparent) 48%,
+    transparent 74%
+  );
+  filter: blur(10px);
+}
+
+/* Frosted-glass panel for section content floating over the cosmos. More opaque
+   than .glass-panel so body text stays legible over the bright core. */
+.cosmic-panel {
+  background: color-mix(in srgb, var(--bg-surface) 70%, transparent);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid var(--glass-border);
+  border-radius: 1.75rem;
+  box-shadow: 0 18px 60px -20px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 0 color-mix(in srgb, #ffffff 8%, transparent);
+}
+
+/* ============================================================================
    ANIMATION LAYER (GSAP + Lenis) — see src/animations/
    ========================================================================= */
 

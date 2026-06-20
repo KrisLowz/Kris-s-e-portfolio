@@ -22,7 +22,7 @@ const Experience: React.FC = () => {
               {/* Dot */}
               <div data-anim="pop" className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-pop-surface border-4 border-pop-border group-hover:border-pop-primary transition-colors z-10" />
 
-              <div data-anim="clip-left" className="bg-pop-surface p-6 rounded-2xl shadow-sm border border-pop-border hover:shadow-lg transition-[transform,box-shadow] hover:-translate-y-1">
+              <div data-anim="clip-left" className="bg-pop-surface/75 backdrop-blur-lg p-6 rounded-2xl shadow-lg border border-pop-border hover:shadow-xl transition-[transform,box-shadow] hover:-translate-y-1">
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4">
                   <div>
                     <h3 className="text-xl font-bold text-pop-text-main">{exp.role}</h3>

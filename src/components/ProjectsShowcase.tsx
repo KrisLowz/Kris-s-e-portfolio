@@ -46,7 +46,7 @@ const ProjectsShowcase: React.FC = () => {
               key={project.id}
               data-project-card=""
               onClick={() => openDetailModal(project)}
-              className="rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group bg-pop-surface/40 border border-pop-border"
+              className="rounded-3xl overflow-hidden flex flex-col h-full cursor-pointer group bg-pop-surface/55 backdrop-blur-md border border-pop-border"
             >
                 {/* Image Area */}
                 <div className="relative h-64 overflow-hidden bg-pop-surface-2 tilt-card-inner">
