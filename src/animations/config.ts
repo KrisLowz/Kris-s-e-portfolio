@@ -126,10 +126,12 @@ export const CONFIG: AnimConfig = {
   },
 
   ease: {
-    smooth: 'silk',
+    // Playful overshoot on block/card entrances; masked text + clip stay smooth
+    // ('silk') so they don't clip oddly when overshooting past their mask edge.
+    smooth: 'back.out(1.7)',
     out: 'power2.out',
     inOut: 'glide',
-    pop: 'back.out(1.7)',
+    pop: 'back.out(2)',
     elastic: 'elastic.out(1, 0.5)',
     expo: 'silk',
   },
