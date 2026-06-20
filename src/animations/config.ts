@@ -126,12 +126,12 @@ export const CONFIG: AnimConfig = {
   },
 
   ease: {
-    smooth: 'power3.out',
+    smooth: 'silk',
     out: 'power2.out',
-    inOut: 'power2.inOut',
+    inOut: 'glide',
     pop: 'back.out(1.7)',
     elastic: 'elastic.out(1, 0.5)',
-    expo: 'expo.out',
+    expo: 'silk',
   },
 
   duration: {

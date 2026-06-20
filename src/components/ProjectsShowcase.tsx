@@ -59,8 +59,10 @@ const ProjectsShowcase: React.FC = () => {
               onMouseLeave={() => emitWorldBlur({ type: 'project', id: project.id })}
               className="project-portal group"
             >
-              <div className="portal-frame">
-                <img src={project.image} alt={project.title} loading="lazy" className="portal-img" />
+              <div className="portal-frame" data-anim="clip">
+                <div className="portal-img-wrap" data-speed="0.86">
+                  <img src={project.image} alt={project.title} loading="lazy" className="portal-img" />
+                </div>
                 <span className="portal-sheen" aria-hidden="true" />
                 {project.id === 'trackpoint' && (
                   <span className="portal-badge tilt-pop">
