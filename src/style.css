@@ -663,6 +663,60 @@
   box-shadow: 0 0 30px -6px color-mix(in srgb, var(--accent-primary) 80%, transparent);
 }
 
+/* --- Morphing glow blob accent (Contact) --- */
+.contact-blob {
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  top: -140px;
+  right: -120px;
+  z-index: 0;
+  opacity: 0.16;
+  filter: blur(70px);
+  pointer-events: none;
+}
+
+/* --- Matter.js physics playground (Skills) --- */
+.physics-stage {
+  position: relative;
+}
+.physics-stage:not(.active) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+.physics-stage.active {
+  height: 300px;
+  overflow: hidden;
+}
+.physics-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--text-main);
+  background: color-mix(in srgb, var(--bg-surface) 55%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 35%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 18px -8px color-mix(in srgb, var(--accent-primary) 70%, transparent);
+  user-select: none;
+}
+.physics-stage.active .physics-pill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  will-change: transform;
+}
+.physics-pill i {
+  font-size: 1.05rem;
+}
+
 /* 3D scene DOM fallback: theme-aware gradient backdrop. Shown when the WebGL
    scene is gated off (reduced-motion / no-WebGL / low-power / mobile), and
    painted behind the canvas so there is never a blank flash before init.

@@ -314,6 +314,24 @@ function hexToRgba(hex: string, alpha: number): string {
 }
 
 /**
+ * Scroll-scrubbed "zoom out": the element scales up and fades as it leaves the
+ * viewport top — a cinematic depth transition (the Zoom technique). Used on the
+ * hero so scrolling away pushes it back into the cosmos.
+ */
+function buildZoomOut(el: HTMLElement) {
+  gsap.fromTo(
+    el,
+    { scale: 1, autoAlpha: 1 },
+    {
+      scale: 1.18,
+      autoAlpha: 0.12,
+      ease: 'none',
+      scrollTrigger: { trigger: el, start: 'top top', end: 'bottom top', scrub: 0.6 },
+    }
+  );
+}
+
+/**
  * Scan the document and wire every animated element. Call inside a gsap.context.
  * If reduced motion is on, make everything visible and do nothing else.
  */
@@ -356,6 +374,8 @@ export function initEngine() {
   if (CONFIG.toggles.floatAccents) {
     gsap.utils.toArray<HTMLElement>('[data-float]').forEach((el) => buildFloat(el));
   }
+
+  gsap.utils.toArray<HTMLElement>('[data-zoom-out]').forEach((el) => buildZoomOut(el));
 
   buildVelocitySkew();
   buildSectionTint();

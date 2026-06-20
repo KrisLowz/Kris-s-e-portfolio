@@ -2,6 +2,7 @@ import React from 'react';
 import { PROFILE } from '../constants';
 import { Mail, MapPin, Send, Radio } from 'lucide-react';
 import MagneticButton from './MagneticButton';
+import MorphBlob from './MorphBlob';
 
 /**
  * Contact as a "transmission console" — frameless luminous contact nodes and a
@@ -10,6 +11,7 @@ import MagneticButton from './MagneticButton';
 const Contact: React.FC = () => {
   return (
     <footer id="contact" className="relative overflow-hidden pb-12 pt-28">
+      <MorphBlob className="contact-blob" colorVar="--accent-secondary" />
       <div className="mx-auto max-w-5xl px-6">
         <div className="const-heading relative z-10 mb-14 text-center">
           <p

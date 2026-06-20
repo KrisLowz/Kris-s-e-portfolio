@@ -67,6 +67,7 @@ const Hero: React.FC = () => {
 
       <div
         data-hero-content
+        data-zoom-out
         className="max-w-4xl mx-auto px-6 w-full relative z-10 text-center flex flex-col items-center"
       >
         {/* Status Badge */}

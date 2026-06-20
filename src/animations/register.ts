@@ -7,12 +7,13 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import { CustomEase } from 'gsap/CustomEase';
+import { MorphSVGPlugin } from 'gsap/MorphSVGPlugin';
 
 let registered = false;
 
 export function registerGsap() {
   if (registered) return;
-  gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase);
+  gsap.registerPlugin(ScrollTrigger, SplitText, CustomEase, MorphSVGPlugin);
   // Signature organic eases — the "buttery" feel, used across reveals/transitions.
   CustomEase.create('silk', 'M0,0 C0.2,1 0.22,1 1,1');
   CustomEase.create('glide', 'M0,0 C0.62,0 0.18,1 1,1');

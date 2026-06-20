@@ -1,6 +1,7 @@
 import React from 'react';
 import { SKILLS } from '../constants';
 import ConstellationCluster, { ConstNode } from './ConstellationCluster';
+import PhysicsPlayground from './PhysicsPlayground';
 
 /**
  * Skills section in the Living Constellation language — the tech stack as a star
@@ -26,6 +27,11 @@ const SkillsConstellation: React.FC = () => {
           <p className="mt-3 text-sm text-pop-text-muted/80">Hover a star to chart it</p>
         </div>
         <ConstellationCluster nodes={nodes} sync3d gradientId="skills-grad" />
+
+        <p className="mb-2 mt-14 text-center text-[11px] font-bold uppercase tracking-[0.35em] text-pop-secondary/60">
+          Or fling the stack around ✦
+        </p>
+        <PhysicsPlayground />
       </div>
     </section>
   );
