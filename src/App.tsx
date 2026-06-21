@@ -8,12 +8,13 @@ import Contact from './components/Contact';
 import AIChatBot from './components/AIChatBot';
 import GhostCursors from './components/GhostCursors';
 import ReactionButton from './components/ReactionButton';
-import SkillsConstellation from './components/SkillsConstellation';
+import HoloSkills from './components/HoloSkills';
 import CustomCursor from './components/CustomCursor';
 import ScrollProgressBar from './components/ScrollProgressBar';
 import SectionHoverGlow from './components/SectionHoverGlow';
 import ScrollRippleEffect from './components/ScrollRippleEffect';
 import Preloader from './components/Preloader';
+import VoyageHUD from './components/VoyageHUD';
 import { useSiteAnimations } from './animations';
 import { shouldRenderScene } from './scene/capability';
 import SceneFallback from './scene/SceneFallback';
@@ -58,13 +59,16 @@ const App: React.FC = () => {
           </div>
         </Suspense>
       )}
+      {/* Cinematic flight-HUD: only over the live 3D voyage (DOM-only, no
+          three.js import, so it stays out of the lazy scene bundle). */}
+      {renderScene && !sceneCrashed && <VoyageHUD />}
 
       <GhostCursors />
 
       <Navigation />
       <Hero />
       <About />
-      <SkillsConstellation />
+      <HoloSkills />
       <Experience />
       <ProjectsShowcase />
       <Contact />

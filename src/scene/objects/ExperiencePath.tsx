@@ -40,16 +40,23 @@ export default function ExperiencePath({ theme }: { theme: ThemeColors }) {
   useFrame((_, delta) => {
     vis.current += (centred(sections.experience) - vis.current) * (1 - Math.exp(-4 * delta));
     const k = 1 - Math.exp(-12 * delta);
+    const p = sections.experience;
+    const n = nodes.length;
 
-    for (let i = 0; i < nodes.length; i++) {
+    for (let i = 0; i < n; i++) {
       const m = meshRefs.current[i];
       if (!m) continue;
       const isHot = hovered.current === nodes[i].id;
-      const ts = (isHot ? 2.4 : 1) * (0.5 + vis.current);
+      // Beacon ignition: a bright flare as the probe passes this node's point
+      // along the section (staggered for multiple roles).
+      const pi = n > 1 ? i / (n - 1) : 0.5;
+      const ignite = Math.exp(-Math.pow((p - pi) / 0.12, 2));
+      const ts = (isHot ? 2.4 : 1) * (0.5 + vis.current) + ignite * 1.8;
       m.scale.setScalar(m.scale.x + (ts - m.scale.x) * k);
       const mat = m.material as THREE.MeshBasicMaterial;
-      mat.opacity = vis.current * (isHot ? 1 : 0.85);
-      mat.color.lerp(isHot ? hot : theme.secondary, k);
+      mat.opacity = Math.min(1, vis.current * (isHot ? 1 : 0.8) + ignite * 0.6);
+      const lit = isHot || ignite > 0.45;
+      mat.color.lerp(lit ? hot : theme.secondary, k);
     }
 
     if (lineRef.current) lineRef.current.material.opacity = vis.current * 0.35;

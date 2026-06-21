@@ -12,6 +12,7 @@ export interface WorldFocusDetail {
 const FOCUS = 'world:focus';
 const BLUR = 'world:blur';
 const PROJECT_OPEN = 'project:open';
+const TRANSMIT = 'voyage:transmit';
 
 export function emitWorldFocus(detail: WorldFocusDetail): void {
   window.dispatchEvent(new CustomEvent(FOCUS, { detail }));
@@ -37,4 +38,15 @@ export function onProjectOpen(fn: (id: string) => void): () => void {
   const h = (e: Event) => fn((e as CustomEvent<{ id: string }>).detail.id);
   window.addEventListener(PROJECT_OPEN, h);
   return () => window.removeEventListener(PROJECT_OPEN, h);
+}
+
+/** Fired when the visitor hits "Transmit" on the contact form — the comms relay
+ *  answers with a stronger signal burst. */
+export function emitTransmit(): void {
+  window.dispatchEvent(new CustomEvent(TRANSMIT));
+}
+export function onTransmit(fn: () => void): () => void {
+  const h = () => fn();
+  window.addEventListener(TRANSMIT, h);
+  return () => window.removeEventListener(TRANSMIT, h);
 }

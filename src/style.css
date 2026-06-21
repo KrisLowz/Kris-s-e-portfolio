@@ -1292,3 +1292,593 @@ html.anim-ready .reveal-on-scroll {
   pointer-events: none;
   z-index: 9998;
 }
+
+/* ============================================================
+   Voyage flight HUD — cinematic edge readouts over the 3D scene.
+   Decorative (aria-hidden, pointer-events:none). Base state is
+   visible so it survives reduced-motion (which kills the boot anim).
+   ============================================================ */
+.voyage-hud {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  font-size: 0.6rem;
+  line-height: 1.55;
+  text-shadow: 0 0 8px rgba(var(--spotlight-rgb), 0.25);
+}
+.hud-corner {
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  opacity: 1;
+  animation: hud-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hud-tl { top: 84px; left: 26px; }
+.hud-tr { top: 84px; right: 26px; text-align: right; align-items: flex-end; }
+/* bottom corners are kept clear of the floating heart / chat widgets AND of the
+   probe, which frames at lower-centre */
+.hud-bl { bottom: 92px; left: 26px; text-align: left; align-items: flex-start; }
+.hud-br { bottom: 104px; right: 26px; text-align: right; align-items: flex-end; }
+.hud-row {
+  color: var(--text-main);
+  font-size: 0.66rem;
+  letter-spacing: 0.12em;
+}
+.hud-dim { opacity: 0.6; }
+.hud-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #34d399;
+  box-shadow: 0 0 8px #34d399;
+  margin-right: 6px;
+  vertical-align: middle;
+  animation: hud-blink 2s ease-in-out infinite;
+}
+.hud-act {
+  font-size: 0.92rem;
+  letter-spacing: 0.2em;
+  color: var(--accent-primary);
+  font-weight: 700;
+  text-shadow: 0 0 14px rgba(var(--spotlight-rgb), 0.5);
+}
+.hud-switch { animation: hud-flicker 0.5s steps(2) 1; }
+.hud-track {
+  position: fixed;
+  right: 26px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 168px;
+  background: rgba(var(--spotlight-rgb), 0.16);
+  border-radius: 2px;
+  overflow: hidden;
+  animation: hud-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.hud-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: bottom;
+  transform: scaleY(0.04);
+  background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary));
+  box-shadow: 0 0 10px rgba(var(--spotlight-rgb), 0.6);
+}
+@keyframes hud-in {
+  from { opacity: 0; filter: blur(3px); }
+  to { opacity: 1; filter: blur(0); }
+}
+@keyframes hud-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes hud-flicker {
+  0% { opacity: 0.3; }
+  50% { opacity: 1; }
+  100% { opacity: 1; }
+}
+@media (max-width: 767px) {
+  .voyage-hud { display: none; }
+}
+
+/* ============================================================
+   Holographic Skills — "NEBULA SCAN". The stack as a scanning
+   sci-fi projection (orbital signal-nodes, radar sweep, corner
+   brackets, scanlines) instead of a logo grid. Cyan is the
+   hologram colour by convention; labels follow the theme.
+   ============================================================ */
+.holo-head {
+  text-align: center;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.holo-head-tag {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: #22d3ee;
+  text-shadow: 0 0 12px rgba(34, 211, 238, 0.7);
+}
+.holo-head-title {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  color: var(--text-main);
+  margin: 8px 0 6px;
+  text-shadow: 0 0 26px rgba(var(--spotlight-rgb), 0.45);
+}
+.holo-head-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.62rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+.holo-rec {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+  animation: holo-blink 1.4s infinite;
+}
+
+.holo-stage {
+  --holo: 34, 211, 238; /* hologram cyan (raw RGB for rgba()) */
+  position: relative;
+  height: clamp(460px, 66vh, 660px);
+  margin-top: 22px;
+  perspective: 900px;
+  isolation: isolate;
+}
+
+/* corner brackets — frame the projection (no card) */
+.holo-bracket {
+  position: absolute;
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(var(--holo), 0.7);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  z-index: 4;
+}
+.holo-stage.is-live .holo-bracket { opacity: 0.85; }
+.holo-bracket.tl { top: 0; left: 1%; border-right: 0; border-bottom: 0; }
+.holo-bracket.tr { top: 0; right: 1%; border-left: 0; border-bottom: 0; }
+.holo-bracket.bl { bottom: 0; left: 1%; border-right: 0; border-top: 0; }
+.holo-bracket.br { bottom: 0; right: 1%; border-left: 0; border-top: 0; }
+
+/* perspective grid floor */
+.holo-grid {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44%;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(var(--holo), 0.26) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--holo), 0.26) 1px, transparent 1px);
+  background-size: 46px 46px;
+  transform: rotateX(74deg);
+  transform-origin: bottom center;
+  -webkit-mask-image: linear-gradient(to top, #000, transparent);
+  mask-image: linear-gradient(to top, #000, transparent);
+  opacity: 0;
+  transition: opacity 0.8s ease 0.2s;
+}
+.holo-stage.is-live .holo-grid { opacity: 0.5; }
+
+/* rotating radar sweep */
+.holo-sweep {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(80%, 580px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 1;
+  background: conic-gradient(from 0deg, rgba(var(--holo), 0.4), transparent 28%);
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.holo-stage.is-live .holo-sweep {
+  opacity: 0.42;
+  animation: holo-sweep-rot 7s linear infinite;
+}
+
+/* scanline overlay + flicker */
+.holo-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 3px);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.holo-stage.is-live .holo-scanlines { opacity: 0.6; animation: holo-flick 4s infinite; }
+
+/* spokes from emitter to each signal */
+.holo-spokes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+.holo-spokes line {
+  stroke: rgba(var(--holo), 0.55);
+  stroke-width: 0.16;
+  stroke-dasharray: 1.1 1.5;
+  opacity: 0;
+  transition: opacity 0.8s ease 0.3s;
+}
+.holo-stage.is-live .holo-spokes line { opacity: 0.4; }
+
+/* emitter core */
+.holo-core { position: absolute; left: 50%; top: 50%; z-index: 2; }
+.holo-core-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  border: 2px solid rgba(var(--holo), 0.7);
+  border-radius: 50%;
+  box-shadow: 0 0 24px rgba(var(--holo), 0.6);
+  animation: holo-core-pulse 2.4s ease-in-out infinite;
+}
+.holo-core-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff, #22d3ee);
+  box-shadow: 0 0 18px #22d3ee;
+}
+
+/* signal nodes */
+.holo-node {
+  position: absolute;
+  z-index: 5;
+  transform: translate(-50%, -50%) scale(0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: none;
+  opacity: 0;
+}
+.holo-stage.is-live .holo-node {
+  animation: holo-node-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--d);
+}
+.holo-node-ring {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  border: 1.5px solid rgba(var(--holo), 0.6);
+  background: rgba(var(--holo), 0.07);
+  box-shadow: 0 0 16px rgba(var(--holo), 0.28), inset 0 0 14px rgba(var(--holo), 0.12);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.holo-node.core .holo-node-ring { width: 62px; height: 62px; }
+.holo-node-glyph {
+  font-size: 1.5rem;
+  line-height: 1;
+  filter: grayscale(1) brightness(1.85) drop-shadow(0 0 7px #22d3ee);
+  opacity: 0.85;
+  transition: filter 0.25s ease, opacity 0.25s ease, transform 0.25s ease;
+}
+.holo-node.core .holo-node-glyph { font-size: 1.85rem; }
+.holo-node-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.5;
+  white-space: nowrap;
+  transition: opacity 0.25s ease, color 0.25s ease;
+}
+/* lock-on (hover) — the signal "decodes" to full colour */
+.holo-node:hover { z-index: 7; }
+.holo-node:hover .holo-node-ring {
+  border-color: #22d3ee;
+  box-shadow: 0 0 28px rgba(var(--holo), 0.7), inset 0 0 18px rgba(var(--holo), 0.26);
+  transform: scale(1.18);
+}
+.holo-node:hover .holo-node-glyph { filter: none; opacity: 1; transform: scale(1.06); }
+.holo-node:hover .holo-node-label {
+  opacity: 1;
+  color: var(--text-main);
+  text-shadow: 0 0 10px rgba(var(--holo), 0.7);
+}
+
+@keyframes holo-sweep-rot {
+  from { transform: translate(-50%, -50%) rotate(0); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes holo-core-pulse {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; }
+  50% { transform: translate(-50%, -50%) scale(1.28); opacity: 0.45; }
+}
+@keyframes holo-flick {
+  0%, 100% { opacity: 0.6; }
+  92% { opacity: 0.6; }
+  94% { opacity: 0.28; }
+  96% { opacity: 0.66; }
+}
+@keyframes holo-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+@keyframes holo-node-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+@media (max-width: 767px) {
+  .holo-node-ring { width: 44px; height: 44px; }
+  .holo-node.core .holo-node-ring { width: 50px; height: 50px; }
+  .holo-node-glyph { font-size: 1.2rem; }
+  .holo-node-label { font-size: 0.5rem; }
+}
+
+/* ============================================================
+   Shared holographic toolkit — reused across About / Experience /
+   Projects / Contact so every section speaks the same in-world
+   "hologram" language: HUD frames, field readouts, signal tags,
+   transmission channels. Cyan is the hologram colour by convention.
+   ============================================================ */
+.holo-frame {
+  position: relative;
+  border: 1px solid rgba(34, 211, 238, 0.22);
+  background: repeating-linear-gradient(to bottom, rgba(34, 211, 238, 0.045) 0 1px, transparent 1px 4px);
+  box-shadow: 0 0 26px rgba(34, 211, 238, 0.08), inset 0 0 34px rgba(34, 211, 238, 0.05);
+  -webkit-backdrop-filter: blur(3px);
+  backdrop-filter: blur(3px);
+}
+.holo-frame::before,
+.holo-frame::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 2px solid #22d3ee;
+  pointer-events: none;
+}
+.holo-frame::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
+.holo-frame::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
+
+.holo-label {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: #22d3ee;
+}
+.holo-row {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  gap: 14px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(34, 211, 238, 0.1);
+}
+.holo-row:last-child { border-bottom: 0; }
+.holo-row-val { color: var(--text-main); font-size: 0.95rem; line-height: 1.4; }
+
+.holo-tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.holo-tag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  color: #67e8f9;
+  border: 1px solid rgba(34, 211, 238, 0.3);
+  background: rgba(34, 211, 238, 0.06);
+  transition: color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.holo-tag:hover {
+  border-color: rgba(34, 211, 238, 0.7);
+  color: #a5f3fc;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.4);
+}
+
+.holo-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #34d399;
+}
+.holo-status .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 8px currentColor;
+  animation: holo-blink 1.6s infinite;
+}
+.holo-status.complete { color: #22d3ee; }
+.holo-status.standby { color: #fbbf24; }
+
+.holo-scan-img { position: relative; overflow: hidden; }
+.holo-scan-img::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  background:
+    repeating-linear-gradient(to bottom, rgba(34, 211, 238, 0.08) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, rgba(34, 211, 238, 0.07), transparent 42%);
+  mix-blend-mode: screen;
+}
+.holo-scan-img img { filter: saturate(0.9) contrast(1.04); }
+
+.holo-btn {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  cursor: none;
+  color: #a5f3fc;
+  border: 1px solid rgba(34, 211, 238, 0.5);
+  background: rgba(34, 211, 238, 0.08);
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.holo-btn:hover {
+  background: rgba(34, 211, 238, 0.18);
+  border-color: #22d3ee;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+  color: #fff;
+}
+
+.holo-channel { display: block; }
+.holo-channel > .holo-label { display: block; margin-bottom: 6px; }
+.holo-input,
+textarea.holo-input {
+  width: 100%;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9rem;
+  color: var(--text-main);
+  background: rgba(34, 211, 238, 0.05);
+  border: 1px solid rgba(34, 211, 238, 0.25);
+  border-left: 2px solid rgba(34, 211, 238, 0.6);
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+textarea.holo-input { resize: vertical; min-height: 96px; }
+.holo-input::placeholder { color: var(--text-muted); opacity: 0.5; }
+.holo-input:focus {
+  border-color: rgba(34, 211, 238, 0.5);
+  border-left-color: #22d3ee;
+  background: rgba(34, 211, 238, 0.1);
+  box-shadow: 0 0 18px rgba(34, 211, 238, 0.25);
+}
+
+/* ---- About: SUBJECT DOSSIER ---- */
+.about-holo {
+  display: grid;
+  gap: 22px;
+  margin-top: 26px;
+  grid-template-columns: 1fr;
+}
+@media (min-width: 900px) { .about-holo { grid-template-columns: 280px 1fr; align-items: start; } }
+.about-id { display: flex; flex-direction: column; gap: 14px; }
+.about-avatar { padding: 10px; }
+.about-avatar img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; }
+.about-avatar .holo-label { position: absolute; left: 12px; bottom: 12px; z-index: 3; }
+.about-id-name { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 1rem; letter-spacing: 0.16em; color: var(--text-main); }
+.about-dossier { padding: 24px 26px; }
+.about-block { margin-top: 18px; }
+.about-block .holo-label { display: block; margin-bottom: 8px; }
+.about-log p { color: var(--text-muted); line-height: 1.7; font-size: 0.98rem; }
+
+/* ---- Experience: MISSION RECORD ---- */
+.mlog { display: flex; flex-direction: column; gap: 16px; margin-top: 26px; }
+.mlog-rec { padding: 20px 24px; transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease; }
+.mlog-rec:hover { border-color: rgba(34, 211, 238, 0.5); box-shadow: 0 0 30px rgba(34, 211, 238, 0.14); transform: translateX(4px); }
+.mlog-rec.active { box-shadow: 0 0 30px rgba(251, 191, 36, 0.12), inset 0 0 34px rgba(34, 211, 238, 0.05); }
+.mlog-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.mlog-title { font-size: 1.3rem; font-weight: 700; color: var(--text-main); letter-spacing: 0.01em; }
+.mlog-org { margin-top: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.78rem; letter-spacing: 0.1em; color: var(--accent-primary); }
+.mlog-desc { margin: 12px 0; color: var(--text-muted); line-height: 1.65; }
+.mlog-rec .holo-btn { margin-top: 14px; }
+
+/* ---- Projects: WORLD DOSSIERS (keeps the pinned horizontal track) ---- */
+.proj-panel .project-portal { padding: 0; background: none; border: 0; }
+.portal-frame.holo-frame { border-color: rgba(34, 211, 238, 0.22); box-shadow: 0 0 26px rgba(34, 211, 238, 0.1), inset 0 0 34px rgba(34, 211, 238, 0.05); }
+.proj-feed-tag { position: absolute; left: 12px; top: 12px; z-index: 3; }
+.proj-clearance {
+  position: absolute; right: 12px; top: 12px; z-index: 3;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase;
+  padding: 5px 9px; color: #a5f3fc; border: 1px solid rgba(34, 211, 238, 0.5); background: rgba(8, 15, 30, 0.55);
+  display: inline-flex; align-items: center; gap: 6px;
+}
+.proj-dossier { padding-top: 18px; }
+.proj-dossier-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 14px; }
+.proj-title { font-size: 1.5rem; font-weight: 800; color: var(--text-main); letter-spacing: 0.01em; margin-top: 4px; }
+.project-portal:hover .proj-title { color: #67e8f9; }
+.proj-sub { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; letter-spacing: 0.1em; color: var(--text-muted); margin-top: 4px; }
+.proj-dossier .holo-label { display: block; margin-bottom: 9px; }
+
+/* ---- Contact: RELAY CONSOLE ---- */
+.contact-holo { display: grid; gap: 22px; margin-top: 26px; grid-template-columns: 1fr; }
+@media (min-width: 820px) { .contact-holo { grid-template-columns: 0.85fr 1.15fr; align-items: start; } }
+.contact-coords { padding: 24px 26px; }
+.contact-coords > .holo-label { display: block; margin-bottom: 8px; }
+a.holo-row { text-decoration: none; transition: background 0.2s ease; }
+a.holo-row:hover { background: rgba(34, 211, 238, 0.06); }
+.contact-console { padding: 24px 26px; display: flex; flex-direction: column; gap: 16px; }
+.contact-console > .holo-label { display: block; }
+.contact-transmit { justify-content: center; margin-top: 4px; }
+
+/* ---- Hero: PILOT IDENTITY / boot ---- */
+.holo-btn-lg { padding: 15px 28px; font-size: 0.74rem; }
+.hero-brief {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.92rem;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  max-width: 40rem;
+}
+.holo-social {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  color: #a5f3fc;
+  border: 1px solid rgba(34, 211, 238, 0.4);
+  background: rgba(34, 211, 238, 0.06);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.holo-social:hover {
+  border-color: #22d3ee;
+  box-shadow: 0 0 16px rgba(34, 211, 238, 0.4);
+  color: #fff;
+}
+
+/* Reduced-motion failsafe: the holographic Skills nodes gate their visibility
+   on a boot animation; force them (and the projection chrome) statically visible
+   so the stack is always legible without motion. */
+@media (prefers-reduced-motion: reduce) {
+  .holo-node { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  .holo-bracket,
+  .holo-spokes line,
+  .holo-grid { opacity: 0.45; }
+  .holo-sweep { opacity: 0.28; }
+}

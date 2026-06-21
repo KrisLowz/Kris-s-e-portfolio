@@ -20,20 +20,60 @@ export const CAMERA_WAYPOINTS: ReadonlyArray<readonly [number, number, number]> 
 ];
 
 export const CAMERA = {
-  /** Exponential damping for scroll → camera position (higher = snappier). */
+  /** Exponential damping for scroll → probe position along the path. */
   positionDamping: 3.5,
   /** Cursor-parallax sway amplitude (world units). */
   parallaxAmount: 0.5,
   /** Damping for the parallax sway. */
   parallaxDamping: 2.5,
-  /** Point the camera looks at (the core, at origin). */
-  lookAt: [0, 0, 0] as [number, number, number],
+  /** 3rd-person follow-cam: distance behind the probe (along -tangent). */
+  followBack: 4.2,
+  /** ...and height above it. */
+  followUp: 2.2,
+  /** Cinematic camera smoothing (lower = floatier trail). */
+  followDamping: 2.4,
+  /** How far ahead of the probe the camera looks. */
+  lookAhead: 3.0,
+  /** Raise the look-target above the probe so the craft frames in the lower
+   *  third (cinematic negative space, clear of headline copy). */
+  lookUp: 0.7,
 } as const;
 
 export const CURVE = {
   /** CatmullRom tension (0.5 ≈ centripetal smoothness, avoids overshoot). */
   tension: 0.5,
 } as const;
+
+/**
+ * Cinematic pacing. Linear scroll progress (0→1) is remapped through these
+ * anchors so the probe DECELERATES into each world (an "arrival") and
+ * ACCELERATES between them (a "warp"). One anchor per section; uniform spacing
+ * maps each section's scroll band to its slice of the camera path.
+ */
+export const PACING = {
+  anchors: [0, 0.2, 0.4, 0.6, 0.8, 1] as const,
+  /** Probe speed (curve-units/s) that reads as "cruising" — warp starts here. */
+  warpLo: 0.08,
+  /** ...and saturates (full warp streaks) here. */
+  warpHi: 0.35,
+} as const;
+
+/** Quintic smootherstep — flat (zero-velocity) at both ends → arrival holds. */
+const smoother = (u: number) => u * u * u * (u * (u * 6 - 15) + 10);
+
+/**
+ * Remap linear scroll progress `s` (0..1) to the eased curve parameter `t`.
+ * Within each segment the easing is flat at both anchors, so the probe lingers
+ * at every world (arrival dwell) and races through the gap between them.
+ */
+export function pace(s: number): number {
+  const a = PACING.anchors;
+  const n = a.length - 1;
+  const x = Math.min(Math.max(s, 0), 1) * n; // 0..n
+  const i = Math.min(Math.floor(x), n - 1);
+  const u = x - i;
+  return a[i] + (a[i + 1] - a[i]) * smoother(u);
+}
 
 /**
  * Visual tunables for the cosmic world. Counts are kept deliberately modest so

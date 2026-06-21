@@ -70,35 +70,33 @@ const Hero: React.FC = () => {
         data-zoom-out
         className="max-w-4xl mx-auto px-6 w-full relative z-10 text-center flex flex-col items-center"
       >
-        {/* Status Badge */}
+        {/* Boot status */}
         <div data-hero-badge className="hero-status mb-8 cursor-default">
           <span className="relative flex h-2.5 w-2.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
             <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
           </span>
-          Available for 2025 Opportunities
+          System Online · Available 2025
         </div>
 
-        {/* Main Headline with Typewriter */}
-        <h1 className="text-5xl md:text-7xl font-extrabold text-pop-text-main tracking-tight leading-[1.1] mb-8 min-h-[160px] md:min-h-[auto]">
+        {/* Identity boot */}
+        <span className="holo-label mb-4 block">// identifying pilot</span>
+        <h1 className="text-5xl md:text-7xl font-extrabold text-pop-text-main tracking-tight leading-[1.1] mb-4 min-h-[160px] md:min-h-[auto]">
           <span data-hero-headline className="inline-block">Hi, I am</span> <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-pop-primary via-pop-secondary to-pop-primary text-gradient-flow">
             <span ref={typeTarget}></span>
           </span>
         </h1>
 
-        <p data-hero-sub className="text-lg md:text-xl text-pop-text-muted mb-10 leading-relaxed max-w-2xl mx-auto">
-          I bridge the gap between playful mobile interactions and robust enterprise systems.
+        <p data-hero-sub className="hero-brief mb-10">
+          // bridging playful mobile interactions and robust enterprise systems.
         </p>
 
         {/* Buttons */}
         <div className="flex flex-wrap justify-center gap-4">
           <div data-hero-cta>
-            <MagneticButton
-              href="#projects"
-              className="btn-shine px-8 py-4 bg-pop-primary text-white font-bold rounded-full shadow-lg shadow-pop-primary/30 flex items-center gap-2 hover:bg-opacity-90 transition-colors"
-            >
-              View Work <ArrowRight className="w-4 h-4" />
+            <MagneticButton href="#projects" className="holo-btn holo-btn-lg btn-shine">
+              ▸ Launch tour <ArrowRight className="w-4 h-4" />
             </MagneticButton>
           </div>
 
@@ -106,20 +104,32 @@ const Hero: React.FC = () => {
             <MagneticButton
               href="https://drive.google.com/file/d/1o6RSy9MJDvYwHtKJq0QmLbf6vui4sNPp/view?usp=drive_link"
               download
-              className="btn-cv px-8 py-4 font-bold rounded-full flex items-center gap-2 cursor-pointer"
+              className="holo-btn holo-btn-lg"
             >
-              Download CV <Download className="w-4 h-4" />
+              ▸ Download CV <Download className="w-4 h-4" />
             </MagneticButton>
           </div>
         </div>
 
-        {/* Social Proof */}
-        <div className="mt-16 flex items-center justify-center gap-6">
-          <a data-hero-social data-magnetic="18" href={PROFILE.social.github} aria-label="GitHub" className="p-3 bg-pop-surface border border-pop-border rounded-full text-pop-text-muted hover:text-pop-text-main hover:border-pop-primary hover:shadow-lg transition-shadow">
-            <Github className="w-6 h-6" />
+        {/* Social uplinks */}
+        <div className="mt-16 flex items-center justify-center gap-5">
+          <a
+            data-hero-social
+            data-magnetic="18"
+            href={PROFILE.social.github}
+            aria-label="GitHub"
+            className="holo-social"
+          >
+            <Github className="w-5 h-5" />
           </a>
-          <a data-hero-social data-magnetic="18" href={PROFILE.social.linkedin} aria-label="LinkedIn" className="p-3 bg-pop-surface border border-pop-border rounded-full text-pop-text-muted hover:text-pop-primary hover:border-pop-primary hover:shadow-lg transition-shadow">
-            <Linkedin className="w-6 h-6" />
+          <a
+            data-hero-social
+            data-magnetic="18"
+            href={PROFILE.social.linkedin}
+            aria-label="LinkedIn"
+            className="holo-social"
+          >
+            <Linkedin className="w-5 h-5" />
           </a>
         </div>
       </div>
