@@ -46,3 +46,64 @@ export function buildShardSeeds(): ShardSeed[] {
     };
   });
 }
+
+/** Scroll progress at which the planet detonates. */
+export const DETONATE = 0.4;
+
+/** Smoothstep ramp from a→b, clamped. */
+const ramp = (a: number, b: number, x: number): number => {
+  const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1);
+  return t * t * (3 - 2 * t);
+};
+
+export interface ShardTransform {
+  pos: THREE.Vector3;
+  rot: THREE.Euler;
+  scale: number;
+  opacity: number;
+}
+
+export interface ForgeState {
+  /** 1 = solid planet, 0 = fully dissolved. */
+  planetOpacity: number;
+  /** 0→1 "charging" glow before detonation. */
+  planetCharge: number;
+  planetScale: number;
+  shards: ShardTransform[];
+}
+
+/**
+ * Pure smash choreography as a function of scroll progress (so it is perfectly
+ * reversible — scrolling back recomputes the assembled state). `time` only
+ * drives idle drift/tumble; the macro motion is progress-driven. All positions
+ * are relative to the forge group origin.
+ */
+export function computeForge(
+  progress: number,
+  seeds: ShardSeed[],
+  time: number,
+  beacon: THREE.Vector3
+): ForgeState {
+  const charge = ramp(0.12, DETONATE, progress); // cracks/energy build
+  const dissolve = ramp(DETONATE, 0.5, progress); // planet fades
+  const fly = ramp(DETONATE, 0.7, progress); // shards travel out
+  const carry = ramp(0.85, 1.0, progress); // streak to the beacon
+
+  const planetOpacity = 1 - dissolve;
+  const planetScale = 1 + charge * 0.05 - dissolve * 0.25;
+
+  const target = beacon.clone().add(new THREE.Vector3(0, 0.4, 0));
+  const shards = seeds.map((s) => {
+    const drift = Math.sin(time * 0.6 + s.phase) * 0.18 * (1 - carry);
+    const radius = s.dist * fly + drift;
+    const base = s.dir.clone().multiplyScalar(radius);
+    const pos = base.lerp(target, carry);
+    const spinAngle = time * 0.5 + fly * 6;
+    const rot = new THREE.Euler(s.spin.x * spinAngle, s.spin.y * spinAngle, s.spin.z * spinAngle);
+    const scale = fly * (1 - carry * 0.6);
+    const opacity = Math.min(fly * 1.4, 1) * (1 - carry);
+    return { pos, rot, scale, opacity };
+  });
+
+  return { planetOpacity, planetCharge: charge, planetScale, shards };
+}
