@@ -45,7 +45,7 @@ export function createIridescent(
       uOpacity: { value: 1 },
     },
     transparent: true,
-    depthWrite: true,
+    depthWrite: false,
     toneMapped: false,
   });
 }
