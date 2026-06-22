@@ -5,20 +5,21 @@ import CoreObject from './objects/CoreObject';
 import ParticleField from './objects/ParticleField';
 import OrbitRings from './objects/OrbitRings';
 import MeteorField from './objects/MeteorField';
-import SkillNodes from './objects/SkillNodes';
+import Forge from './objects/Forge';
 import ExperiencePath from './objects/ExperiencePath';
 import ProjectMonoliths from './objects/ProjectMonoliths';
 import Nebula from './objects/Nebula';
 import Planet from './objects/Planet';
 import ScanBeam from './objects/ScanBeam';
 import WarpStreaks from './objects/WarpStreaks';
-import SkillConstellationLines from './objects/SkillConstellationLines';
 import ProjectWorldRings from './objects/ProjectWorldRings';
 import CommsRelay from './objects/CommsRelay';
 import { useThemeColors } from './hooks/useThemeColors';
 
 /** The Origin World the probe scans during the About act. */
 const ABOUT_PLANET: [number, number, number] = [4.6, 0.2, 8.6];
+/** The Skills "Forge" planet — placed ahead of the Skills camera waypoint. TUNE by observation. */
+const FORGE_POS: [number, number, number] = [3.0, -0.2, 9.2];
 /** The comms relay the probe reaches at the Contact act, and its boresight tilt. */
 const RELAY_POS: [number, number, number] = [2.0, -1.1, 10.5];
 const RELAY_ROT: [number, number, number] = [-0.35, 0, 0.15];
@@ -46,8 +47,8 @@ export default function SceneRoot() {
       <Nebula theme={theme} />
       <ParticleField theme={theme} />
       <OrbitRings theme={theme} />
-      <SkillNodes theme={theme} />
-      <SkillConstellationLines theme={theme} />
+      {/* Skills act — the Forge replaces the old skill constellation */}
+      <Forge theme={theme} position={FORGE_POS} />
       <ExperiencePath theme={theme} />
       <ProjectMonoliths />
       <ProjectWorldRings theme={theme} />
