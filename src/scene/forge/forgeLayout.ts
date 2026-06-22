@@ -36,6 +36,7 @@ export function buildShardSeeds(): ShardSeed[] {
     return {
       id: skill.id,
       dir,
+      // per-axis tumble rate, each in [-1, 1] (so the vector magnitude is ≤ √3)
       spin: new THREE.Vector3(
         (hash(i, 1) - 0.5) * 2,
         (hash(i, 2) - 0.5) * 2,
@@ -49,6 +50,9 @@ export function buildShardSeeds(): ShardSeed[] {
 
 /** Scroll progress at which the planet detonates. */
 export const DETONATE = 0.4;
+
+/** How far above the beacon the carried shards aim, in local units. */
+const BEACON_LIFT = 0.4;
 
 /** Smoothstep ramp from a→b, clamped. */
 const ramp = (a: number, b: number, x: number): number => {
@@ -92,7 +96,7 @@ export function computeForge(
   const planetOpacity = 1 - dissolve;
   const planetScale = 1 + charge * 0.05 - dissolve * 0.25;
 
-  const target = beacon.clone().add(new THREE.Vector3(0, 0.4, 0));
+  const target = beacon.clone().add(new THREE.Vector3(0, BEACON_LIFT, 0));
   const shards = seeds.map((s) => {
     const drift = Math.sin(time * 0.6 + s.phase) * 0.18 * (1 - carry);
     const radius = s.dist * fly + drift;
