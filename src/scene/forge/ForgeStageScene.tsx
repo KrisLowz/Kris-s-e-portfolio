@@ -66,19 +66,27 @@ export default function ForgeStageScene({
     });
   }, [world]);
 
-  // Dispose materials, geometry, and physics world on unmount
+  // Drag state ref
+  const drag = useRef<{ idx: number; startX: number; startY: number; moved: boolean } | null>(null);
+
+  // GPU resources live for the component's lifetime — dispose ONLY on unmount.
   useEffect(
     () => () => {
       mats.forEach((m) => m.dispose());
       geo.dispose();
-      Matter.World.clear(world.engine.world, false);
-      Matter.Engine.clear(world.engine);
     },
-    [mats, geo, world]
+    [mats, geo]
   );
 
-  // Drag state ref
-  const drag = useRef<{ idx: number; startX: number; startY: number; moved: boolean } | null>(null);
+  // Matter world: tear down the PREVIOUS world when it's replaced (resize) and on unmount.
+  useEffect(
+    () => () => {
+      Matter.World.clear(world.engine.world, false);
+      Matter.Engine.clear(world.engine);
+      drag.current = null; // a world swap invalidates any in-flight grab index
+    },
+    [world]
+  );
 
   // Helper: convert pointer client coords to world coords
   const toWorld = (clientX: number, clientY: number) => {

@@ -64,7 +64,7 @@ export function grabAt(world: ForgeWorld, wx: number, wy: number): number | null
 }
 
 /** Drag a grabbed body to a world point; setting position tracks velocity so a
- *  release throws it. Make it non-static while dragging. */
+ *  release throws it. */
 export function dragTo(world: ForgeWorld, index: number, wx: number, wy: number): void {
   const b = world.bodies[index];
   Matter.Body.setPosition(b, { x: wx * PHYS_SCALE, y: wy * PHYS_SCALE });
