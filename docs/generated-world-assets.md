@@ -8,6 +8,7 @@ This file tracks the starter visual assets generated for the cosmic cyberpunk po
 | --- | --- | --- |
 | Cyber cat mascot | `/assets/world/mascot/cyber-cat-mascot.png` | Hero guide, preloader, contact success, story companion |
 | Cyber cat mascot cutout | `/assets/world/mascot/cyber-cat-mascot-cutout.png` | Transparent mascot sprite for layering over scenes |
+| Cyber cat turnaround cutout | `/assets/world/mascot/cyber-cat-turnaround-cutout.png` | Transparent four-view character sheet for modeling, rigging, and animation reference |
 | Portfolio spaceship | `/assets/world/hero/portfolio-spaceship.png` | Hero launch scene, scroll route, section transitions |
 | Portfolio spaceship cutout | `/assets/world/hero/portfolio-spaceship-cutout.png` | Transparent spaceship sprite for parallax / travel animation |
 | Origin planet | `/assets/world/about/origin-planet.png` | About / Origin World background |
@@ -43,6 +44,7 @@ Asset:
 
 ```txt
 /assets/world/mascot/cyber-cat-mascot-cutout.png
+/assets/world/mascot/cyber-cat-turnaround-cutout.png
 ```
 
 What happens:
@@ -52,6 +54,7 @@ What happens:
 - Loading orbit spins around the mascot.
 - Text reveals: `Initializing voyage`, `Pilot profile detected`, `Low Chee Fei`.
 - Scene exits with a cyan-white flash into Hero.
+- Use `cyber-cat-turnaround-cutout.png` as a design/modeling reference, not as the main animated in-page sprite.
 
 ### Hero / Launch Sequence
 
@@ -193,6 +196,7 @@ What happens:
 | Asset | Boot | Hero | About | Skills | Experience | Projects | Contact | End |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | `cyber-cat-mascot-cutout.png` | Yes | Yes | Yes | Yes | Yes | Optional | Yes | Yes |
+| `cyber-cat-turnaround-cutout.png` | Reference | Reference | Reference | Reference | Reference | Reference | Reference | Reference |
 | `portfolio-spaceship-cutout.png` | Optional | Yes | Yes | Yes | Yes | Yes | Yes | Yes |
 | `origin-planet-cutout.png` | No | Background hint | Yes | No | No | No | No | No |
 | `skill-crystal-cutout.png` | No | No | No | Yes | Transition route | No | No | No |
