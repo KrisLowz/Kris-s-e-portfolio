@@ -1,44 +1,10 @@
-import React, { useEffect, useRef } from 'react';
-import Typed from 'typed.js';
+import React from 'react';
 import { ArrowRight, Download, Github, Linkedin } from 'lucide-react';
 import { PROFILE } from '../constants';
 import MagneticButton from './MagneticButton';
-import { CONFIG } from '../animations';
+import SignalLockText from './hero/SignalLockText';
 
 const Hero: React.FC = () => {
-  const typeTarget = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    let typed: Typed | null = null;
-
-    const startTyping = () => {
-      if (!typeTarget.current || typed) return;
-      typed = new Typed(typeTarget.current, {
-        strings: [PROFILE.name, 'Web Developer', 'Mobile Developer', 'UI/UX Designer'],
-        typeSpeed: 50,
-        backSpeed: 40,
-        backDelay: 1500,
-        startDelay: 300,
-        loop: true,
-        smartBackspace: false,
-      });
-    };
-
-    // Under reduced motion, show a static name instead of the typewriter loop.
-    // Otherwise sync the typewriter to the intro (the headline reveal fires
-    // `intro:type`).
-    if (CONFIG.reducedMotion) {
-      if (typeTarget.current) typeTarget.current.textContent = PROFILE.name;
-    } else {
-      window.addEventListener('intro:type', startTyping, { once: true });
-    }
-
-    return () => {
-      window.removeEventListener('intro:type', startTyping);
-      typed?.destroy();
-    };
-  }, []);
-
   return (
     <section
       id="hero"
@@ -84,7 +50,7 @@ const Hero: React.FC = () => {
         <h1 className="text-5xl md:text-7xl font-extrabold text-pop-text-main tracking-tight leading-[1.1] mb-4 min-h-[160px] md:min-h-[auto]">
           <span data-hero-headline className="inline-block">Hi, I am</span> <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-pop-primary via-pop-secondary to-pop-primary text-gradient-flow">
-            <span ref={typeTarget}></span>
+            <SignalLockText text={PROFILE.name} />
           </span>
         </h1>
 
