@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { SKILLS } from '../constants';
 import { shouldRenderScene } from '../scene/capability';
 import ForgeStageScene from '../scene/forge/ForgeStageScene';
+import ForgeHoloPanel from './ForgeHoloPanel';
 
 /** The Skills act — an interactive "Forge" stage on capable desktops, a readable
  *  grid otherwise. Keeps id="skills" so existing scroll triggers + the background
@@ -37,7 +38,7 @@ export default function ForgeStage() {
         <Canvas camera={{ position: [0, 0, 8], fov: 50 }} style={{ pointerEvents: 'auto' }}>
           <ForgeStageScene onFocus={setFocusedId} focusedId={focusedId} />
         </Canvas>
-        {/* ForgeHoloPanel overlay is added in Task 4, driven by focusedId */}
+        {focusedId && <ForgeHoloPanel skillId={focusedId} onClose={() => setFocusedId(null)} />}
       </div>
     </section>
   );

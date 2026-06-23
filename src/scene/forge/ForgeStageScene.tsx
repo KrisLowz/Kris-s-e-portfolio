@@ -50,16 +50,17 @@ export default function ForgeStageScene({
       const m = meshes.current[i];
       if (!m) continue;
       m.position.set(positions[i].x, positions[i].y + Math.sin(t * 0.5 + i) * 0.12, positions[i].z);
+      // Focused shard spins more slowly to read as "selected"
+      const isFocused = SKILLS[i].id === focusedId;
+      const spinRate = isFocused ? 0.001 : 0.004;
       m.rotation.x += 0.003;
-      m.rotation.y += 0.004;
-      const target = hovered === i ? 1.5 : 1.0;
+      m.rotation.y += spinRate;
+      // Focused shard takes bloom priority over hover
+      const target = isFocused ? 1.7 : hovered === i ? 1.5 : 1.0;
       const next = m.scale.x + (target - m.scale.x) * (1 - Math.exp(-10 * delta));
       m.scale.setScalar(next);
     }
   });
-
-  // Task 2 renders idle shards only; onFocus/focusedId are wired in Tasks 3–4.
-  void onFocus; void focusedId;
 
   return (
     <>
@@ -75,6 +76,7 @@ export default function ForgeStageScene({
           }}
           onPointerOver={(e) => { e.stopPropagation(); setHovered(i); document.body.style.cursor = 'pointer'; }}
           onPointerOut={() => { setHovered(null); document.body.style.cursor = ''; }}
+          onClick={(e) => { e.stopPropagation(); onFocus(focusedId === SKILLS[i].id ? null : SKILLS[i].id); }}
         />
       ))}
       {hovered != null && (
