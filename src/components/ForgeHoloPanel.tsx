@@ -1,19 +1,28 @@
+import { useEffect, useRef } from 'react';
 import { SKILLS } from '../constants';
 import { skillUsedInTitles } from '../scene/forge/skillData';
 
 /** Diegetic holo readout for a focused skill — data as fragments, not a plain card. */
 export default function ForgeHoloPanel({ skillId, onClose }: { skillId: string; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  useEffect(() => { closeRef.current?.focus(); }, []);
   const skill = SKILLS.find((s) => s.id === skillId);
   if (!skill) return null;
   const projects = skillUsedInTitles(skill.id);
   return (
     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
       <button
+        ref={closeRef}
         aria-label="Close"
         onClick={onClose}
         className="absolute inset-0 pointer-events-auto bg-transparent cursor-default"
       />
-      <div className="relative pointer-events-none text-center font-mono">
+      <div role="dialog" aria-modal="true" aria-label={skill.name} className="relative pointer-events-none text-center font-mono">
         <div className="text-2xl font-bold tracking-wide" style={{ color: 'var(--accent-primary)' }}>{skill.name}</div>
         <div className="text-[11px] text-[#bfe9ff] mt-1">{skill.category}</div>
         <p className="text-sm text-[#9fb6d6] max-w-xs mx-auto mt-3">{skill.blurb}</p>

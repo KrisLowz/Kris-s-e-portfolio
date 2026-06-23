@@ -5,20 +5,11 @@ import * as THREE from 'three';
 import Matter from 'matter-js';
 import { SKILLS } from '../../constants';
 import { createIridescent } from '../materials/iridescent';
+import { useThemeColors } from '../hooks/useThemeColors';
 import { viewBounds, screenToWorld } from './forgeView';
 import { createForgeWorld, stepForge, grabAt, dragTo, release, PHYS_SCALE } from './forgePhysics';
 
 const GOLD = new THREE.Color('#ffd56b');
-
-/** Read two theme colors from CSS once (the stage canvas is short-lived per view). */
-function readThemeColors() {
-  const cs = getComputedStyle(document.documentElement);
-  const get = (v: string, fb: string) => (cs.getPropertyValue(v).trim() || fb);
-  return {
-    primary: new THREE.Color(get('--accent-primary', '#00E5FF')),
-    secondary: new THREE.Color(get('--accent-secondary', '#a855f7')),
-  };
-}
 
 /** Lay the 17 shards on a loose, camera-facing ellipse cloud (deterministic). */
 function layout(): THREE.Vector3[] {
@@ -39,10 +30,10 @@ export default function ForgeStageScene({
 }) {
   const { size, gl } = useThree();
   const positions = useMemo(() => layout(), []);
-  const colors = useMemo(() => readThemeColors(), []);
+  const theme = useThemeColors();
   const mats = useMemo(
-    () => SKILLS.map(() => createIridescent(colors.primary, colors.secondary, GOLD)),
-    [colors]
+    () => SKILLS.map(() => createIridescent(theme.primary, theme.secondary, GOLD)),
+    [theme]
   );
   const geo = useMemo(() => new THREE.IcosahedronGeometry(0.42, 0), []);
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
