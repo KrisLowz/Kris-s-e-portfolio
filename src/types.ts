@@ -3,6 +3,11 @@ export interface SkillCategory {
   skills: string[];
 }
 
+export interface AboutPacketField {
+  label: string;
+  value: string;
+}
+
 export interface Skill {
   id: string;
   name: string;
