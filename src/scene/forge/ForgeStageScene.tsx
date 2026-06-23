@@ -1,5 +1,6 @@
-import { useMemo, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
+import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { SKILLS } from '../../constants';
 import { createIridescent } from '../materials/iridescent';
@@ -41,8 +42,9 @@ export default function ForgeStageScene({
   );
   const geo = useMemo(() => new THREE.IcosahedronGeometry(0.42, 0), []);
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
+  const [hovered, setHovered] = useState<number | null>(null);
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const t = state.clock.elapsedTime;
     for (let i = 0; i < positions.length; i++) {
       const m = meshes.current[i];
@@ -50,6 +52,9 @@ export default function ForgeStageScene({
       m.position.set(positions[i].x, positions[i].y + Math.sin(t * 0.5 + i) * 0.12, positions[i].z);
       m.rotation.x += 0.003;
       m.rotation.y += 0.004;
+      const target = hovered === i ? 1.5 : 1.0;
+      const next = m.scale.x + (target - m.scale.x) * (1 - Math.exp(-10 * delta));
+      m.scale.setScalar(next);
     }
   });
 
@@ -68,8 +73,17 @@ export default function ForgeStageScene({
           ref={(el) => {
             meshes.current[i] = el;
           }}
+          onPointerOver={(e) => { e.stopPropagation(); setHovered(i); document.body.style.cursor = 'pointer'; }}
+          onPointerOut={() => { setHovered(null); document.body.style.cursor = ''; }}
         />
       ))}
+      {hovered != null && (
+        <Html position={positions[hovered]} center distanceFactor={10} style={{ pointerEvents: 'none' }}>
+          <div className="px-2 py-1 rounded bg-[rgba(9,16,30,.85)] border border-[rgba(0,229,255,.5)] text-[11px] font-mono text-[#bfe9ff] whitespace-nowrap">
+            {SKILLS[hovered].name}
+          </div>
+        </Html>
+      )}
     </>
   );
 }
