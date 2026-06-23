@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { recommend, waveformPath } from './cinemateDemo';
+import { recommend, waveformPath } from './recommender';
 
 describe('recommend', () => {
   it('maps an uplifting vibe to a positive pick', () => {

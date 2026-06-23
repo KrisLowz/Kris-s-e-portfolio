@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { X, CheckCircle, AlertTriangle, Layers, ExternalLink, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react';
 import { Project } from '../types';
 import { gsap, getLenis, CONFIG } from '../animations';
+import CinemateDemo from './projects/CinemateDemo';
 
 interface ProjectModalProps {
   project: Project | null;
@@ -274,6 +275,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({ project, isOpen, onClose })
                   {project.overview}
                 </p>
               </section>
+
+              {project.id === 'cinemate' && <CinemateDemo />}
 
               {/* Challenges vs Solutions */}
               <div data-modal-block className="grid md:grid-cols-2 gap-8">
