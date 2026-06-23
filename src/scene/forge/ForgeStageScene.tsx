@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
@@ -43,6 +43,11 @@ export default function ForgeStageScene({
   const geo = useMemo(() => new THREE.IcosahedronGeometry(0.42, 0), []);
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
   const [hovered, setHovered] = useState<number | null>(null);
+
+  useEffect(() => () => {
+    mats.forEach((m) => m.dispose());
+    geo.dispose();
+  }, [mats, geo]);
 
   useFrame((state, delta) => {
     const t = state.clock.elapsedTime;

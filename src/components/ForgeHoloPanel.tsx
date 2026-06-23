@@ -14,7 +14,7 @@ export default function ForgeHoloPanel({ skillId, onClose }: { skillId: string; 
         className="absolute inset-0 pointer-events-auto bg-transparent cursor-default"
       />
       <div className="relative pointer-events-none text-center font-mono">
-        <div className="text-[#00E5FF] text-2xl font-bold tracking-wide">{skill.name}</div>
+        <div className="text-2xl font-bold tracking-wide" style={{ color: 'var(--accent-primary)' }}>{skill.name}</div>
         <div className="text-[11px] text-[#bfe9ff] mt-1">{skill.category}</div>
         <p className="text-sm text-[#9fb6d6] max-w-xs mx-auto mt-3">{skill.blurb}</p>
         {projects.length > 0 && (
@@ -25,7 +25,7 @@ export default function ForgeHoloPanel({ skillId, onClose }: { skillId: string; 
             <span
               key={n}
               className="h-1.5 w-7 rounded-sm"
-              style={{ background: n <= skill.level ? 'linear-gradient(90deg,#00E5FF,#a855f7)' : 'rgba(255,255,255,.12)' }}
+              style={{ background: n <= skill.level ? 'linear-gradient(90deg, var(--accent-primary), var(--accent-secondary))' : 'rgba(255,255,255,.12)' }}
             />
           ))}
         </div>
