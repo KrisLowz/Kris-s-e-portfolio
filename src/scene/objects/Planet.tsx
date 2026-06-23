@@ -67,8 +67,13 @@ export default function Planet({
       g.visible = v > 0.01;
       g.rotation.y += delta * 0.06;
     }
-    if (surfaceMat.current) surfaceMat.current.opacity = v;
-    atmoUniforms.uOpacity.value = v;
+    // Ignite: the core flares brighter as the About fragments converge (~0.5).
+    const ignite = THREE.MathUtils.smoothstep(sections.about, 0.35, 0.52);
+    if (surfaceMat.current) {
+      surfaceMat.current.opacity = v;
+      surfaceMat.current.emissiveIntensity = 0.35 + ignite * 0.9;
+    }
+    atmoUniforms.uOpacity.value = v * (1 + ignite * 0.6);
   });
 
   return (

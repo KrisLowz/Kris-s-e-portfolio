@@ -6,6 +6,7 @@ import ParticleField from './objects/ParticleField';
 import OrbitRings from './objects/OrbitRings';
 import MeteorField from './objects/MeteorField';
 import Forge from './objects/Forge';
+import AboutAssembly from './objects/AboutAssembly';
 import ExperiencePath from './objects/ExperiencePath';
 import ProjectMonoliths from './objects/ProjectMonoliths';
 import Nebula from './objects/Nebula';
@@ -52,6 +53,8 @@ export default function SceneRoot() {
       <ExperiencePath theme={theme} />
       <ProjectMonoliths />
       <ProjectWorldRings theme={theme} />
+      {/* About act — crystal fragments magnetise into the Origin core */}
+      <AboutAssembly theme={theme} position={ABOUT_PLANET} />
       <Planet theme={theme} position={ABOUT_PLANET} />
       <ScanBeam theme={theme} target={ABOUT_PLANET} />
       <CommsRelay theme={theme} position={RELAY_POS} rotation={RELAY_ROT} />
