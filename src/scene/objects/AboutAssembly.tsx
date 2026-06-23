@@ -40,8 +40,9 @@ function buildSeeds(): Seed[] {
 /**
  * The "Origin: Assembly" — iridescent crystal fragments (same material as the
  * Skills shards) that magnetise inward and lock onto the Origin core as the
- * About section centres, then disperse as it leaves. Pure sections.about-driven
- * (reversible), no pointer interaction; lives in the shared background canvas.
+ * About section centres, then disperse as it leaves. The scatter→converge motion
+ * is a pure, reversible function of sections.about (the per-fragment spin/drift is
+ * decorative); no pointer interaction; lives in the shared background canvas.
  */
 export default function AboutAssembly({
   theme,
@@ -61,10 +62,15 @@ export default function AboutAssembly({
   );
   const geo = useMemo(() => new THREE.IcosahedronGeometry(0.17, 0), []);
 
-  // Materials rebuild on theme change — dispose the replaced set then. Geometry
-  // is stable, so dispose it only on unmount (don't kill the in-use geo on a toggle).
-  useEffect(() => () => mats.forEach((m) => m.dispose()), [mats]);
-  useEffect(() => () => geo.dispose(), [geo]);
+  // mats + geo are stable for the component's lifetime (theme is a stable,
+  // in-place-lerped object), so this disposes them once, on unmount.
+  useEffect(
+    () => () => {
+      mats.forEach((m) => m.dispose());
+      geo.dispose();
+    },
+    [mats, geo]
+  );
 
   useFrame((_, delta) => {
     time.current += delta;
@@ -79,7 +85,10 @@ export default function AboutAssembly({
       if (!m) continue;
       const s = seeds[i];
       const drift = Math.sin(time.current * 0.5 + s.phase) * 0.15 * (1 - assemble);
-      const radius = s.dist * (1 - assemble) + 0.2 + drift; // far when scattered, near the core when assembled
+      // Converge onto the core's SURFACE (~1.7, just outside the 1.5 planet) — not
+      // its centre — so fragments lock onto / get absorbed by the core rather than
+      // rendering buried inside the sphere.
+      const radius = s.dist * (1 - assemble) + 1.7 + drift;
       m.position.set(s.dir.x * radius, s.dir.y * radius, s.dir.z * radius);
       m.rotation.x += s.spin.x * delta * 0.6;
       m.rotation.y += s.spin.y * delta * 0.6;

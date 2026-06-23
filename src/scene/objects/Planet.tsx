@@ -73,7 +73,7 @@ export default function Planet({
       surfaceMat.current.opacity = v;
       surfaceMat.current.emissiveIntensity = 0.35 + ignite * 0.9;
     }
-    atmoUniforms.uOpacity.value = v * (1 + ignite * 0.6);
+    atmoUniforms.uOpacity.value = v;
   });
 
   return (
