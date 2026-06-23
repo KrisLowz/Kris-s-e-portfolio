@@ -8,6 +8,14 @@ export interface Skill {
   name: string;
   iconClass: string;
   ring: 'inner' | 'outer';
+  /** Short grouping shown on the holo panel, e.g. "Mobile · Language". */
+  category: string;
+  /** One-line human truth about the skill. */
+  blurb: string;
+  /** PROJECTS ids where this was used (may be empty). */
+  usedIn: string[];
+  /** Signal-strength 1–5 (honest, owner-reviewed). */
+  level: 1 | 2 | 3 | 4 | 5;
 }
 
 export interface TechStackItem {
