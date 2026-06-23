@@ -8,7 +8,7 @@ import Contact from './components/Contact';
 import AIChatBot from './components/AIChatBot';
 import GhostCursors from './components/GhostCursors';
 import ReactionButton from './components/ReactionButton';
-import HoloSkills from './components/HoloSkills';
+import ForgeStage from './components/ForgeStage';
 import CustomCursor from './components/CustomCursor';
 import ScrollProgressBar from './components/ScrollProgressBar';
 import SectionHoverGlow from './components/SectionHoverGlow';
@@ -68,7 +68,7 @@ const App: React.FC = () => {
       <Navigation />
       <Hero />
       <About />
-      <HoloSkills />
+      <ForgeStage />
       <Experience />
       <ProjectsShowcase />
       <Contact />
