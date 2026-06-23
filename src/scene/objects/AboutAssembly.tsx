@@ -61,13 +61,10 @@ export default function AboutAssembly({
   );
   const geo = useMemo(() => new THREE.IcosahedronGeometry(0.17, 0), []);
 
-  useEffect(
-    () => () => {
-      mats.forEach((m) => m.dispose());
-      geo.dispose();
-    },
-    [mats, geo]
-  );
+  // Materials rebuild on theme change — dispose the replaced set then. Geometry
+  // is stable, so dispose it only on unmount (don't kill the in-use geo on a toggle).
+  useEffect(() => () => mats.forEach((m) => m.dispose()), [mats]);
+  useEffect(() => () => geo.dispose(), [geo]);
 
   useFrame((_, delta) => {
     time.current += delta;
