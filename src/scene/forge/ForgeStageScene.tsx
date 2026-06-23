@@ -8,6 +8,7 @@ import { createIridescent } from '../materials/iridescent';
 import { useThemeColors } from '../hooks/useThemeColors';
 import { viewBounds, screenToWorld } from './forgeView';
 import { createForgeWorld, stepForge, grabAt, dragTo, release, PHYS_SCALE } from './forgePhysics';
+import { getSectionProgress } from '../../animations/scroll';
 
 const GOLD = new THREE.Color('#ffd56b');
 
@@ -38,6 +39,8 @@ export default function ForgeStageScene({
   const geo = useMemo(() => new THREE.IcosahedronGeometry(0.42, 0), []);
   const meshes = useRef<(THREE.Mesh | null)[]>([]);
   const [hovered, setHovered] = useState<number | null>(null);
+
+  const sections = getSectionProgress();
 
   const bounds = useMemo(
     () => viewBounds(8, 50, size.width / size.height),
@@ -115,13 +118,17 @@ export default function ForgeStageScene({
 
   useFrame((_state, delta) => {
     stepForge(world, delta * 1000);
+    const enter = THREE.MathUtils.smoothstep(sections.skills, 0.04, 0.18);
+    const leave = THREE.MathUtils.smoothstep(sections.skills, 0.82, 0.97);
+    const vis = enter * (1 - leave);
     for (let i = 0; i < positions.length; i++) {
       const m = meshes.current[i];
       if (!m) continue;
       // Read position from physics
       m.position.x = world.bodies[i].position.x / PHYS_SCALE;
-      m.position.y = world.bodies[i].position.y / PHYS_SCALE;
+      m.position.y = world.bodies[i].position.y / PHYS_SCALE + leave * 4;
       m.position.z = positions[i].z;
+      mats[i].uniforms.uOpacity.value = vis;
       // Rotation from physics angle
       m.rotation.z = world.bodies[i].angle;
       // Scale bloom damping (focused 1.7 / hovered 1.5 / idle 1.0)
