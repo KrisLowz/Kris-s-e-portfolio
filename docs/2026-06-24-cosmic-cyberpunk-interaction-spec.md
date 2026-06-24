@@ -4,9 +4,9 @@ This document turns the movie-style storyline into buildable UI components, scro
 
 Related docs:
 
-- `docs/cosmic-cyberpunk-scroll-storyline.md`
-- `docs/generated-world-assets.md`
-- `docs/scroll-driven-realtime-motion-reference.md`
+- `docs/2026-06-23-cosmic-cyberpunk-scroll-storyline.md`
+- `docs/2026-06-23-generated-world-assets.md`
+- `docs/2026-06-23-scroll-driven-realtime-motion-reference.md`
 
 ## Goal
 
