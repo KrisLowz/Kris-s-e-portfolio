@@ -10,6 +10,7 @@ import SkillField from './components/story/skills/SkillField';
 import MissionArchive from './components/story/experience/MissionArchive';
 import ProjectWorldRoute from './components/story/projects/ProjectWorldRoute';
 import RelayConsole from './components/story/contact/RelayConsole';
+import VoyageCompleteFooter from './components/story/ending/VoyageCompleteFooter';
 
 export default function App() {
   useMotion();
@@ -27,6 +28,7 @@ export default function App() {
       <MissionArchive />
       <ProjectWorldRoute />
       <RelayConsole />
+      <VoyageCompleteFooter />
     </main>
   );
 }
