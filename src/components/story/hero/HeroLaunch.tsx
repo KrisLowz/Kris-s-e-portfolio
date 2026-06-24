@@ -1,9 +1,43 @@
+import { useRef, useEffect } from 'react';
+import { gsap } from '../../../motion/register';
+import { CONFIG } from '../../../motion/config';
 import { PROFILE } from '../../../content';
 
 export default function HeroLaunch() {
+  const sectionRef = useRef<HTMLElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (CONFIG.reducedMotion || CONFIG.isMobile || !CONFIG.toggles.heroPin) return;
+    const section = sectionRef.current;
+    const content = contentRef.current;
+    if (!section || !content) return;
+
+    const ctx = gsap.context(() => {
+      gsap
+        .timeline({
+          scrollTrigger: {
+            trigger: section,
+            start: 'top top',
+            end: '+=80%',
+            pin: true,
+            scrub: 0.6,
+            anticipatePin: 1,
+          },
+        })
+        .to(content, { scale: 0.9, autoAlpha: 0.15, ease: 'none' });
+    }, section);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section id="hero" className="relative grid min-h-screen items-center overflow-hidden px-6 pt-24 md:px-16">
-      <div className="relative z-10 max-w-3xl">
+    <section
+      ref={sectionRef}
+      id="hero"
+      className="relative grid min-h-screen items-center overflow-hidden px-6 pt-24 md:px-16"
+    >
+      <div ref={contentRef} className="relative z-10 max-w-3xl">
         <span data-anim="pop" className="font-mono text-xs uppercase tracking-[0.3em] text-pop-primary">
           Pilot profile · {PROFILE.title}
         </span>
