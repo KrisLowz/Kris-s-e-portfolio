@@ -7,6 +7,7 @@ import StoryCursor from './components/story/StoryCursor';
 import HeroLaunch from './components/story/hero/HeroLaunch';
 import OriginDossier from './components/story/about/OriginDossier';
 import SkillField from './components/story/skills/SkillField';
+import MissionArchive from './components/story/experience/MissionArchive';
 
 export default function App() {
   useMotion();
@@ -21,6 +22,7 @@ export default function App() {
       <HeroLaunch />
       <OriginDossier />
       <SkillField />
+      <MissionArchive />
     </main>
   );
 }
