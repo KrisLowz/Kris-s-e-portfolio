@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { signalLock } from './signalLock';
-import { CONFIG } from '../../animations';
+import { CONFIG } from '../../motion/config';
 
 /** Drives a signal-lock reveal of `text` once, synced to the intro (`intro:type`)
  *  with a timeout fallback. Static under reduced motion. */
