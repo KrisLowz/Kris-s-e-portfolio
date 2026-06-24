@@ -4,6 +4,7 @@ import StoryWorldLayer from './components/story/StoryWorldLayer';
 import StoryHUD from './components/story/StoryHUD';
 import SectionRouteProgress from './components/story/SectionRouteProgress';
 import StoryCursor from './components/story/StoryCursor';
+import HeroLaunch from './components/story/hero/HeroLaunch';
 
 export default function App() {
   useMotion();
@@ -15,7 +16,7 @@ export default function App() {
       <SectionRouteProgress />
       <StoryCursor />
       {/* Sections added in Tasks 6–13 */}
-      <section id="hero" className="grid min-h-screen place-items-center font-mono text-pop-text-muted">HERO</section>
+      <HeroLaunch />
     </main>
   );
 }
