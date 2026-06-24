@@ -41,6 +41,10 @@ export interface MotionConfig {
     tilt: boolean;
     floatAccents: boolean;
     navAutoHide: boolean;
+    /** Phase 2 cinematic systems. */
+    shipFlight: boolean;
+    heroPin: boolean;
+    warp: boolean;
   };
 
   /** Named easing curves used across the layer. */
@@ -119,6 +123,9 @@ export const CONFIG: MotionConfig = {
     tilt: true,
     floatAccents: true,
     navAutoHide: true,
+    shipFlight: true,
+    heroPin: true,
+    warp: true,
   },
 
   ease: {
