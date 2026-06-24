@@ -5,6 +5,7 @@ import StoryHUD from './components/story/StoryHUD';
 import SectionRouteProgress from './components/story/SectionRouteProgress';
 import StoryCursor from './components/story/StoryCursor';
 import HeroLaunch from './components/story/hero/HeroLaunch';
+import OriginDossier from './components/story/about/OriginDossier';
 
 export default function App() {
   useMotion();
@@ -17,6 +18,7 @@ export default function App() {
       <StoryCursor />
       {/* Sections added in Tasks 6–13 */}
       <HeroLaunch />
+      <OriginDossier />
     </main>
   );
 }
