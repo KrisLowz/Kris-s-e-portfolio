@@ -1,16 +1,8 @@
 import { PROFILE } from '../../../content';
-import { WORLD_ASSETS } from '../../../story/worldAssets';
 
 export default function HeroLaunch() {
   return (
     <section id="hero" className="relative grid min-h-screen items-center overflow-hidden px-6 pt-24 md:px-16">
-      <img
-        src={WORLD_ASSETS.spaceship}
-        alt=""
-        aria-hidden
-        data-float
-        className="pointer-events-none absolute bottom-[12%] right-[6%] w-56 opacity-80 md:w-80"
-      />
       <div className="relative z-10 max-w-3xl">
         <span data-anim="pop" className="font-mono text-xs uppercase tracking-[0.3em] text-pop-primary">
           Pilot profile · {PROFILE.title}

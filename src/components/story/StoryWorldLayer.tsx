@@ -1,16 +1,11 @@
-import { WORLD_ASSETS } from '../../story/worldAssets';
+import ShipFlight from './ShipFlight';
 
-/** Persistent decorative sprites that will travel between acts in later phases.
- *  In v1 it renders a faint parked spaceship so the world reads as continuous. */
+/** Persistent decorative layer hosting the scroll-flying spaceship. Sits behind
+ *  all content (z-[-20]); the ship itself is viewport-fixed. */
 export default function StoryWorldLayer() {
   return (
-    <div aria-hidden className="pointer-events-none fixed inset-0 z-[-20] overflow-hidden">
-      <img
-        src={WORLD_ASSETS.spaceship}
-        alt=""
-        className="absolute right-[8%] top-[14%] w-40 opacity-30"
-        data-float
-      />
+    <div aria-hidden className="pointer-events-none fixed inset-0 z-[-20]">
+      <ShipFlight />
     </div>
   );
 }
