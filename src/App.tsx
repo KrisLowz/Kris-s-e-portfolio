@@ -6,6 +6,7 @@ import SectionRouteProgress from './components/story/SectionRouteProgress';
 import StoryCursor from './components/story/StoryCursor';
 import HeroLaunch from './components/story/hero/HeroLaunch';
 import OriginDossier from './components/story/about/OriginDossier';
+import SkillField from './components/story/skills/SkillField';
 
 export default function App() {
   useMotion();
@@ -19,6 +20,7 @@ export default function App() {
       {/* Sections added in Tasks 6–13 */}
       <HeroLaunch />
       <OriginDossier />
+      <SkillField />
     </main>
   );
 }
