@@ -20,9 +20,14 @@ export default {
         'pop-border': 'var(--border-color)',
         'pop-primary': 'var(--accent-primary)',
         'pop-secondary': 'var(--accent-secondary)',
+        'pop-magenta': 'var(--accent-magenta)',
+        'pop-amber': 'var(--accent-amber)',
+        'pop-teal': 'var(--accent-teal)',
       },
       fontFamily: {
-        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+        display: ['"Space Grotesk"', 'sans-serif'],
+        sans: ['Inter', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace'],
       },
       animation: {
         blob: 'blob 10s infinite',

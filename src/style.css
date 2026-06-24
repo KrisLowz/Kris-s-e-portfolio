@@ -3,67 +3,35 @@
 @tailwind utilities;
 
 /* STRICT THEME VARIABLES - The Single Source of Truth */
-:root {
-  /* LIGHT MODE (Default) */
-  --bg-primary: #f8fafc;       /* Slate 50 */
-  --bg-surface: #ffffff;       /* White */
-  --bg-surface-2: #f1f5f9;     /* Slate 100 */
-  
-  --text-main: #0f172a;        /* Slate 900 */
-  --text-muted: #64748b;       /* Slate 500 */
-  
-  --border-color: #e2e8f0;     /* Slate 200 */
-  --accent-primary: #4f46e5;   /* Indigo 600 */
-  --accent-secondary: #8b5cf6; /* Violet 500 */
-  
-  --globe-color: rgba(15, 23, 42, 0.08); /* Faint dark lines */
-  --meteor-color: #6366f1;     /* Indigo */
-  
-  --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.6);
-  --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+:root,
+[data-theme='dark'],
+.dark {
+  --bg-primary: #070B14;     /* void */
+  --bg-surface: #0C1322;     /* panel */
+  --bg-surface-2: #121C30;   /* raised panel */
+  --text-main: #E8EDF5;
+  --text-muted: #5A6A8A;
+  --border-color: rgba(120, 150, 200, 0.18);
+  --accent-primary: #00E5FF;   /* signal cyan */
+  --accent-secondary: #A855F7; /* violet */
+  --accent-magenta: #FF4FD8;
+  --accent-amber: #FFB347;
+  --accent-teal: #3BE8B0;
 
-  /* Blob Colors */
-  --blob-1: #d1fae5;
-  --blob-2: #e9d5ff;
-  --blob-3: #bae6fd;
-
-  --fog-color: rgba(255, 255, 255, 0.6);
-  
-  /* Spotlight Color (RGB for rgba usage) */
-  --spotlight-rgb: 79, 70, 229; 
-}
-
-/* DARK MODE OVERRIDES */
-[data-theme="dark"], .dark {
-  --bg-primary: #020617;       /* Slate 950 */
-  --bg-surface: #0f172a;       /* Slate 900 */
-  --bg-surface-2: #1e293b;     /* Slate 800 */
-  
-  --text-main: #f8fafc;        /* Slate 50 */
-  --text-muted: #94a3b8;       /* Slate 400 */
-  
-  --border-color: #334155;     /* Slate 700 */
-  --accent-primary: #818cf8;   /* Indigo 400 */
-  --accent-secondary: #a78bfa; /* Violet 400 */
-  
-  --globe-color: rgba(34, 211, 238, 0.2); /* Cyan Glow */
-  --meteor-color: #22d3ee;     /* Cyan */
-  
-  --glass-bg: rgba(15, 23, 42, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.1);
+  /* Legacy vars kept for backward-compat with existing CSS rules */
+  --globe-color: rgba(0, 229, 255, 0.2);
+  --meteor-color: #00E5FF;
+  --glass-bg: rgba(12, 19, 34, 0.6);
+  --glass-border: rgba(120, 150, 200, 0.18);
   --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
-
-  /* Blob Colors */
-  --blob-1: #312e81; /* Indigo 900 */
-  --blob-2: #134e4a; /* Teal 900 */
-  --blob-3: #172554; /* Blue 900 */
-
-  --fog-color: rgba(15, 23, 42, 0.2);
-  
-  /* Spotlight Color (RGB for rgba usage) */
-  --spotlight-rgb: 129, 140, 248;
+  --blob-1: #0C1322;
+  --blob-2: #121C30;
+  --blob-3: #070B14;
+  --fog-color: rgba(7, 11, 20, 0.2);
+  --spotlight-rgb: 0, 229, 255;
 }
+
+html, body { background: var(--bg-primary); color: var(--text-main); }
 
 /* Base Transition for EVERYTHING */
 *, *::before, *::after {
