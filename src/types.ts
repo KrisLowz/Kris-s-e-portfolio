@@ -57,3 +57,23 @@ export interface Message {
   role: 'user' | 'model';
   text: string;
 }
+
+export type StoryActId =
+  | 'boot' | 'hero' | 'about' | 'skills'
+  | 'experience' | 'projects' | 'contact' | 'end';
+
+export type MascotState =
+  | 'sleep' | 'wave' | 'pilot' | 'scan' | 'alarm'
+  | 'aim' | 'celebrate' | 'archive' | 'relay' | 'goodbye';
+
+export interface StoryAct {
+  id: StoryActId;
+  /** Short label shown in the route-progress nav. */
+  label: string;
+  /** DOM id of the section element this act maps to (empty for boot/end). */
+  sectionId: string;
+  /** Mascot pose for this act. */
+  mascotState: MascotState;
+  /** Accent hue (hex) used for tinting this act. */
+  tint: string;
+}
