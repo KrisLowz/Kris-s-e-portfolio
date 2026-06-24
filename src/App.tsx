@@ -9,6 +9,7 @@ import OriginDossier from './components/story/about/OriginDossier';
 import SkillField from './components/story/skills/SkillField';
 import MissionArchive from './components/story/experience/MissionArchive';
 import ProjectWorldRoute from './components/story/projects/ProjectWorldRoute';
+import RelayConsole from './components/story/contact/RelayConsole';
 
 export default function App() {
   useMotion();
@@ -25,6 +26,7 @@ export default function App() {
       <SkillField />
       <MissionArchive />
       <ProjectWorldRoute />
+      <RelayConsole />
     </main>
   );
 }
