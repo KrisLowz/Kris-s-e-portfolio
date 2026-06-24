@@ -8,7 +8,7 @@ interface Props {
 /** Cinematic heading: eyebrow pops, title reveals by words, meta clips in. */
 export default function AnimatedSectionHeading({ eyebrow, title, meta, align = 'left' }: Props) {
   return (
-    <div data-stagger="0.08" className={align === 'center' ? 'text-center' : 'text-left'}>
+    <div className={align === 'center' ? 'text-center' : 'text-left'}>
       <span data-anim="pop" className="block font-mono text-xs uppercase tracking-[0.3em] text-pop-primary">
         {eyebrow}
       </span>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import AnimatedSectionHeading from '../AnimatedSectionHeading';
 import { PROJECTS } from '../../../content';
 import { WORLD_ASSETS } from '../../../story/worldAssets';
@@ -7,6 +7,7 @@ import ProjectModal from './ProjectModal';
 
 export default function ProjectWorldRoute() {
   const [active, setActive] = useState<Project | null>(null);
+  const closeModal = useCallback(() => setActive(null), []);
   return (
     <section id="projects" className="relative px-6 py-28 md:px-16">
       <div className="mx-auto max-w-5xl">
@@ -28,7 +29,7 @@ export default function ProjectWorldRoute() {
           ))}
         </div>
       </div>
-      {active && <ProjectModal project={active} onClose={() => setActive(null)} />}
+      {active && <ProjectModal project={active} onClose={closeModal} />}
     </section>
   );
 }

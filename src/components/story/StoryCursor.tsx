@@ -1,9 +1,10 @@
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function StoryCursor() {
   const ref = useRef<HTMLDivElement>(null);
+  const [fine, setFine] = useState(false);
   useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return;
+    if (window.matchMedia('(pointer: fine)').matches) setFine(true); else return;
     const el = ref.current;
     if (!el) return;
     const move = (e: MouseEvent) => {
@@ -12,6 +13,7 @@ export default function StoryCursor() {
     window.addEventListener('mousemove', move);
     return () => window.removeEventListener('mousemove', move);
   }, []);
+  if (!fine) return null;
   return (
     <div
       ref={ref}

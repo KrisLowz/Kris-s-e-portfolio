@@ -20,9 +20,9 @@ export default function RelayConsole() {
           <p className="mt-8 rounded-lg border border-pop-primary/50 p-4 font-mono text-pop-primary">Signal sent. Transmission channel remains open.</p>
         ) : (
           <form data-stagger="0.06" className="mt-8 flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
-            <input data-anim="clip-left" required placeholder="Name" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
-            <input data-anim="clip-left" required type="email" placeholder="Email" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
-            <textarea data-anim="clip-left" required placeholder="Message" rows={4} className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
+            <input data-anim="clip-left" required aria-label="Name" placeholder="Name" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
+            <input data-anim="clip-left" required aria-label="Email" type="email" placeholder="Email" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
+            <textarea data-anim="clip-left" required aria-label="Message" placeholder="Message" rows={4} className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
             <button data-anim="pop" type="submit" className="self-start rounded-full bg-pop-primary px-5 py-2 font-mono text-sm text-black">Initiate Transmission →</button>
           </form>
         )}

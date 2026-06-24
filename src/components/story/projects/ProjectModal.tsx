@@ -20,7 +20,7 @@ export default function ProjectModal({ project, onClose }: { project: Project; o
             <h3 className="font-display text-2xl text-pop-text-main">{project.title}</h3>
             <p className="font-mono text-xs text-pop-text-muted">{project.subtitle}</p>
           </div>
-          <button ref={closeRef} onClick={onClose} className="rounded border border-pop-border px-2 py-1 font-mono text-xs">Close ✕</button>
+          <button ref={closeRef} onClick={onClose} aria-label="Close" className="rounded border border-pop-border px-2 py-1 font-mono text-xs">Close ✕</button>
         </div>
         <p className="mt-4 text-pop-text-muted">{project.overview}</p>
         <ul className="mt-4 list-disc pl-5 text-sm text-pop-text-muted">

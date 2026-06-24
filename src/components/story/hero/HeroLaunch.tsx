@@ -3,7 +3,7 @@ import { WORLD_ASSETS } from '../../../story/worldAssets';
 
 export default function HeroLaunch() {
   return (
-    <section id="hero" className="relative grid min-h-screen items-center overflow-hidden px-6 md:px-16">
+    <section id="hero" className="relative grid min-h-screen items-center overflow-hidden px-6 pt-24 md:px-16">
       <img
         src={WORLD_ASSETS.spaceship}
         alt=""

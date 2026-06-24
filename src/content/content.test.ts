@@ -15,7 +15,10 @@ describe('content invariants', () => {
   });
 
   it('every skill level is 1..5', () => {
-    for (const s of SKILLS) expect(s.level).toBeGreaterThanOrEqual(1), expect(s.level).toBeLessThanOrEqual(5);
+    for (const s of SKILLS) {
+      expect(s.level).toBeGreaterThanOrEqual(1);
+      expect(s.level).toBeLessThanOrEqual(5);
+    }
   });
 
   it('story has 8 acts; 6 map to sections', () => {
