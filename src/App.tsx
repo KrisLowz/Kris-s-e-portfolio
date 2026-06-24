@@ -16,7 +16,7 @@ import VoyageCompleteFooter from './components/story/ending/VoyageCompleteFooter
 export default function App() {
   useMotion();
   return (
-    <main className="relative min-h-screen bg-pop-bg text-pop-text-main font-sans selection:bg-pop-primary/30">
+    <main className="relative isolate min-h-screen bg-pop-bg text-pop-text-main font-sans selection:bg-pop-primary/30">
       <StoryBootPreloader />
       <StoryWorldLayer />
       <StoryHUD />

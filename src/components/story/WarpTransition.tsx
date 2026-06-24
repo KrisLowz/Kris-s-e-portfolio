@@ -3,10 +3,12 @@ import { gsap } from '../../motion/register';
 import { CONFIG } from '../../motion/config';
 import { WORLD_ASSETS } from '../../story/worldAssets';
 
-/** Full-screen wormhole warp at a section boundary. Desktop+motion: pins a
- *  spacer and scrubs a wormhole bloom (grow → peak → blow past). Reduced-motion
- *  / mobile: no pin — a short non-pinned crossfade over a small spacer, so the
- *  scroll never traps and content stays reachable. */
+/** Full-screen wormhole warp at a section boundary. The wormhole image is
+ *  always viewport-fixed; an in-flow spacer supplies the scroll RANGE that
+ *  scrubs the bloom — no ScrollTrigger pin (pinning reparents DOM and crashes
+ *  React 19's reconciler). Desktop+motion: a full grow → peak → blow-past
+ *  bloom over a 60vh spacer. Reduced-motion / mobile: a short crossfade over a
+ *  small spacer. Either way scroll never traps and content stays reachable. */
 export default function WarpTransition({ id }: { id: string }) {
   const spacerRef = useRef<HTMLDivElement>(null);
   const warpRef = useRef<HTMLImageElement>(null);
@@ -25,9 +27,7 @@ export default function WarpTransition({ id }: { id: string }) {
               trigger: spacer,
               start: 'top bottom',
               end: 'bottom top',
-              pin: spacer,
               scrub: 0.5,
-              anticipatePin: 1,
             },
           })
           .fromTo(
