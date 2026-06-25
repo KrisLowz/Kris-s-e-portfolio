@@ -3,11 +3,14 @@ import AnimatedSectionHeading from '../AnimatedSectionHeading';
 import { PROJECTS } from '../../../content';
 import { WORLD_ASSETS } from '../../../story/worldAssets';
 import { Project } from '../../../types';
+import { cinematicOn } from '../../../motion/config';
 import ProjectModal from './ProjectModal';
+import ProjectPortalTransition from './ProjectPortalTransition';
 
 export default function ProjectWorldRoute() {
   const [active, setActive] = useState<Project | null>(null);
   const closeModal = useCallback(() => setActive(null), []);
+  const cinematic = cinematicOn('blackhole');
   return (
     <section id="projects" className="relative px-6 py-28 md:px-16">
       <div className="mx-auto max-w-5xl">
@@ -29,7 +32,9 @@ export default function ProjectWorldRoute() {
           ))}
         </div>
       </div>
-      {active && <ProjectModal project={active} onClose={closeModal} />}
+      {active && (cinematic
+        ? <ProjectPortalTransition project={active} onClose={closeModal} />
+        : <ProjectModal project={active} onClose={closeModal} />)}
     </section>
   );
 }
