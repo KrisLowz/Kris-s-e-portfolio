@@ -7,7 +7,7 @@ import StoryCursor from './components/story/StoryCursor';
 import HeroLaunch from './components/story/hero/HeroLaunch';
 import WarpTransition from './components/story/WarpTransition';
 import OriginDossier from './components/story/about/OriginDossier';
-import SkillField from './components/story/skills/SkillField';
+import Forge from './components/story/skills/Forge';
 import MissionArchive from './components/story/experience/MissionArchive';
 import ProjectWorldRoute from './components/story/projects/ProjectWorldRoute';
 import RelayConsole from './components/story/contact/RelayConsole';
@@ -26,7 +26,7 @@ export default function App() {
       <HeroLaunch />
       <WarpTransition id="hero-about" />
       <OriginDossier />
-      <SkillField />
+      <Forge />
       <MissionArchive />
       <ProjectWorldRoute />
       <WarpTransition id="projects-contact" />
