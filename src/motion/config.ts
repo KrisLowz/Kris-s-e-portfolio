@@ -47,6 +47,7 @@ export interface MotionConfig {
     warp: boolean;
     sectionFx: boolean;
     forge: boolean;
+    blackhole: boolean;
   };
 
   /** Named easing curves used across the layer. */
@@ -130,6 +131,7 @@ export const CONFIG: MotionConfig = {
     warp: true,
     sectionFx: true,
     forge: true,
+    blackhole: true,
   },
 
   ease: {
