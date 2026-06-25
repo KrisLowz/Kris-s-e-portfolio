@@ -29,6 +29,7 @@ export default function App() {
       <SkillField />
       <MissionArchive />
       <ProjectWorldRoute />
+      <WarpTransition id="projects-contact" />
       <RelayConsole />
       <VoyageCompleteFooter />
     </main>
