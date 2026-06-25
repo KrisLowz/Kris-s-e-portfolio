@@ -4,7 +4,9 @@ import { WORLD_ASSETS } from '../../../story/worldAssets';
 export default function VoyageCompleteFooter() {
   return (
     <footer className="relative overflow-hidden px-6 py-24 text-center md:px-16">
+      <span aria-hidden data-anim="draw" className="mx-auto mb-6 block h-px w-40 bg-gradient-to-r from-transparent via-pop-primary to-transparent" />
       <img src={WORLD_ASSETS.spaceship} alt="" aria-hidden data-speed="1.1" className="mx-auto w-24 opacity-40" />
+      <img src={WORLD_ASSETS.mascot} alt="" aria-hidden data-anim="pop" data-float className="mx-auto mt-3 w-14 opacity-80" />
       <p data-anim="words" className="mt-6 font-display text-2xl text-pop-text-main">Voyage complete.</p>
       <p data-anim="fade-up" className="mt-2 text-pop-text-muted">Thanks for exploring Low Chee Fei's developer universe.</p>
       <div data-stagger="0.06" className="mt-6 flex justify-center gap-4 font-mono text-sm">
