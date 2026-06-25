@@ -3,6 +3,7 @@ import AnimatedSectionHeading from '../AnimatedSectionHeading';
 import { PROFILE } from '../../../content';
 import { WORLD_ASSETS } from '../../../story/worldAssets';
 import SignalRings from './SignalRings';
+import SignalBeam from './SignalBeam';
 
 export default function RelayConsole() {
   const [sent, setSent] = useState(false);
@@ -18,9 +19,12 @@ export default function RelayConsole() {
           <div data-anim="clip-left"><dt className="text-pop-text-muted">Status</dt><dd className="text-pop-teal">Available</dd></div>
         </dl>
         {sent ? (
-          <p className="mt-8 rounded-lg border border-pop-primary/50 p-4 font-mono text-pop-primary">Signal sent. Transmission channel remains open.</p>
+          <div className="relative mt-8">
+            <SignalBeam />
+            <p className="rounded-lg border border-pop-primary/50 p-4 font-mono text-pop-primary">Signal sent. Transmission channel remains open.</p>
+          </div>
         ) : (
-          <form data-stagger="0.06" className="mt-8 flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); setSent(true); }}>
+          <form data-stagger="0.06" className="mt-8 flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); setSent(true); window.dispatchEvent(new CustomEvent('story:signal-sent')); }}>
             <input data-anim="clip-left" required aria-label="Name" placeholder="Name" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
             <input data-anim="clip-left" required aria-label="Email" type="email" placeholder="Email" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
             <textarea data-anim="clip-left" required aria-label="Message" placeholder="Message" rows={4} className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
