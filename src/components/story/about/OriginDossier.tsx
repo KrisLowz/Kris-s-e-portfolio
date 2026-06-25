@@ -1,10 +1,12 @@
 import AnimatedSectionHeading from '../AnimatedSectionHeading';
 import { ABOUT } from '../../../content';
 import { WORLD_ASSETS } from '../../../story/worldAssets';
+import ScanBeam from './ScanBeam';
 
 export default function OriginDossier() {
   return (
     <section id="about" className="relative overflow-hidden px-6 py-28 md:px-16">
+      <ScanBeam />
       <img src={WORLD_ASSETS.originPlanet} alt="" aria-hidden data-speed="0.85"
         className="pointer-events-none absolute -right-20 top-10 w-[28rem] opacity-25" />
       <div className="relative z-10 mx-auto max-w-4xl">
