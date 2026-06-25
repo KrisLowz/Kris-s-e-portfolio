@@ -49,7 +49,7 @@ export default function MascotPilot() {
     const el = moodRef.current;
     if (!el) return;
     const onSignal = () => {
-      gsap.fromTo(el, { y: 0, scale: 1 }, { y: -16, scale: 1.2, duration: 0.25, yoyo: true, repeat: 3, ease: 'power1.out' });
+      gsap.fromTo(el, { y: 0, scale: 1 }, { y: -16, scale: 1.2, duration: 0.25, yoyo: true, repeat: 3, ease: 'power1.out', overwrite: 'auto' });
     };
     window.addEventListener('story:signal-sent', onSignal);
     return () => window.removeEventListener('story:signal-sent', onSignal);
