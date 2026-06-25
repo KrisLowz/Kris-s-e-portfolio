@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from '../../../motion/register';
-import { CONFIG } from '../../../motion/config';
+import { cinematicOn } from '../../../motion/config';
 import { PROFILE } from '../../../content';
 
 export default function HeroLaunch() {
@@ -11,7 +11,7 @@ export default function HeroLaunch() {
   // ScrollTrigger pin — pinning reparents DOM and crashes React 19's
   // reconciler with an insertBefore NotFoundError). A non-pinning scrubbed
   // trigger recedes the content as the tall section scrolls past.
-  const pinned = !CONFIG.reducedMotion && !CONFIG.isMobile && CONFIG.toggles.heroPin;
+  const pinned = cinematicOn('heroPin');
 
   useEffect(() => {
     if (!pinned) return;

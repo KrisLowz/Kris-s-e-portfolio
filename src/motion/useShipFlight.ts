@@ -1,6 +1,6 @@
 import { useEffect, RefObject } from 'react';
 import { gsap } from './register';
-import { CONFIG } from './config';
+import { cinematicOn } from './config';
 import { SHIP_PATH } from './shipPath';
 
 /** Drives a viewport-fixed ship element along SHIP_PATH, scrubbed by global
@@ -12,7 +12,7 @@ export function useShipFlight(shipRef: RefObject<HTMLElement>): void {
   useEffect(() => {
     const ship = shipRef.current;
     if (!ship) return;
-    if (CONFIG.reducedMotion || CONFIG.isMobile || !CONFIG.toggles.shipFlight) return;
+    if (!cinematicOn('shipFlight')) return;
 
     const ctx = gsap.context(() => {
       const first = SHIP_PATH[0];

@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { gsap } from '../../motion/register';
-import { CONFIG } from '../../motion/config';
+import { cinematicOn } from '../../motion/config';
 import { WORLD_ASSETS } from '../../story/worldAssets';
 
 /** Full-screen wormhole warp at a section boundary. The wormhole image is
@@ -12,7 +12,7 @@ import { WORLD_ASSETS } from '../../story/worldAssets';
 export default function WarpTransition({ id }: { id: string }) {
   const spacerRef = useRef<HTMLDivElement>(null);
   const warpRef = useRef<HTMLImageElement>(null);
-  const full = !CONFIG.reducedMotion && !CONFIG.isMobile && CONFIG.toggles.warp;
+  const full = cinematicOn('warp');
 
   useEffect(() => {
     const spacer = spacerRef.current;

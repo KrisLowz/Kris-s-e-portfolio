@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { CONFIG, dur, revealDistance } from './config';
+import { CONFIG, dur, revealDistance, cinematicOn } from './config';
 
 describe('motion config', () => {
   it('exposes resolved capability flags', () => {
@@ -12,5 +12,12 @@ describe('motion config', () => {
   });
   it('revealDistance() returns a positive number', () => {
     expect(revealDistance()).toBeGreaterThan(0);
+  });
+  it('cinematicOn equals the reduced/mobile/toggle gate', () => {
+    expect(cinematicOn('shipFlight')).toBe(
+      !CONFIG.reducedMotion && !CONFIG.isMobile && CONFIG.toggles.shipFlight
+    );
+    expect(typeof cinematicOn('warp')).toBe('boolean');
+    expect(typeof cinematicOn('sectionFx')).toBe('boolean');
   });
 });

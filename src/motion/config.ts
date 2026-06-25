@@ -45,6 +45,7 @@ export interface MotionConfig {
     shipFlight: boolean;
     heroPin: boolean;
     warp: boolean;
+    sectionFx: boolean;
   };
 
   /** Named easing curves used across the layer. */
@@ -126,6 +127,7 @@ export const CONFIG: MotionConfig = {
     shipFlight: true,
     heroPin: true,
     warp: true,
+    sectionFx: true,
   },
 
   ease: {
@@ -183,4 +185,10 @@ export function revealDistance(): number {
 /** Scale a duration for the current device. */
 export function dur(seconds: number): number {
   return CONFIG.isMobile ? seconds * CONFIG.mobileScale : seconds;
+}
+
+/** True only when a cinematic system should run: motion allowed, not mobile,
+ *  and the system's toggle is on. The single gate for every Phase-2 system. */
+export function cinematicOn(toggle: keyof MotionConfig['toggles']): boolean {
+  return !CONFIG.reducedMotion && !CONFIG.isMobile && CONFIG.toggles[toggle];
 }
