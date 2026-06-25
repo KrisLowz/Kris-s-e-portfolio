@@ -16,11 +16,13 @@ There are no tests and no linter configured. Type checking is `noEmit` only (`np
 
 ## Environment
 
-The AI chatbot requires `GEMINI_API_KEY` in `.env.local`. Vite's `define` config (vite.config.ts) inlines it as both `process.env.API_KEY` and `process.env.GEMINI_API_KEY` at build time. Without the key, the chatbot degrades gracefully with a fallback message — everything else works.
+No environment variables are required. (The site previously shipped a Gemini-backed AI chatbot needing `GEMINI_API_KEY`; the chatbot was removed in the v2 rebuild — no key, no `@google/genai` dependency, no Gemini wiring in `vite.config.ts`.)
+
+> **Note:** much of the Architecture/Conventions below still describes the pre-v2 app (old background/section components, `src/animations`, etc.) and is slated for a full refresh in Phase 5. Treat the v2 source under `src/components/story/`, `src/motion/`, and `src/content/` as ground truth where they disagree.
 
 ## Architecture
 
-**Entry flow:** `index.html` → `src/index.tsx` → `src/App.tsx`, which composes the entire page: decorative background layers (FogBackground, MeshBackground, WireframeGlobe, MeteorShower, GhostCursors), scroll/cursor effects (CustomCursor, ScrollProgressBar, SectionHoverGlow, ScrollRippleEffect), then content sections in order (Navigation, Hero, About, ProfessionalSkills, Experience, ProjectsShowcase, Contact), plus floating widgets (ReactionButton, AIChatBot).
+**Entry flow:** `index.html` → `src/index.tsx` → `src/App.tsx`, which composes the entire page: decorative background layers (FogBackground, MeshBackground, WireframeGlobe, MeteorShower, GhostCursors), scroll/cursor effects (CustomCursor, ScrollProgressBar, SectionHoverGlow, ScrollRippleEffect), then content sections in order (Navigation, Hero, About, ProfessionalSkills, Experience, ProjectsShowcase, Contact), plus floating widgets (ReactionButton). [pre-v2 — see Phase 5 note above]
 
 **Dependencies are npm + a build step (not CDN):** GSAP (+ScrollTrigger, +SplitText), Lenis, Typed.js, React and `@google/genai` are npm packages bundled by Vite. Tailwind CSS is built statically via PostCSS (`tailwind.config.js` + `postcss.config.js`); the `@tailwind` directives are at the top of `src/style.css`. Only Devicon and Google Fonts still load from a CDN `<link>` in `index.html`. Do NOT use `window.gsap` — import `gsap` from `src/animations` (one shared instance). New Tailwind theme tokens go in `tailwind.config.js`.
 
@@ -30,9 +32,7 @@ The AI chatbot requires `GEMINI_API_KEY` in `.env.local`. Vite's `define` config
 
 `ThemeToggle.tsx` sets both `data-theme` attribute and `.dark` class on `<html>`, persisting to localStorage. When adding colors, define the variable in both light and dark blocks of `style.css`, then map it in `index.html`'s Tailwind config if a utility class is needed.
 
-**Content is data-driven:** All portfolio content (profile, projects, experience, skills, and the chatbot's `SYSTEM_INSTRUCTION`) lives in `src/constants.ts`, typed by `src/types.ts`. To add or edit a project/experience entry, edit `constants.ts` — components render from these arrays.
-
-**AI chatbot:** `AIChatBot.tsx` → `src/services/geminiService.ts`, which calls Gemini (`gemini-2.5-flash` via `@google/genai`) client-side with `SYSTEM_INSTRUCTION` from `constants.ts` as the system prompt. Update `SYSTEM_INSTRUCTION` when portfolio content changes so the chatbot stays accurate.
+**Content is data-driven:** All portfolio content (profile, projects, experience, skills) lives in `src/content/` (v2; the old `src/constants.ts` is gone), typed by `src/types.ts`. To add or edit a project/experience entry, edit the relevant module under `src/content/` — components render from these arrays.
 
 **Animation layer (`src/animations/`):** A GSAP 3.13 + Lenis motion system, booted once from `App.tsx` via `useSiteAnimations()` inside a self-cleaning `gsap.context`. Add a `data-anim="fade-up|words|clip|scale|pop|…"` attribute to any element and it animates on scroll automatically (see the engine in `engine.ts` and the full attribute API in README.md). Tune everything — eases, durations, staggers, per-effect on/off toggles — in `config.ts`. `register.ts` exports the single shared `gsap` instance; import from `'../animations'`, never `window.gsap`. Reduced-motion and touch fallbacks are handled centrally via `CONFIG`. (The legacy `.reveal-on-scroll` class still works — the engine maps it to `fade-up`.)
 

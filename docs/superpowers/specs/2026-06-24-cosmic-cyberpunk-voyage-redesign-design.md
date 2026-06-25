@@ -65,14 +65,14 @@ lives behind clicks (crystal flip, project modal).
     plus `data-stagger`, `data-speed` (parallax), `data-float`, `data-velocity`, `data-tint`.
     Reduced motion renders final states and wires nothing.
   - `scroll.ts` — exposes global + per-section scroll progress as mutable refs for scene timelines.
-- **AI chatbot:** kept, re-skinned as the cat "comms assistant" floating widget; calls Gemini
-  (`@google/genai`) client-side with a `SYSTEM_INSTRUCTION` fed from the content modules.
-  Degrades gracefully without `GEMINI_API_KEY`.
+- ~~**AI chatbot:** kept, re-skinned as the cat "comms assistant" floating widget; calls Gemini.~~
+  **DROPPED 2026-06-26** — the chatbot was cut from the product (owner's request). No `@google/genai`
+  dependency, no Gemini key, no comms widget. (See §10 decision 1 and the Phase 4 spec §3.)
 - **Custom cursor:** spaceship-reticle on fine-pointer devices; default cursor hidden globally.
 
 ## 4. Data model (`src/content/`, typed by `src/types.ts`)
 
-Single source of truth; also feeds the chatbot `SYSTEM_INSTRUCTION`.
+Single source of truth for all portfolio content. (Previously also fed a chatbot `SYSTEM_INSTRUCTION` — the chatbot is dropped; see §10 decision 1.)
 
 - `PROFILE` — name, title, headline, supporting copy, email, location, status, CV path, socials.
 - `ABOUT` — `packet` (label/value identity rows), `statement` (split bio lines), `traits[]`.
@@ -99,7 +99,7 @@ Single source of truth; also feeds the chatbot `SYSTEM_INSTRUCTION`.
 3. The eight scene sections in order (Hero … Ending).
 4. `StoryHUD` + `SectionRouteProgress` — mini star-map nav: current act glows, route line
    draws with scroll, nodes scroll-to via Lenis.
-5. Floating recruiter fast-path widgets (CV download, Contact) + the re-skinned chatbot.
+5. Floating recruiter fast-path widgets (CV download, Contact). ~~+ the re-skinned chatbot~~ (dropped).
 
 **Z-index bands** (from the interaction spec): −50 backdrop · −20 global story sprites ·
 0 section background assets · 10 section content · 40 nav/HUD · 80 transitions/portal · 100 modals.
@@ -145,7 +145,7 @@ Adopt the interaction spec's tree. Global: `StoryWorldLayer`, `StoryHUD`,
 - **Reduced motion:** boot skipped; scenes render final states; transitions become crossfades.
 - **Recruiter fast-path:** a visible "skip the voyage" affordance; CV download and Contact
   reachable immediately; correct OG/meta so shared links preview well.
-- **Degradation:** missing `GEMINI_API_KEY` → chatbot fallback message; everything else works.
+- **Degradation:** cinematic systems fall back to static/plain equivalents; all content stays readable.
 
 ## 9. Phased build roadmap
 
@@ -171,7 +171,7 @@ readable, on-theme site standing.
 
 ## 10. Resolved decisions
 
-1. **AI chatbot:** KEEP, re-skinned as the cat comms assistant; `SYSTEM_INSTRUCTION` fed by content.
+1. **AI chatbot:** ~~KEEP, re-skinned as the cat comms assistant.~~ **REVERSED 2026-06-26 → DROP.** The owner decided the portfolio does not need a chatbot. All remnants purged (`@google/genai`, `src/content/chatbot.ts`, Gemini `vite.config.ts` wiring). Phase 4b cancelled.
 2. **Theme:** DARK-ONLY (cosmic). A light "clean lab" mode is deferred to a later cycle.
 3. **Old social widgets (ReactionButton, GhostCursors, and other v1 decorative layers):** DROP.
 4. **Mascot:** single cutout sprite animated via CSS/GSAP transforms in v1; multi-pose art is

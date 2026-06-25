@@ -2,7 +2,7 @@
  * Smooth scrolling via Lenis, synced to GSAP ScrollTrigger.
  *
  * Lenis is used instead of GSAP ScrollSmoother because the site has 11+
- * `position: fixed` overlays (cursor, nav, backgrounds, chatbot, modal). Lenis
+ * `position: fixed` overlays (cursor, nav, backgrounds, modal). Lenis
  * smooths the *native* scroll position, so fixed elements keep working with zero
  * DOM restructuring — ScrollSmoother's transform wrapper would break them all.
  */
