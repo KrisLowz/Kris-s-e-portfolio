@@ -46,6 +46,7 @@ export interface MotionConfig {
     heroPin: boolean;
     warp: boolean;
     sectionFx: boolean;
+    forge: boolean;
   };
 
   /** Named easing curves used across the layer. */
@@ -128,6 +129,7 @@ export const CONFIG: MotionConfig = {
     heroPin: true,
     warp: true,
     sectionFx: true,
+    forge: true,
   },
 
   ease: {
