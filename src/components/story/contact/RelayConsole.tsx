@@ -2,6 +2,7 @@ import { useState } from 'react';
 import AnimatedSectionHeading from '../AnimatedSectionHeading';
 import { PROFILE } from '../../../content';
 import { WORLD_ASSETS } from '../../../story/worldAssets';
+import SignalRings from './SignalRings';
 
 export default function RelayConsole() {
   const [sent, setSent] = useState(false);
@@ -23,7 +24,10 @@ export default function RelayConsole() {
             <input data-anim="clip-left" required aria-label="Name" placeholder="Name" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
             <input data-anim="clip-left" required aria-label="Email" type="email" placeholder="Email" className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
             <textarea data-anim="clip-left" required aria-label="Message" placeholder="Message" rows={4} className="rounded border border-pop-border bg-pop-surface px-3 py-2" />
-            <button data-anim="pop" type="submit" className="self-start rounded-full bg-pop-primary px-5 py-2 font-mono text-sm text-black">Initiate Transmission →</button>
+            <div className="relative self-start">
+              <SignalRings />
+              <button data-anim="pop" type="submit" className="rounded-full bg-pop-primary px-5 py-2 font-mono text-sm text-black">Initiate Transmission →</button>
+            </div>
           </form>
         )}
       </div>
