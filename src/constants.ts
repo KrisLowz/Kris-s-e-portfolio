@@ -199,12 +199,13 @@ Skills:
 - Enterprise: Oracle JD Edwards (JDE) Implementation.
 
 Experience:
-1. ONE ERP SOLUTIONS (Intern): Worked on Oracle JDE implementation, DB management, integration.
-2. DS HOME (Logistic Admin): Managed inventory/delivery.
+1. MR BUR (M) SDN BHD (Intern - Web Developer): Designed and developed brand-new web applications to streamline dental clinics' daily operations, deployed on Cloudflare Workers.
+2. ONE ERP SOLUTIONS (Intern): Worked on Oracle JDE implementation, DB management, integration.
 
 Projects:
 1. TrackPoint (Mobile App - Kotlin/Firebase): Sales performance/GPS tracking for HuaChang Growmax. Award winner. Solved real-world logistics problems.
 2. Cinemate (Web App - Python/Django): Movie recommendation system using TMDB API and AI sentiment analysis. Grade A.
+3. Splash Aquatics (Web App - Python/Flask/MySQL): Full-stack e-commerce aquarium store with a fish tank builder and fish compatibility checks. Distinction grade.
 
 Personality: Professional, innovative, problem-solver, eager to bridge mobile and enterprise tech.
 
