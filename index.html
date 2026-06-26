@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth" data-theme="light">
+<!-- no global scroll-behavior: smooth — it fights ScrollTrigger's pin+scrub (use JS/GSAP scrollTo for nav) -->
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,7 +10,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <!-- Devicon CDN -->
     <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
@@ -39,7 +40,8 @@
               'pop-secondary': 'var(--accent-secondary)',
             },
             fontFamily: {
-              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              sans: ['Manrope', 'sans-serif'],
+              display: ['"Bricolage Grotesque"', 'sans-serif'],
             },
             animation: {
               'blob': 'blob 10s infinite',
@@ -72,7 +74,7 @@
     }
     </script>
   </head>
-  <body class="bg-pop-bg text-pop-text-main antialiased overflow-x-hidden selection:bg-pop-primary selection:text-white transition-colors duration-300">
+  <body class="bg-white text-[#14121A] antialiased overflow-x-clip selection:bg-[#FF2BD6] selection:text-white">
     <div id="root"></div>
     <script type="module" src="/src/index.tsx"></script>
   </body>
