@@ -94,7 +94,7 @@ const About: React.FC = () => {
                 Whether it's a mobile app or website/webpage, the experience should be fluid, intuitive, and reliable.
               </p>
               <p>
-                Currently final semester (Internship) of my degree at <strong>Swinburne University of Technology</strong>, I've already helped businesses solve real-world logistic challenges through my award-winning work.
+                Having graduated from <strong>Swinburne University of Technology</strong> in 2026, I'm now a Junior Software Developer — already helping businesses solve real-world logistic challenges through my award-winning work.
               </p>
             </div>
 

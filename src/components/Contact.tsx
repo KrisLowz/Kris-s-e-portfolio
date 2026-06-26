@@ -64,7 +64,7 @@ const Contact: React.FC = () => {
         </div>
 
         <div className="mt-16 text-center text-pop-text-muted text-sm font-medium">
-          <p>&copy; 2025 Low Chee Fei. Designed with ♥ and React.</p>
+          <p>&copy; 2026 Low Chee Fei. Designed with ♥ and React.</p>
         </div>
       </div>
     </footer>

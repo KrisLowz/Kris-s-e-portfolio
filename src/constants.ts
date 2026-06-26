@@ -2,10 +2,10 @@ import { Project, ExperienceItem, SkillCategory } from './types';
 
 export const PROFILE = {
   name: "Low Chee Fei",
-  title: "Software Developer",
+  title: "Junior Software Developer",
   headline: "Bridging Mobile Innovation with Enterprise Solutions",
-  bio: `I am a Computer Science graduate from Swinburne University (Class of 2025) specializing in Software Development. With a strong foundation in both mobile application development and enterprise ERP implementation, I bridge the gap between user-centric design and robust backend systems. My passion lies in solving real-world inefficiencies through technology, demonstrated by my award-winning final year project.`,
-  email: "horuslow0218@gmail.com", // Placeholder
+  bio: `I am a Computer Science graduate from Swinburne University (Class of 2026) specializing in Software Development, now working as a Junior Software Developer. With a strong foundation in both mobile application development and enterprise ERP implementation, I bridge the gap between user-centric design and robust backend systems. My passion lies in solving real-world inefficiencies through technology, demonstrated by my award-winning final year project.`,
+  email: "horuslow0218@gmail.com",
   social: {
     github: "https://github.com/KrisLowz",
     linkedin: "https://www.linkedin.com/in/lowcheefei/"
@@ -159,6 +159,14 @@ export const PROJECTS: Project[] = [
 
 export const EXPERIENCE: ExperienceItem[] = [
   {
+    id: "mr-bur",
+    role: "Intern - Web Developer",
+    company: "MR BUR (M) SDN BHD",
+    period: "Jan - March 2026",
+    description: "Designed and developed brand-new web applications to streamline dental clinics' daily operations, deployed on Cloudflare's edge network for speed and reliability.",
+    skills: ["Web Design", "Web Development", "Cloudflare Workers"]
+  },
+  {
     id: "one-erp",
     role: "Intern - ERP Consultant",
     company: "ONE ERP SOLUTIONS SDN BHD",
@@ -181,7 +189,8 @@ You are an AI assistant for Low Chee Fei's portfolio website.
 Your goal is to answer questions about Chee Fei's professional background, skills, and projects based strictly on the following context.
 
 Name: Low Chee Fei
-Degree: Bachelor of Computer Science (Software Development) - Swinburne University (Graduating 2025).
+Degree: Bachelor of Computer Science (Software Development) - Swinburne University (Graduated 2026).
+Current Role: Junior Software Developer (completed all studies).
 Key Awards: "Best Project on Display" (ICT Tradeshow 2025) for Final Year Project "TrackPoint".
 
 Skills:
