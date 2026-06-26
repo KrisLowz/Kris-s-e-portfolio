@@ -18,7 +18,7 @@
 | **Location** | Petaling Jaya, Selangor _(from [src/components/Contact.tsx](src/components/Contact.tsx))_ |
 | **GitHub** | https://github.com/KrisLowz |
 | **LinkedIn** | https://www.linkedin.com/in/lowcheefei/ |
-| **CV / Resume** | https://drive.google.com/file/d/1o6RSy9MJDvYwHtKJq0QmLbf6vui4sNPp/view?usp=drive_link _(from [src/components/Hero.tsx](src/components/Hero.tsx))_ |
+| **CV / Resume** | https://drive.google.com/file/d/10t-OUA1b0qfzzDt6ggl6EEy-NgRhFRrP/view?usp=sharing _(from [src/components/Hero.tsx](src/components/Hero.tsx))_ |
 | **Avatar image** | /assets/ME.png |
 
 **Bio**
