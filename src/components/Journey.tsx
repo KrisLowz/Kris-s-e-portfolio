@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Hero from './Hero';
-import SpaceScene, { SKILLS } from './SpaceScene';
+import SpaceScene, { SKILLS, PHASES } from './SpaceScene';
 
 declare global {
   interface Window {
@@ -116,6 +116,20 @@ const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObj
         </div>
       </div>
     </div>
+
+    {/* Act 3 — skills-universe intro title at the top; the crystal grid (3D) fills the space below. */}
+    {use3D && (
+      <div className="skills-intro pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col items-center px-6 pt-[8vh] text-center" style={{ opacity: 0 }}>
+        <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Forge // Technical Skills</p>
+        <h2 className="mt-3 font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-[#F5F3FF] sm:text-6xl">
+          The Tools I{' '}
+          <span className="bg-gradient-to-r from-[#22D3EE] via-[#7C5CFF] to-[#FF2BD6] bg-clip-text text-transparent">Command</span>
+        </h2>
+        <p className="mt-3 max-w-xl text-base leading-relaxed text-[#C3BFD6] sm:text-lg">
+          Every language and framework — forged by shipping real work under real pressure.
+        </p>
+      </div>
+    )}
   </>
 );
 
@@ -140,6 +154,7 @@ const Journey: React.FC = () => {
       gsap.set('.jr-overlay', { opacity: 1 });
       gsap.set('.about-space', { opacity: 0 });
       gsap.set('.about-scrim', { opacity: 0 });
+      gsap.set('.skills-intro', { opacity: 0, y: 24 });
       // Masked reveal: each line starts pushed fully below its overflow-hidden wrapper, then wipes up.
       gsap.set('.about-line', { yPercent: 120, opacity: 0 });
 
@@ -148,7 +163,7 @@ const Journey: React.FC = () => {
         scrollTrigger: {
           trigger: stageRef.current,
           start: 'top top',
-          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 1.6 : 2.2),
+          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 2.6 : 3.4),
           scrub: 1,
           pin: true,
           pinSpacing: true,
@@ -166,17 +181,26 @@ const Journey: React.FC = () => {
         },
       });
 
+      // The planet entrance + the 90° camera turn are driven in 3D by progressRef (see SpaceScene);
+      // this timeline only crossfades the HTML layers across the three acts.
+      const { ABOUT_END, TURN_START, TURN_END } = PHASES;
       tl
-        // 1) background overlays the hero FIRST: deep space washes in, hero zooms past + fades out.
-        //    The planet's pop/grow/land is driven separately in 3D by progressRef (see SpaceScene).
-        .to('.about-space', { opacity: 1, duration: 0.24 }, 0.0)
-        .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.24 }, 0.04)
-        .to('.about-scrim', { opacity: 1, duration: 0.18 }, 0.7)
-        .to(
-          '.about-line',
-          { yPercent: 0, opacity: 1, stagger: 0.11, duration: 0.34, ease: 'power3.out' },
-          0.72
-        );
+        // Act 1 — About (compressed into [0, ABOUT_END]): deep space washes in over the hero, hero
+        // fades past, scrim + copy reveal as the planet lands.
+        .to('.about-space', { opacity: 1, duration: 0.12 }, 0.0)
+        .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.12 }, 0.02)
+        .to('.about-scrim', { opacity: 1, duration: 0.1 }, ABOUT_END - 0.16)
+        .to('.about-line', { yPercent: 0, opacity: 1, stagger: 0.04, duration: 0.12, ease: 'power3.out' }, ABOUT_END - 0.15)
+        // Act 2 — the camera turns right into the skills universe; fade the About layers out as they leave view.
+        .to(['.about-copy', '.about-space', '.about-scrim'], { opacity: 0, duration: 0.12 }, TURN_START)
+        // Act 3 — the skills universe: its intro title rises in once the turn completes.
+        .to('.skills-intro', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, TURN_END);
+
+      // Pin the timeline length to exactly 1.0 so scrub maps timeline-time 1:1 onto scroll progress —
+      // i.e. a tween at position P fires at progress P, keeping these GSAP phases in lockstep with the
+      // PHASES thresholds SpaceScene reads from raw progress. (Without this, editing any tween's
+      // duration would silently rescale every phase and desync the HTML crossfades from the 3D turn.)
+      tl.to({ v: 0 }, { v: 1, duration: 0 }, 1);
     }, trackRef);
 
     return () => ctx.revert();

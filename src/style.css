@@ -478,6 +478,12 @@
 .about-copy { perspective: 900px; }
 .about-line { backface-visibility: hidden; }
 
+/* Focused tech-skill detail card entrance */
+@keyframes skillCardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* Skill chips low on screen flip their detail card upward so it never clips off the bottom.
    Two-class selector (.skill-up .skill-detail) outranks the Tailwind top-* utility. */
 .skill-up .skill-detail {

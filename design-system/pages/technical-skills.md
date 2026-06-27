@@ -2,9 +2,27 @@
 
 > Overrides `design-system/MASTER.md`. The third act of the space journey: after the About planet, the
 > camera **turns 90° right** into a new universe where a meteor shatters into the tech-stack crystals.
-> Status: **M1 built** — `src/components/SpaceScene.tsx` is the shared 3D world; the About planet + soft-skill
-> constellation now render in it (parity verified). **Next: M2** (skills universe + the 90° camera turn), then
-> M3 crystals, M4 interactions, then the v2 cinematic. (`Planet3D.tsx` is now superseded/unused.)
+> Status: **M1 + M2 built.** `src/components/SpaceScene.tsx` is the shared 3D world. The journey is now ONE
+> pinned stage with three scroll acts driven by `PHASES = { ABOUT_END: 0.5, TURN_START: 0.62, TURN_END: 0.82 }`:
+> About planet (entrance uses `pa = p/ABOUT_END`) → **camera yaws 90° right** (`camera.rotation.y = -turn·π/2`)
+> into the skills universe (starfield + nebula at +X, fading in) with a `.skills-intro` title. Fully scrubbed +
+> reversible. **M3 built:** the 17 brand-tinted crystals (`TECH_SKILLS`) — **equal-dimension octahedra** in a
+> depth-varied grid — each hold a Devicon logo (`makeIconTexture` fetches the SVG via a same-origin blob →
+> CanvasTexture, short-name text as the immediate fallback). **v2 meteor cinematic built (scrubbed):** a big
+> perturbed-icosahedron meteor hurtles in during the turn (`flyT` 0.66→0.86), then **shatters** (`shatterT`
+> 0.86→0.97) — emissive flares, a debris Points burst expands, and the 17 crystals burst from the meteor centre
+> out to their grid positions (`lerpVectors`, staggered, arc). Fully reversible. **M4 built:** raycast hover →
+> crystal turns more transparent (icon clearer) + lifts/glows; **click → camera zooms to the crystal** (`focusT`
+> lerp of `camera.position`/`lookAt`), body goes transparent, others dim, and an HTML **detail card** (badge +
+> name + description) rises in (close via backdrop/✕). **Drama built:** the cyber-cat spaceship weaves in during
+> the turn (`SHIP0..SHIP1`) dodging 3 small meteors, then fires a laser (`beam`, `FIRE0..FIRE1`) at the big
+> meteor just before it shatters. **Meteor polished:** chunkier perturbed rock + a hot fresnel rim, lower base
+> emissive. All scrubbed + reversible; verified at 1440px. **Possible next:** bundle Devicon SVGs locally; tune
+> meteor emissive / ship timing. (`Planet3D.tsx` is superseded/unused.)
+>
+> **Icon note:** logos load from jsdelivr at runtime (couldn't verify live in the network-isolated sandbox, but
+> the loader + text fallback are verified). Consider bundling the 16 SVGs into `public/assets/tech-icons/` for
+> offline/robustness later.
 
 ## Concept
 Coming out of the About planet's landing, the shared camera **yaws 90° to the right** (a real 3D pivot, not a scroll-down) to face a deeper universe. A scroll-scrubbed cinematic plays: the spaceship weaves past small meteors → a **big "undodgeable" meteor** appears → the ship fires and **shatters it into crystal shards**. Each shard is a **faceted, semi-transparent, brand-tinted crystal** with a tech-stack **Devicon icon suspended inside**. There are **two waves**: a *Languages* meteor → 8 language crystals, then a *Tools* meteor → 9 tool crystals (17 total). The meteor = the challenge of mastering the stack; destroying it = command of the craft. Fully reversible (scrub).

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Lightbulb, MessageCircle, Brain, Repeat2, Users, Timer, ListChecks } from 'lucide-react';
 
 const PLANET_IMG = '/assets/world/about/origin-planet-cutout-opt.webp';
+const SHIP_IMG = '/assets/world/hero/portfolio-spaceship-cutout.png';
 
 // Soft skills — each is a node on the planet. [lat, lon] (deg) put them on the front hemisphere.
 export const SKILLS: { name: string; desc: string; lat: number; lon: number }[] = [
@@ -39,6 +40,117 @@ function makeGlowTexture(THREE: any) {
   return new THREE.CanvasTexture(c);
 }
 
+// Soft galaxy/nebula for the skills universe (cyan core → violet → magenta falloff).
+function makeNebulaTexture(THREE: any) {
+  const s = 256;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const ctx = c.getContext('2d')!;
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0.0, 'rgba(196,232,255,0.5)');
+  g.addColorStop(0.32, 'rgba(124,92,255,0.3)');
+  g.addColorStop(0.62, 'rgba(255,43,214,0.12)');
+  g.addColorStop(1.0, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(c);
+}
+
+// Scroll-progress phases of the journey (shared with Journey's GSAP timeline). About (planet + copy)
+// plays over [0, ABOUT_END]; the camera turns right into the skills universe over [TURN_START, TURN_END].
+export const PHASES = { ABOUT_END: 0.5, TURN_START: 0.62, TURN_END: 0.82 };
+
+// The 17 technical skills that crystallise in the skills universe (two waves: languages, then tools).
+// `dev` = the Devicon icon-font class (the font + CSS are already loaded in index.html, so the glyph is
+// available with no runtime network fetch). Empty `dev` falls back to the short name as text.
+export const TECH_SKILLS: { name: string; short: string; desc: string; color: string; dev: string; group: 'lang' | 'tool' }[] = [
+  { name: 'HTML5', short: 'HTML', desc: 'The semantic, accessible backbone of every interface I build.', color: '#E34F26', dev: 'devicon-html5-plain', group: 'lang' },
+  { name: 'CSS3', short: 'CSS', desc: 'Layout, motion, and responsive design — where structure becomes experience.', color: '#1572B6', dev: 'devicon-css3-plain', group: 'lang' },
+  { name: 'JavaScript', short: 'JS', desc: 'My go-to for interactivity, from DOM logic to async APIs.', color: '#F7DF1E', dev: 'devicon-javascript-plain', group: 'lang' },
+  { name: 'Python', short: 'PY', desc: 'My toolkit for backends, scripting, and data-heavy problem solving.', color: '#3776AB', dev: 'devicon-python-plain', group: 'lang' },
+  { name: 'Java', short: 'Java', desc: 'OOP fundamentals and robust application logic from my CS foundation.', color: '#5382A1', dev: 'devicon-java-plain', group: 'lang' },
+  { name: 'C++', short: 'C++', desc: 'Low-level performance and the algorithms that taught me how machines think.', color: '#00599C', dev: 'devicon-cplusplus-plain', group: 'lang' },
+  { name: 'C#', short: 'C#', desc: 'Strongly-typed application development across the .NET ecosystem.', color: '#9B4F96', dev: 'devicon-csharp-plain', group: 'lang' },
+  { name: 'SQL', short: 'SQL', desc: 'Designing and querying relational data with precision.', color: '#E38C00', dev: 'devicon-azuresqldatabase-plain', group: 'lang' },
+  { name: 'Figma', short: 'Figma', desc: 'Where I prototype and design before a single line of code.', color: '#F24E1E', dev: 'devicon-figma-plain', group: 'tool' },
+  { name: 'Tailwind CSS', short: 'TW', desc: 'Utility-first styling for fast, consistent, maintainable UIs.', color: '#06B6D4', dev: 'devicon-tailwindcss-original', group: 'tool' },
+  { name: 'PostgreSQL', short: 'PSQL', desc: 'Production-grade relational databases for real-world data.', color: '#4169E1', dev: 'devicon-postgresql-plain', group: 'tool' },
+  { name: 'Firebase', short: 'FB', desc: 'Realtime data, auth, and hosting for shipping apps fast.', color: '#FFCA28', dev: 'devicon-firebase-plain', group: 'tool' },
+  { name: 'Kotlin', short: 'KT', desc: 'Modern, expressive Android development.', color: '#7F52FF', dev: 'devicon-kotlin-plain', group: 'tool' },
+  { name: 'Flutter', short: 'Flutter', desc: 'Cross-platform apps from one codebase — my mobile framework of choice.', color: '#02569B', dev: 'devicon-flutter-plain', group: 'tool' },
+  { name: 'Android', short: 'Android', desc: "Native mobile development for the world's biggest platform.", color: '#3DDC84', dev: 'devicon-android-plain', group: 'tool' },
+  { name: 'Git', short: 'Git', desc: 'Version control and collaboration: the spine of every project.', color: '#F05032', dev: 'devicon-git-plain', group: 'tool' },
+  { name: 'VS Code', short: 'Code', desc: 'My daily driver, tuned for speed and flow.', color: '#007ACC', dev: 'devicon-vscode-plain', group: 'tool' },
+];
+
+// The Devicon slug for a skill (e.g. 'devicon-cplusplus-plain' -> 'cplusplus'); names the local SVG file.
+export const iconSlug = (dev: string) => dev.replace(/^devicon-/, '').replace(/-(plain|original|line|wordmark).*$/, '');
+
+// A CanvasTexture for a crystal's icon. Draws the short name immediately, then swaps in the real logo:
+//   1) a locally-bundled SVG  /assets/tech-icons/<slug>.svg  (run `npm run icons` — same-origin, reliable, colour)
+//   2) the Devicon icon-font glyph (tinted), if the CDN font is loaded
+//   3) the text label, if neither is available.
+// Guarded so a late draw after unmount doesn't touch a disposed texture.
+function makeIconTexture(THREE: any, skill: { short: string; dev: string; color: string }, isCancelled: () => boolean) {
+  const size = 128;
+  const c = document.createElement('canvas');
+  c.width = c.height = size;
+  const ctx = c.getContext('2d')!;
+  const tex = new THREE.CanvasTexture(c);
+  const drawText = () => {
+    if (isCancelled()) return;
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = '#eaf6ff';
+    ctx.font = '700 ' + (skill.short.length > 3 ? 30 : 46) + 'px Manrope, system-ui, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(skill.short, size / 2, size / 2 + 2);
+    tex.needsUpdate = true;
+  };
+  drawText();
+  if (typeof document === 'undefined' || !skill.dev) return tex;
+  const tryFont = () => {
+    let glyph = '';
+    try {
+      const probe = document.createElement('i');
+      probe.className = skill.dev;
+      probe.style.cssText = 'position:absolute;left:-9999px;visibility:hidden';
+      document.body.appendChild(probe);
+      const content = getComputedStyle(probe, '::before').content;
+      document.body.removeChild(probe);
+      if (content && content !== 'none' && content !== 'normal') {
+        glyph = content.replace(/^["']|["']$/g, '').replace(/\\([0-9a-fA-F]{1,6})\s?/g, (_, h) => String.fromCodePoint(parseInt(h, 16)));
+      }
+    } catch { /* keep text */ }
+    if (!glyph) return;
+    const draw = () => {
+      if (isCancelled()) return;
+      ctx.clearRect(0, 0, size, size);
+      ctx.fillStyle = skill.color;
+      ctx.font = '92px devicon';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(glyph, size / 2, size / 2 + 4);
+      tex.needsUpdate = true;
+    };
+    draw();
+    const fonts: any = (document as any).fonts;
+    if (fonts && fonts.ready) fonts.ready.then(() => { if (!isCancelled()) draw(); }).catch(() => {});
+  };
+  // 1) try the locally-bundled SVG (same-origin, so it never taints and needs no network at runtime)
+  const img = new Image();
+  img.onload = () => {
+    if (isCancelled()) return;
+    ctx.clearRect(0, 0, size, size);
+    const pad = 14;
+    ctx.drawImage(img, pad, pad, size - 2 * pad, size - 2 * pad);
+    tex.needsUpdate = true;
+  };
+  img.onerror = tryFont; // no local file yet → fall back to the icon font
+  img.src = '/assets/tech-icons/' + iconSlug(skill.dev) + '.svg';
+  return tex;
+}
+
 const clamp01 = (x: number) => Math.max(0, Math.min(1, x));
 const smooth = (t: number) => { const c = clamp01(t); return c * c * (3 - 2 * c); };
 
@@ -65,6 +177,8 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
   const lineRefs = useRef<(SVGLineElement | null)[]>([]);
   const [failed, setFailed] = useState(false);
+  const [focused, setFocused] = useState(-1); // index of the crystal whose detail card is open (-1 = none)
+  const focusRef = useRef(-1); // mirror read by the render loop (no stale closure)
 
   useEffect(() => {
     let cancelled = false;
@@ -179,35 +293,180 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const l2 = new THREE.DirectionalLight(0xff2bd6, 1.5); l2.position.set(3, -1, 1.5); scene.add(l2);
       const l3 = new THREE.DirectionalLight(0xffffff, 0.45); l3.position.set(0, 3, 2); scene.add(l3);
 
+      // ---- skills universe (revealed by the 90° camera turn toward +X) ----
+      // A starfield spread across the world (parallax/depth as the camera turns) + a nebula marking the
+      // destination. Both fade in during the turn; the tech-skill crystals will live here (M3).
+      const STAR_N = isMobile ? 280 : 560;
+      const starGeo = new THREE.BufferGeometry();
+      const starPos = new Float32Array(STAR_N * 3);
+      for (let i = 0; i < STAR_N; i++) {
+        starPos[i * 3] = -10 + Math.random() * 46; // x: biased toward +X (skills direction)
+        starPos[i * 3 + 1] = -22 + Math.random() * 44; // y
+        starPos[i * 3 + 2] = -24 + Math.random() * 42; // z
+      }
+      starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+      const starMat = new THREE.PointsMaterial({ color: 0xcfeaff, size: isMobile ? 0.09 : 0.07, transparent: true, opacity: 0, depthWrite: false, sizeAttenuation: true });
+      const stars = new THREE.Points(starGeo, starMat);
+      scene.add(stars);
+
+      const SKILLS_X = 13; // the skills destination sits to the camera's right
+      const nebTex = makeNebulaTexture(THREE);
+      const nebMat = new THREE.SpriteMaterial({ map: nebTex, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const nebula = new THREE.Sprite(nebMat);
+      nebula.scale.set(22, 22, 1);
+      nebula.position.set(SKILLS_X, 0, 7);
+      scene.add(nebula);
+
+      // ---- the 17 tech-skill crystals (M3): faceted brand-tinted glass shards with the Devicon icon
+      // suspended inside (a camera-facing sprite). Laid out in a grid facing the turned camera; they
+      // fade in with the turn and drift/spin gently. (M4 will add hover + click-to-flip.) ----
+      const crystalsGroup = new THREE.Group();
+      crystalsGroup.visible = false;
+      scene.add(crystalsGroup);
+      const cGeo = new THREE.OctahedronGeometry(0.62, 0); // equal height/width — a balanced gem (not a flat shard)
+      const cEdgeGeo = new THREE.EdgesGeometry(cGeo);
+      const crystals: any[] = [];
+      const crystalMats: any[] = [];
+      const iconTexes: any[] = [];
+      // larger invisible spheres give an easy click/hover target (the visible glow is bigger than the body)
+      const crystalHits: any[] = [];
+      const hitGeo = new THREE.SphereGeometry(1.05, 8, 8);
+      const hitMat = new THREE.MeshBasicMaterial({ visible: false });
+      const CRYS_DEPTH = 11, CRYS_COLS = 6, COL_GAP = 2.3, ROW_GAP = 2.0, Y_TOP = 1.6;
+      const rowCounts: number[] = [];
+      for (let r = 0; r * CRYS_COLS < TECH_SKILLS.length; r++) rowCounts.push(Math.min(CRYS_COLS, TECH_SKILLS.length - r * CRYS_COLS));
+      TECH_SKILLS.forEach((skill, i) => {
+        const row = Math.floor(i / CRYS_COLS), col = i % CRYS_COLS;
+        const n = rowCounts[row];
+        const g = new THREE.Group();
+        // grid position + gentle depth variation so the field reads as a 3D cloud, not a flat wall
+        g.position.set(CRYS_DEPTH + Math.sin(col * 1.4 + row * 0.8) * 1.3, Y_TOP - row * ROW_GAP, 7 + (col - (n - 1) / 2) * COL_GAP);
+        g.rotation.y = Math.random() * Math.PI;
+        const color = new THREE.Color(skill.color);
+        const bodyMat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0, roughness: 0.12, metalness: 0.25, emissive: color, emissiveIntensity: 0.25, flatShading: true, depthWrite: false, side: THREE.DoubleSide });
+        const body = new THREE.Mesh(cGeo, bodyMat); g.add(body);
+        const edgeMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+        const edges = new THREE.LineSegments(cEdgeGeo, edgeMat); body.add(edges);
+        const iconTex = makeIconTexture(THREE, skill, () => cancelled);
+        const iconMat = new THREE.SpriteMaterial({ map: iconTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false });
+        const icon = new THREE.Sprite(iconMat); icon.scale.set(0.56, 0.56, 1); icon.renderOrder = 3; g.add(icon);
+        const cgMat = new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+        const cglow = new THREE.Sprite(cgMat); cglow.scale.set(2.8, 2.8, 1); cglow.position.z = -0.15; g.add(cglow);
+        const hitProxy = new THREE.Mesh(hitGeo, hitMat); g.add(hitProxy); crystalHits.push(hitProxy);
+        crystalsGroup.add(g);
+        crystals.push({ body, bodyMat, edgeMat, iconMat, cgMat, g, gridPos: g.position.clone(), phase: i * 0.7, spin: 0.18 + (i % 3) * 0.05, arc: (Math.random() - 0.5) * 2.6, delay: (i % CRYS_COLS) * 0.015, hoverT: 0 });
+        crystalMats.push(bodyMat, edgeMat, iconMat, cgMat);
+        iconTexes.push(iconTex);
+      });
+
+      // ---- the big meteor: hurtles in during the turn, then SHATTERS into the crystals (v2 cinematic).
+      // Scrubbed: scroll forward = meteor flies in → explodes → fragments fly out to the grid; reverse = re-forms.
+      const MET_FLY0 = 0.66, MET_FLY1 = 0.86, SHA0 = 0.86, SHA1 = 0.97;
+      const meteorCenterV = new THREE.Vector3(CRYS_DEPTH, -0.2, 7);
+      const meteorStartV = new THREE.Vector3(CRYS_DEPTH + 5, 8.5, 7 + 15);
+      const meteorGeo = new THREE.IcosahedronGeometry(1.7, 1);
+      {
+        const mp = meteorGeo.attributes.position, v = new THREE.Vector3();
+        for (let i = 0; i < mp.count; i++) { v.fromBufferAttribute(mp, i); v.multiplyScalar(1 + (Math.sin(v.x * 3.3) + Math.cos(v.y * 4.1) + Math.sin(v.z * 5.2)) * 0.13); mp.setXYZ(i, v.x, v.y, v.z); }
+        meteorGeo.computeVertexNormals();
+      }
+      const meteorMat = new THREE.MeshStandardMaterial({ color: 0x1b140d, roughness: 1, metalness: 0, emissive: 0xff4a12, emissiveIntensity: 0, flatShading: true });
+      const meteor = new THREE.Mesh(meteorGeo, meteorMat);
+      // hot fresnel rim — leading edges glow as the rock heats on entry (intensity driven each frame)
+      const meteorRimMat = new THREE.ShaderMaterial({
+        uniforms: { c: { value: new THREE.Color(0xff7a2a) }, pwr: { value: 0 } },
+        vertexShader: 'varying float vF; void main(){ vec3 n=normalize(normalMatrix*normal); vec4 mv=modelViewMatrix*vec4(position,1.0); vec3 v=normalize(-mv.xyz); vF=pow(1.0-max(dot(n,v),0.0),2.0); gl_Position=projectionMatrix*mv; }',
+        fragmentShader: 'uniform vec3 c; uniform float pwr; varying float vF; void main(){ gl_FragColor=vec4(c, vF*pwr); }',
+        transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const meteorRim = new THREE.Mesh(meteorGeo, meteorRimMat); meteorRim.scale.setScalar(1.04);
+      const meteorGlowMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xff5a18, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const meteorGlow = new THREE.Sprite(meteorGlowMat); meteorGlow.scale.set(7.5, 7.5, 1);
+      const meteorGroup = new THREE.Group(); meteorGroup.visible = false; meteorGroup.add(meteor); meteorGroup.add(meteorRim); meteorGroup.add(meteorGlow);
+      scene.add(meteorGroup);
+
+      const DEBRIS_N = isMobile ? 70 : 120;
+      const debrisGeo = new THREE.BufferGeometry();
+      const debrisPos = new Float32Array(DEBRIS_N * 3);
+      const debrisDir = new Float32Array(DEBRIS_N * 4); // dir.xyz + travel distance
+      for (let i = 0; i < DEBRIS_N; i++) {
+        const u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, s = Math.sqrt(1 - u * u);
+        debrisDir[i * 4] = s * Math.cos(th); debrisDir[i * 4 + 1] = u; debrisDir[i * 4 + 2] = s * Math.sin(th); debrisDir[i * 4 + 3] = 3 + Math.random() * 8;
+        debrisPos[i * 3] = meteorCenterV.x; debrisPos[i * 3 + 1] = meteorCenterV.y; debrisPos[i * 3 + 2] = meteorCenterV.z;
+      }
+      debrisGeo.setAttribute('position', new THREE.BufferAttribute(debrisPos, 3));
+      const debrisMat = new THREE.PointsMaterial({ color: 0xffb070, size: isMobile ? 0.12 : 0.09, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, sizeAttenuation: true });
+      const debris = new THREE.Points(debrisGeo, debrisMat); debris.visible = false;
+      scene.add(debris);
+
+      // ---- the drama: a spaceship weaves in dodging small meteors, then fires on the big one ----
+      const SHIP0 = 0.63, SHIP1 = 0.85, FIRE0 = 0.835, FIRE1 = 0.862;
+      const _yAxis = new THREE.Vector3(0, 1, 0);
+      const shipTex = new THREE.TextureLoader().load(SHIP_IMG);
+      const shipMat = new THREE.SpriteMaterial({ map: shipTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false });
+      const ship = new THREE.Sprite(shipMat); ship.scale.set(2.8, 2.8, 1); ship.renderOrder = 5; ship.visible = false; scene.add(ship);
+
+      const smallGeo = new THREE.IcosahedronGeometry(0.34, 0);
+      { const sp = smallGeo.attributes.position, v = new THREE.Vector3(); for (let i = 0; i < sp.count; i++) { v.fromBufferAttribute(sp, i); v.multiplyScalar(1 + (Math.sin(v.x * 6) + Math.cos(v.y * 7)) * 0.2); sp.setXYZ(i, v.x, v.y, v.z); } smallGeo.computeVertexNormals(); }
+      const smallMat = new THREE.MeshStandardMaterial({ color: 0x2a211a, roughness: 1, metalness: 0, emissive: 0x933008, emissiveIntensity: 0.5, flatShading: true });
+      const smalls: any[] = [];
+      for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(smallGeo, smallMat); m.visible = false; scene.add(m); smalls.push({ m, z0: 12 + i * 2.5, y: [2.1, -1.3, 0.7][i], spd: 1 + i * 0.3, off: i * 0.18 }); }
+
+      const beamGeo = new THREE.CylinderGeometry(0.05, 0.05, 1, 6);
+      const beamMat = new THREE.MeshBasicMaterial({ color: 0x6cf0ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const beam = new THREE.Mesh(beamGeo, beamMat); beam.visible = false; scene.add(beam);
+
       // ---- interaction (freeze + reveal constellation when the cursor is over the actual sphere) ----
       const raycaster = new THREE.Raycaster();
       const ndc = new THREE.Vector2();
-      const landed = () => progressRef.current > 0.93; // only interactive once the planet has settled (entrance finishes ~0.96)
+      // Constellation is interactive only once the planet has settled (About sub-progress > 0.93) AND
+      // before the camera starts turning away to the skills universe.
+      const landed = () => { const p = progressRef.current; return p / PHASES.ABOUT_END > 0.93 && p < PHASES.TURN_START; };
       let hover = false;
       let pinned = false;
       let chipHoverCount = 0;
 
-      const hitsPlanet = (clientX: number, clientY: number) => {
+      const setNdc = (clientX: number, clientY: number) => {
         const rect = canvas.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return false;
+        if (!rect.width || !rect.height) return false;
         ndc.x = ((clientX - rect.left) / rect.width) * 2 - 1;
         ndc.y = -(((clientY - rect.top) / rect.height) * 2 - 1);
+        return true;
+      };
+      const hitsPlanet = (clientX: number, clientY: number) => {
+        if (!setNdc(clientX, clientY)) return false;
         raycaster.setFromCamera(ndc, camera);
         return raycaster.intersectObject(bodyMesh, false).length > 0;
       };
+      // skills crystals are interactive once they've mostly settled out of the meteor shatter
+      const skillsSettled = () => (progressRef.current - SHA0) / (SHA1 - SHA0) > 0.8;
+      const hitsCrystal = (clientX: number, clientY: number) => {
+        if (!setNdc(clientX, clientY)) return -1;
+        raycaster.setFromCamera(ndc, camera);
+        const hit = raycaster.intersectObjects(crystalHits, false)[0];
+        return hit ? crystalHits.indexOf(hit.object) : -1;
+      };
+      let hoverIdx = -1;
       const onPointerMove = (e: PointerEvent) => {
         if (e.pointerType === 'touch') return;
+        if (focusRef.current >= 0) { mount.style.cursor = 'pointer'; return; }
         hover = landed() && hitsPlanet(e.clientX, e.clientY);
-        mount.style.cursor = hover ? 'pointer' : '';
+        hoverIdx = !hover && skillsSettled() ? hitsCrystal(e.clientX, e.clientY) : -1;
+        mount.style.cursor = hover || hoverIdx >= 0 ? 'pointer' : '';
       };
       const onPointerLeave = (e: PointerEvent) => {
         if (e.pointerType === 'touch') return;
-        hover = false;
+        hover = false; hoverIdx = -1;
         mount.style.cursor = '';
       };
       const onPointerUp = (e: PointerEvent) => {
-        if (e.pointerType !== 'touch' || !landed()) return;
-        if (hitsPlanet(e.clientX, e.clientY)) pinned = !pinned;
+        if (focusRef.current >= 0) return; // the detail-card overlay handles closing
+        if (skillsSettled()) {
+          const ci = hitsCrystal(e.clientX, e.clientY);
+          if (ci >= 0) { focusRef.current = ci; setFocused(ci); }
+          return;
+        }
+        if (e.pointerType === 'touch' && landed() && hitsPlanet(e.clientX, e.clientY)) pinned = !pinned;
       };
       canvas.addEventListener('pointermove', onPointerMove);
       canvas.addEventListener('pointerleave', onPointerLeave);
@@ -224,6 +483,10 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const tmp = new THREE.Vector3();
       const pc = new THREE.Vector3();
       const pe = new THREE.Vector3();
+      const _v1 = new THREE.Vector3();
+      const _v2 = new THREE.Vector3();
+      let focusT = 0; // 0..1 zoom-to-crystal animation
+      let lastFocusIdx = -1;
       let labelAlpha = 0;
       let lastEngaged = -1e9;
       const GRACE_MS = 480;
@@ -272,11 +535,13 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         const dt = Math.min((now - last) / 1000, 0.05);
         last = now;
         const p = progressRef.current;
-        const sc = entranceScale(p);
+        const pa = Math.min(1, p / PHASES.ABOUT_END); // About sub-progress (planet entrance + copy)
+        const sc = entranceScale(pa);
+        const turn = smooth(clamp01((p - PHASES.TURN_START) / (PHASES.TURN_END - PHASES.TURN_START)));
 
-        // Hero/idle phase: planet hidden (scale 0) and nothing revealed — skip the per-frame work; clear
-        // the canvas once so no stale frame lingers, and keep the loop scheduled so it resumes on scroll.
-        if (sc === 0 && labelAlpha < 0.001) {
+        // Hero/idle phase: planet hidden (scale 0), nothing revealed, camera not yet turning — skip the
+        // per-frame work; clear the canvas once so no stale frame lingers, keep the loop scheduled.
+        if (sc === 0 && labelAlpha < 0.001 && turn === 0) {
           if (!idle) {
             idle = true;
             renderer.clear();
@@ -287,10 +552,106 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         }
         idle = false;
 
-        // entrance: scale + drift from scroll progress
+        // entrance: scale + drift from the About sub-progress
         planet.scale.setScalar(sc * S_FINAL);
-        const d = driftFrac(p);
+        const d = driftFrac(pa);
         planet.position.set(d * LAND_X, d * LAND_Y, 0);
+
+        // camera: scroll-driven yaw into the skills universe, OR (M4) zoom to a clicked crystal
+        const fIdx = focusRef.current;
+        if (fIdx >= 0) lastFocusIdx = fIdx;
+        focusT += ((fIdx >= 0 ? 1 : 0) - focusT) * Math.min(1, dt * 3.5);
+        if (focusT > 0.001 && lastFocusIdx >= 0) {
+          const cp = crystals[lastFocusIdx].gridPos;
+          const fe = smooth(focusT);
+          camera.position.set(0, 0, 7).lerp(_v1.set(cp.x - 3.4, cp.y - 0.4, cp.z), fe);
+          camera.up.set(0, 1, 0);
+          camera.lookAt(_v2.set(30, 0, 7).lerp(cp, fe));
+        } else {
+          camera.position.set(0, 0, 7);
+          camera.rotation.y = -turn * (Math.PI / 2);
+        }
+        starMat.opacity = turn * 0.95;
+        nebMat.opacity = turn * 0.7;
+
+        // ---- meteor → shatter → crystals (all scrubbed by scroll) ----
+        const flyT = smooth(clamp01((p - MET_FLY0) / (MET_FLY1 - MET_FLY0)));
+        const shatterT = smooth(clamp01((p - SHA0) / (SHA1 - SHA0)));
+        // the meteor hurtles in, heats up, then flares + vanishes as it shatters
+        meteorGroup.visible = flyT > 0.001 && shatterT < 0.55;
+        if (meteorGroup.visible) {
+          meteorGroup.position.lerpVectors(meteorStartV, meteorCenterV, flyT);
+          const shrink = 1 - smooth(clamp01(shatterT / 0.35));
+          meteorGroup.scale.setScalar(Math.max(0.001, (0.55 + flyT * 0.45) * shrink));
+          meteor.rotation.x += dt * 0.8; meteor.rotation.y += dt * 1.1;
+          meteorMat.emissiveIntensity = 0.12 + flyT * 0.33 + shatterT * 1.9;
+          meteorRimMat.uniforms.pwr.value = (0.5 + flyT * 0.7) * (1 - smooth(clamp01(shatterT / 0.4)));
+          meteorGlowMat.opacity = (0.3 + flyT * 0.45) * (1 - smooth(clamp01(shatterT / 0.4)));
+        }
+        // crystals burst from the meteor centre out to their grid positions
+        crystalsGroup.visible = shatterT > 0.001;
+        if (crystalsGroup.visible) {
+          for (let i = 0; i < crystals.length; i++) {
+            const cr = crystals[i];
+            const st = smooth(clamp01((shatterT - cr.delay) * 1.3));
+            cr.g.position.lerpVectors(meteorCenterV, cr.gridPos, st);
+            cr.g.position.y += Math.sin(st * Math.PI) * cr.arc + 0.12 * Math.sin(now * 0.0009 + cr.phase) * st;
+            const isFocusCr = i === lastFocusIdx && focusT > 0.01;
+            cr.hoverT += ((i === hoverIdx || isFocusCr ? 1 : 0) - cr.hoverT) * Math.min(1, dt * 8);
+            cr.body.rotation.y += dt * (cr.spin + (1 - st) * 4 + cr.hoverT * 1.4);
+            cr.body.rotation.x += dt * (1 - st) * 2.5;
+            cr.body.scale.setScalar(1 + cr.hoverT * 0.14);
+            cr.g.position.y += cr.hoverT * 0.22 * st;
+            const o = clamp01(st * 1.6);
+            const dim = isFocusCr ? 1 : 1 - focusT * 0.82; // other crystals fade when one is focused
+            // hover / focus → MORE transparent body (the icon reads clearer) + brighter edges & glow
+            cr.bodyMat.opacity = o * (0.4 - cr.hoverT * 0.26) * dim;
+            cr.edgeMat.opacity = o * (0.8 + cr.hoverT * 0.5) * dim;
+            cr.iconMat.opacity = o * (isFocusCr ? 1 : 1 - focusT * 0.82);
+            cr.cgMat.opacity = o * (0.5 + cr.hoverT * 0.6) * dim;
+          }
+        }
+        // debris burst — particles fly out from the shatter point, peak then fade
+        const debrisA = Math.sin(clamp01(shatterT) * Math.PI);
+        debris.visible = debrisA > 0.01;
+        if (debris.visible) {
+          const dp = debrisGeo.attributes.position;
+          for (let i = 0; i < DEBRIS_N; i++) {
+            const r = shatterT * debrisDir[i * 4 + 3];
+            dp.setXYZ(i, meteorCenterV.x + debrisDir[i * 4] * r, meteorCenterV.y + debrisDir[i * 4 + 1] * r, meteorCenterV.z + debrisDir[i * 4 + 2] * r);
+          }
+          dp.needsUpdate = true;
+          debrisMat.opacity = debrisA * 0.85;
+        }
+
+        // ---- drama: spaceship weaves in dodging small meteors, then fires on the big one ----
+        const shipT = clamp01((p - SHIP0) / (SHIP1 - SHIP0));
+        const shipFade = 1 - smooth(clamp01(shatterT / 0.35));
+        ship.visible = shipT > 0.001 && shatterT < 0.5;
+        if (ship.visible) {
+          ship.position.set(8.5, 1.8 * Math.sin(shipT * Math.PI * 3) * shipFade, 2 + shipT * 8);
+          shipMat.rotation = -0.5 * Math.cos(shipT * Math.PI * 3); // bank with the weave
+          shipMat.opacity = smooth(clamp01(shipT * 4)) * shipFade;
+        }
+        for (let i = 0; i < smalls.length; i++) {
+          const sm = smalls[i];
+          const t = clamp01((shipT - sm.off) * 1.4);
+          sm.m.visible = t > 0.001 && t < 0.999 && shatterT < 0.4;
+          if (sm.m.visible) {
+            sm.m.position.set(8.5, sm.y, sm.z0 - t * 16 * sm.spd);
+            sm.m.rotation.x += dt * 2; sm.m.rotation.y += dt * 1.5;
+          }
+        }
+        const fireT = smooth(clamp01((p - FIRE0) / (FIRE1 - FIRE0)));
+        beam.visible = fireT > 0.01 && fireT < 0.99 && meteorGroup.visible;
+        if (beam.visible) {
+          _v1.subVectors(meteorGroup.position, ship.position);
+          const len = Math.max(0.01, _v1.length());
+          beam.position.copy(ship.position).addScaledVector(_v1, 0.5);
+          beam.scale.set(1, len, 1);
+          beam.quaternion.setFromUnitVectors(_yAxis, _v1.normalize());
+          beamMat.opacity = Math.sin(fireT * Math.PI) * 0.95;
+        }
 
         const active = landed();
         if (!active) { hover = false; pinned = false; chipHoverCount = 0; mount.style.cursor = ''; }
@@ -299,21 +660,23 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         const engaged = active && (rawEngaged || now - lastEngaged < GRACE_MS);
         const k = Math.min(1, dt * 4);
 
-        if (engaged) {
-          const ty = Math.round(planet.rotation.y / TWO_PI) * TWO_PI;
-          planet.rotation.y += (ty - planet.rotation.y) * k;
-          planet.rotation.x += (-0.08 - planet.rotation.x) * k;
-        } else {
-          planet.rotation.y += dt * 0.18;
-          planet.rotation.x += (0 - planet.rotation.x) * k;
-          ring.rotation.z += dt * 0.06;
+        // Planet animation — skip once the camera has fully turned away to the skills act (off-view).
+        if (turn < 1) {
+          if (engaged) {
+            const ty = Math.round(planet.rotation.y / TWO_PI) * TWO_PI;
+            planet.rotation.y += (ty - planet.rotation.y) * k;
+            planet.rotation.x += (-0.08 - planet.rotation.x) * k;
+          } else {
+            planet.rotation.y += dt * 0.18;
+            planet.rotation.x += (0 - planet.rotation.x) * k;
+            ring.rotation.z += dt * 0.06;
+          }
+          const pulse = 1 + 0.18 * Math.sin(now * 0.004);
+          skillNodes.forEach((mNode, i) => mNode.scale.setScalar(pulse + (engaged ? 0.25 : 0) + 0.05 * Math.sin(now * 0.005 + i)));
+          skillMat.opacity = engaged ? 1 : 0.92;
         }
         const targetAlpha = engaged ? 1 : 0;
         labelAlpha += (targetAlpha - labelAlpha) * Math.min(1, dt * (targetAlpha > labelAlpha ? 6 : 1.7));
-
-        const pulse = 1 + 0.18 * Math.sin(now * 0.004);
-        skillNodes.forEach((mNode, i) => mNode.scale.setScalar(pulse + (engaged ? 0.25 : 0) + 0.05 * Math.sin(now * 0.005 + i)));
-        skillMat.opacity = engaged ? 1 : 0.92;
 
         renderer.render(scene, camera);
         if (labelAlpha > 0.001) positionLabels();
@@ -356,6 +719,13 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         icoGeo.dispose(); wireGeo.dispose(); wireMat.dispose(); nodeMat.dispose();
         ringGeo.dispose(); ringMat.dispose(); glowTex.dispose(); glowMat.dispose();
         skillGeo.dispose(); skillMat.dispose();
+        starGeo.dispose(); starMat.dispose(); nebTex.dispose(); nebMat.dispose();
+        cGeo.dispose(); cEdgeGeo.dispose(); hitGeo.dispose(); hitMat.dispose();
+        crystalMats.forEach((m) => m.dispose());
+        iconTexes.forEach((t) => t.dispose());
+        meteorGeo.dispose(); meteorMat.dispose(); meteorRimMat.dispose(); meteorGlowMat.dispose();
+        debrisGeo.dispose(); debrisMat.dispose();
+        shipTex.dispose(); shipMat.dispose(); smallGeo.dispose(); smallMat.dispose(); beamGeo.dispose(); beamMat.dispose();
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
         try { renderer.forceContextLoss(); } catch {}
         renderer.dispose();
@@ -424,6 +794,38 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           );
         })}
       </div>
+      {/* M4 — focused crystal detail card (camera has zoomed to the crystal in 3D; this reveals its name + description) */}
+      {focused >= 0 && (() => {
+        const s = TECH_SKILLS[focused];
+        const close = () => { focusRef.current = -1; setFocused(-1); };
+        return (
+          <div className="skill-focus pointer-events-auto absolute inset-0 z-40 flex items-end justify-center pb-[10vh] sm:items-end sm:pb-[8vh]" onClick={close}>
+            <div className="absolute inset-0 bg-[#04030c]/45 backdrop-blur-[1px]" />
+            <div
+              className="relative mx-6 w-full max-w-md animate-[skillCardIn_0.35s_cubic-bezier(0.34,1.56,0.64,1)] rounded-2xl border border-white/12 bg-[#0a0914]/95 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.7)] backdrop-blur-xl"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button onClick={close} aria-label="Close" className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-full text-[#8b86a6] transition-colors hover:bg-white/10 hover:text-white">✕</button>
+              <span aria-hidden="true" className="absolute inset-x-6 top-0 h-px" style={{ background: `linear-gradient(to right, transparent, ${s.color}, transparent)` }} />
+              <div className="flex items-center gap-3">
+                <span className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-xl" style={{ background: s.color + '22', border: `1px solid ${s.color}55` }}>
+                  <img
+                    src={`/assets/tech-icons/${iconSlug(s.dev)}.svg`}
+                    alt=""
+                    className="h-7 w-7 object-contain"
+                    onError={(e) => { const t = e.currentTarget; const i = document.createElement('i'); i.className = s.dev; i.setAttribute('style', `color:${s.color};font-size:1.7rem`); t.replaceWith(i); }}
+                  />
+                </span>
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.2em]" style={{ color: s.color }}>{s.group === 'lang' ? 'Language / Core' : 'Tool / Framework'}</p>
+                  <h3 className="font-display text-2xl font-extrabold leading-tight text-[#F5F3FF]">{s.name}</h3>
+                </div>
+              </div>
+              <p className="mt-4 text-sm leading-relaxed text-[#c3bdda]">{s.desc}</p>
+            </div>
+          </div>
+        );
+      })()}
       <ul className="sr-only">
         {SKILLS.map((s) => (<li key={s.name}><strong>{s.name}</strong>: {s.desc}</li>))}
       </ul>
