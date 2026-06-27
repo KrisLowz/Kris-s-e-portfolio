@@ -155,6 +155,10 @@ const Journey: React.FC = () => {
       gsap.set('.about-space', { opacity: 0 });
       gsap.set('.about-scrim', { opacity: 0 });
       gsap.set('.skills-intro', { opacity: 0, y: 24 });
+      // The copy lives in the same 3D space as the planet: give it real perspective so its turn-out reads
+      // as a 3D rotation (foreshortening), not a flat slide. It rotates about its own centre (like a billboard
+      // the camera yaws past) while sweeping off + receding.
+      gsap.set('.about-copy', { transformPerspective: 820, transformOrigin: '50% 50%' });
       // Masked reveal: each line starts pushed fully below its overflow-hidden wrapper, then wipes up.
       gsap.set('.about-line', { yPercent: 120, opacity: 0 });
 
@@ -191,12 +195,13 @@ const Journey: React.FC = () => {
         .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.12 }, 0.02)
         .to('.about-scrim', { opacity: 1, duration: 0.1 }, ABOUT_END - 0.16)
         .to('.about-line', { yPercent: 0, opacity: 1, stagger: 0.04, duration: 0.12, ease: 'power3.out' }, ABOUT_END - 0.15)
-        // Act 2 — the camera turns 90° right into the skills universe. The About copy SLIDES LEFT off-screen
-        // on the same smoothstep window as the planet's 3D sweep (TURN_START→TURN_END), so text + planet leave
-        // together as one camera turn. autoAlpha (not opacity) so it ends visibility:hidden and stops
-        // intercepting pointer events (else the invisible left-aligned text blocks the left crystals).
-        // Backdrop layers just fade (moving a full-screen backdrop sideways would look wrong).
-        .to('.about-copy', { xPercent: -150, autoAlpha: 0, duration: TURN_END - TURN_START, ease: 'power1.inOut' }, TURN_START)
+        // Act 2 — the camera turns 90° right into the skills universe. The About copy ROTATES AWAY IN 3D on
+        // the same smoothstep window as the planet's 3D sweep (TURN_START→TURN_END) — pivoting around an axis
+        // off to its right (near the turn axis), so it foreshortens and swings off at an angle, as if it lives
+        // in the same 3D space and the camera is pivoting past it. autoAlpha (not opacity) so it ends
+        // visibility:hidden and stops intercepting pointer events (else the invisible text blocks the left
+        // crystals). Backdrop layers just fade (rotating a full-screen backdrop would look wrong).
+        .to('.about-copy', { rotationY: -82, x: -220, z: -160, autoAlpha: 0, duration: TURN_END - TURN_START, ease: 'power1.inOut' }, TURN_START)
         .to(['.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.14 }, TURN_START)
         // Act 3 — the skills universe: its intro title rises in once the turn completes.
         .to('.skills-intro', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, TURN_END);
