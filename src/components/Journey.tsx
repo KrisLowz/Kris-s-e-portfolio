@@ -192,7 +192,9 @@ const Journey: React.FC = () => {
         .to('.about-scrim', { opacity: 1, duration: 0.1 }, ABOUT_END - 0.16)
         .to('.about-line', { yPercent: 0, opacity: 1, stagger: 0.04, duration: 0.12, ease: 'power3.out' }, ABOUT_END - 0.15)
         // Act 2 — the camera turns right into the skills universe; fade the About layers out as they leave view.
-        .to(['.about-copy', '.about-space', '.about-scrim'], { opacity: 0, duration: 0.12 }, TURN_START)
+        // autoAlpha (not opacity) so the faded copy goes visibility:hidden and stops intercepting pointer
+        // events — otherwise the invisible left-aligned About text blocks hover/click on the left crystals.
+        .to(['.about-copy', '.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.12 }, TURN_START)
         // Act 3 — the skills universe: its intro title rises in once the turn completes.
         .to('.skills-intro', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, TURN_END);
 

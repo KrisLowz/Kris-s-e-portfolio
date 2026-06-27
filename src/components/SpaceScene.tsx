@@ -576,7 +576,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           const cr = crystals[i];
           _v1.set(CRYS_DEPTH, cr.py, cr.pz).project(camera);
           const sx = (_v1.x * 0.5 + 0.5) * W, sy = (1 - (_v1.y * 0.5 + 0.5)) * H;
-          _v2.set(CRYS_DEPTH, cr.py + cr.r * 0.6, cr.pz).project(camera);
+          _v2.set(CRYS_DEPTH, cr.py + cr.r * 0.42, cr.pz).project(camera); // ~30% smaller → sits inside the gem
           const sizePx = Math.max(12, Math.abs((1 - (_v2.y * 0.5 + 0.5)) * H - sy) * 2);
           el.style.transform = `translate(${sx}px,${sy}px) translate(-50%,-50%)`;
           el.style.width = el.style.height = el.style.fontSize = sizePx + 'px';
