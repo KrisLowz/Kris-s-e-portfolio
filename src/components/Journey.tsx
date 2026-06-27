@@ -191,10 +191,13 @@ const Journey: React.FC = () => {
         .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.12 }, 0.02)
         .to('.about-scrim', { opacity: 1, duration: 0.1 }, ABOUT_END - 0.16)
         .to('.about-line', { yPercent: 0, opacity: 1, stagger: 0.04, duration: 0.12, ease: 'power3.out' }, ABOUT_END - 0.15)
-        // Act 2 — the camera turns right into the skills universe; fade the About layers out as they leave view.
-        // autoAlpha (not opacity) so the faded copy goes visibility:hidden and stops intercepting pointer
-        // events — otherwise the invisible left-aligned About text blocks hover/click on the left crystals.
-        .to(['.about-copy', '.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.12 }, TURN_START)
+        // Act 2 — the camera turns 90° right into the skills universe. The About copy SLIDES LEFT off-screen
+        // on the same smoothstep window as the planet's 3D sweep (TURN_START→TURN_END), so text + planet leave
+        // together as one camera turn. autoAlpha (not opacity) so it ends visibility:hidden and stops
+        // intercepting pointer events (else the invisible left-aligned text blocks the left crystals).
+        // Backdrop layers just fade (moving a full-screen backdrop sideways would look wrong).
+        .to('.about-copy', { xPercent: -150, autoAlpha: 0, duration: TURN_END - TURN_START, ease: 'power1.inOut' }, TURN_START)
+        .to(['.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.14 }, TURN_START)
         // Act 3 — the skills universe: its intro title rises in once the turn completes.
         .to('.skills-intro', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, TURN_END);
 
