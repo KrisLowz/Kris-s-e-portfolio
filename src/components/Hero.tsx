@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowRight, Download, Github, Linkedin } from 'lucide-react';
 import { PROFILE } from '../constants';
+import Spaceship3D from './Spaceship3D';
 
 declare var Typed: any;
 
@@ -144,18 +145,6 @@ const Hero: React.FC = () => {
 
         {/* BOTTOM — tagline + CTAs + socials */}
         <div className="w-full max-w-2xl self-start">
-          {/* Mascot spaceship patrolling back and forth above the tagline.
-              Facing is handled by the animation's scaleX (turns around at each end). */}
-          <div className="relative h-24 w-full sm:h-28" aria-hidden="true">
-            <div className="hero-ship w-28 sm:w-36">
-              <img
-                src="/assets/world/hero/portfolio-spaceship-cutout.png"
-                alt=""
-                className="w-full drop-shadow-[0_8px_16px_rgba(6,182,212,0.4)]"
-              />
-            </div>
-          </div>
-
           <p
             className="hero-pop max-w-lg text-lg font-semibold leading-relaxed text-[#2A2730] [text-shadow:0_1px_3px_rgba(255,255,255,0.6)] sm:text-2xl"
             style={{ animationDelay: '660ms' }}
@@ -208,6 +197,10 @@ const Hero: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Full-hero 3D combat layer — cat ship + UFO aliens; click anywhere to fire. Sits in front
+          (z-20) but is pointer-events:none, so the CTAs above stay clickable. */}
+      <Spaceship3D />
     </section>
   );
 };

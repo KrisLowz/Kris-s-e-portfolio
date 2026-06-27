@@ -425,6 +425,14 @@
   .hero-ship { display: none; }
 }
 
+/* Experience radar — rotating sweep wedge */
+@keyframes radarSweep { to { transform: rotate(360deg); } }
+.radar-sweep {
+  background: conic-gradient(from 0deg, rgba(34,211,238,0.28), rgba(34,211,238,0) 70deg);
+  animation: radarSweep 3.4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .radar-sweep { animation: none; } }
+
 /* ============================================================
    About — cosmic scroll scene (dark space journey)
    ============================================================ */
