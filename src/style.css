@@ -464,17 +464,26 @@
 
 /* Short viewports: the pinned 100svh stage clips overflow, so scale the copy to fit (no internal scroll) */
 @media (max-height: 740px) {
-  .about-copy h2 { font-size: clamp(1.9rem, 6vh, 3rem); line-height: 1.06; }
-  .about-copy p  { font-size: 0.95rem; line-height: 1.45; margin-top: 0.6rem; }
+  .about-copy h2 { font-size: clamp(2.6rem, 8.4vh, 4.4rem); line-height: 1.05; }
+  .about-copy p  { font-size: 1.1rem; line-height: 1.5; }
+  .about-copy > div + div { margin-top: 0.8rem; }
 }
 @media (max-height: 560px) {
-  .about-copy h2 { font-size: clamp(1.5rem, 6.5vh, 2.2rem); }
-  .about-copy p  { font-size: 0.85rem; line-height: 1.4; margin-top: 0.4rem; }
+  .about-copy h2 { font-size: clamp(1.8rem, 7vh, 2.7rem); }
+  .about-copy p  { font-size: 0.9rem; line-height: 1.42; }
+  .about-copy > div + div { margin-top: 0.5rem; }
 }
 
 /* 3D text reveal — perspective projects each .about-line as it stands up from a backward tilt */
 .about-copy { perspective: 900px; }
 .about-line { backface-visibility: hidden; }
+
+/* Skill chips low on screen flip their detail card upward so it never clips off the bottom.
+   Two-class selector (.skill-up .skill-detail) outranks the Tailwind top-* utility. */
+.skill-up .skill-detail {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
 
 /* Flowing gradient + glow on the heading word (gated to on-screen; off for reduced motion) */
 @keyframes aboutGradientShift {
