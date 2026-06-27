@@ -27,11 +27,13 @@
 > grabs the gem (lerp-follow with a little swing) and **throws it on release** (velocity carries → bounces
 > neighbours). Verified at 1440px: drag follows the cursor, neighbours bounce, gems spring home, 0 off-screen.
 >
-> **Icons (fixed approach):** the 3D canvas-texture icon is gone; logos are now **HTML overlays** (`z-[5]`, below
-> the heading) that track each gem's projected position every frame — `<img>` of a local SVG
-> (`/assets/tech-icons/<slug>.svg`, via `npm run icons`) → Devicon-font `<i>` → hidden. The overlay render
-> pipeline is **verified** (inline test image renders centred inside each gem); the real logos need either the
-> local SVGs or the Devicon CDN font, which the network-isolated sandbox can't load.
+> **Icons (DONE — real logos render):** the 3D canvas-texture icon is gone; logos are **HTML overlays** (`z-[5]`,
+> below the heading) tracking each gem's projected position every frame — `<img>` of a **committed local SVG**
+> (`public/assets/tech-icons/<slug>.svg`) → Devicon-font `<i>` → hidden. **The 17 official Devicon SVGs are now
+> bundled in the repo** (zero runtime CDN dependency); verified in-browser — every gem + the detail-card badge
+> shows its real brand logo. Root cause of the earlier blank icons: **jsdelivr is blocked on some networks**, so
+> the Devicon font + the old jsdelivr `npm run icons` both failed. `download-tech-icons.mjs` now falls through
+> GitHub-raw → unpkg → jsdelivr per icon; index.html's Devicon font link moved to unpkg.
 
 ## Concept
 Coming out of the About planet's landing, the shared camera **yaws 90° to the right** (a real 3D pivot, not a scroll-down) to face a deeper universe. A scroll-scrubbed cinematic plays: the spaceship weaves past small meteors → a **big "undodgeable" meteor** appears → the ship fires and **shatters it into crystal shards**. Each shard is a **faceted, semi-transparent, brand-tinted crystal** with a tech-stack **Devicon icon suspended inside**. There are **two waves**: a *Languages* meteor → 8 language crystals, then a *Tools* meteor → 9 tool crystals (17 total). The meteor = the challenge of mastering the stack; destroying it = command of the craft. Fully reversible (scrub).
