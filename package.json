@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "icons": "node scripts/download-tech-icons.mjs",
+    "postinstall": "node scripts/download-tech-icons.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.30.0",
