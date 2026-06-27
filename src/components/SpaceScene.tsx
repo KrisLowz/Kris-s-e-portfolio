@@ -309,7 +309,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         const cglow = new THREE.Sprite(cgMat); cglow.scale.set(2.2, 2.2, 1); cglow.position.z = -0.15; cglow.renderOrder = 0; g.add(cglow);
         const iconTex = makeIconTexture(THREE, iconSlug(skill.dev), () => cancelled);
         const iconMat = new THREE.SpriteMaterial({ map: iconTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false });
-        const icon = new THREE.Sprite(iconMat); icon.scale.set(0.66, 0.66, 1); icon.renderOrder = 1; g.add(icon);
+        const icon = new THREE.Sprite(iconMat); icon.scale.set(0.528, 0.528, 1); icon.renderOrder = 1; g.add(icon);
         const bodyMat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0, roughness: 0.12, metalness: 0.25, emissive: color, emissiveIntensity: 0.2, flatShading: true, depthWrite: false, side: THREE.DoubleSide });
         const body = new THREE.Mesh(cGeo, bodyMat); body.renderOrder = 2; g.add(body);
         const edgeMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
