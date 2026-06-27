@@ -175,6 +175,7 @@ const driftFrac = (p: number) => (p < 0.7 ? 0 : smooth((p - 0.7) / 0.26));
 const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({ progressRef }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const iconElsRef = useRef<(HTMLDivElement | null)[]>([]); // per-crystal HTML logo overlays
   const lineRefs = useRef<(SVGLineElement | null)[]>([]);
   const [failed, setFailed] = useState(false);
   const [focused, setFocused] = useState(-1); // index of the crystal whose detail card is open (-1 = none)
@@ -317,46 +318,42 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       nebula.position.set(SKILLS_X, 0, 7);
       scene.add(nebula);
 
-      // ---- the 17 tech-skill crystals (M3): faceted brand-tinted glass shards with the Devicon icon
-      // suspended inside (a camera-facing sprite). Laid out in a grid facing the turned camera; they
-      // fade in with the turn and drift/spin gently. (M4 will add hover + click-to-flip.) ----
+      // ---- the 17 tech-skill crystals: smaller brand-tinted gems on a flat plane below the heading.
+      // Their logos are HTML overlays (reliable), and once settled they're a draggable physics field
+      // (spring to home, collide/bounce, walls keep them on-screen). ----
+      const VFOV = (40 * Math.PI) / 180;
       const crystalsGroup = new THREE.Group();
       crystalsGroup.visible = false;
       scene.add(crystalsGroup);
-      const cGeo = new THREE.OctahedronGeometry(0.62, 0); // equal height/width — a balanced gem (not a flat shard)
+      const cGeo = new THREE.OctahedronGeometry(0.5, 0); // ~20% smaller gem
       const cEdgeGeo = new THREE.EdgesGeometry(cGeo);
       const crystals: any[] = [];
       const crystalMats: any[] = [];
-      const iconTexes: any[] = [];
-      // larger invisible spheres give an easy click/hover target (the visible glow is bigger than the body)
       const crystalHits: any[] = [];
-      const hitGeo = new THREE.SphereGeometry(1.05, 8, 8);
+      const hitGeo = new THREE.SphereGeometry(0.85, 8, 8);
       const hitMat = new THREE.MeshBasicMaterial({ visible: false });
-      const CRYS_DEPTH = 11, CRYS_COLS = 6, COL_GAP = 2.3, ROW_GAP = 2.0, Y_TOP = 1.6;
+      const CRYS_DEPTH = 11, CRYS_R = 0.62, CRYS_COLS = 6, COL_GAP = 2.05, ROW_GAP = 1.5, Y_TOP = 1.15;
       const rowCounts: number[] = [];
       for (let r = 0; r * CRYS_COLS < TECH_SKILLS.length; r++) rowCounts.push(Math.min(CRYS_COLS, TECH_SKILLS.length - r * CRYS_COLS));
       TECH_SKILLS.forEach((skill, i) => {
         const row = Math.floor(i / CRYS_COLS), col = i % CRYS_COLS;
         const n = rowCounts[row];
+        const homeY = Y_TOP - row * ROW_GAP;
+        const homeZ = 7 + (col - (n - 1) / 2) * COL_GAP;
         const g = new THREE.Group();
-        // grid position + gentle depth variation so the field reads as a 3D cloud, not a flat wall
-        g.position.set(CRYS_DEPTH + Math.sin(col * 1.4 + row * 0.8) * 1.3, Y_TOP - row * ROW_GAP, 7 + (col - (n - 1) / 2) * COL_GAP);
+        g.position.set(CRYS_DEPTH, homeY, homeZ); // flat plane (no depth variation → clean physics + bounds)
         g.rotation.y = Math.random() * Math.PI;
         const color = new THREE.Color(skill.color);
-        const bodyMat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0, roughness: 0.12, metalness: 0.25, emissive: color, emissiveIntensity: 0.25, flatShading: true, depthWrite: false, side: THREE.DoubleSide });
+        const bodyMat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0, roughness: 0.12, metalness: 0.25, emissive: color, emissiveIntensity: 0.3, flatShading: true, depthWrite: false, side: THREE.DoubleSide });
         const body = new THREE.Mesh(cGeo, bodyMat); g.add(body);
         const edgeMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
         const edges = new THREE.LineSegments(cEdgeGeo, edgeMat); body.add(edges);
-        const iconTex = makeIconTexture(THREE, skill, () => cancelled);
-        const iconMat = new THREE.SpriteMaterial({ map: iconTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false });
-        const icon = new THREE.Sprite(iconMat); icon.scale.set(0.56, 0.56, 1); icon.renderOrder = 3; g.add(icon);
         const cgMat = new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
-        const cglow = new THREE.Sprite(cgMat); cglow.scale.set(2.8, 2.8, 1); cglow.position.z = -0.15; g.add(cglow);
+        const cglow = new THREE.Sprite(cgMat); cglow.scale.set(2.2, 2.2, 1); cglow.position.z = -0.15; g.add(cglow);
         const hitProxy = new THREE.Mesh(hitGeo, hitMat); g.add(hitProxy); crystalHits.push(hitProxy);
         crystalsGroup.add(g);
-        crystals.push({ body, bodyMat, edgeMat, iconMat, cgMat, g, gridPos: g.position.clone(), phase: i * 0.7, spin: 0.18 + (i % 3) * 0.05, arc: (Math.random() - 0.5) * 2.6, delay: (i % CRYS_COLS) * 0.015, hoverT: 0 });
-        crystalMats.push(bodyMat, edgeMat, iconMat, cgMat);
-        iconTexes.push(iconTex);
+        crystals.push({ body, bodyMat, edgeMat, cgMat, g, gridPos: new THREE.Vector3(CRYS_DEPTH, homeY, homeZ), homeY, homeZ, py: homeY, pz: homeZ, vy: 0, vz: 0, r: CRYS_R, spin: 0.18 + (i % 3) * 0.05, arc: (Math.random() - 0.5) * 2.0, delay: (i % CRYS_COLS) * 0.015, hoverT: 0 });
+        crystalMats.push(bodyMat, edgeMat, cgMat);
       });
 
       // ---- the big meteor: hurtles in during the turn, then SHATTERS into the crystals (v2 cinematic).
@@ -446,28 +443,53 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         const hit = raycaster.intersectObjects(crystalHits, false)[0];
         return hit ? crystalHits.indexOf(hit.object) : -1;
       };
+      // map a screen point onto the crystals' plane (x = CRYS_DEPTH) so a drag follows the cursor
+      const dragPlane = new THREE.Plane(new THREE.Vector3(1, 0, 0), -CRYS_DEPTH);
+      const planeHit = new THREE.Vector3();
+      const cursorOnPlane = (clientX: number, clientY: number) => {
+        if (!setNdc(clientX, clientY)) return null;
+        raycaster.setFromCamera(ndc, camera);
+        return raycaster.ray.intersectPlane(dragPlane, planeHit);
+      };
       let hoverIdx = -1;
+      // tap-vs-drag: press a crystal; move past a small threshold → drag (throw + bounce others); else tap → card
+      let dragIdx = -1, dragTY = 0, dragTZ = 0;
+      let downIdx = -1, downX = 0, downY = 0;
+      const onPointerDown = (e: PointerEvent) => {
+        if (focusRef.current >= 0 || !skillsSettled()) return;
+        const ci = hitsCrystal(e.clientX, e.clientY);
+        if (ci >= 0) { downIdx = ci; downX = e.clientX; downY = e.clientY; dragIdx = -1; (canvas as any).setPointerCapture?.(e.pointerId); }
+      };
       const onPointerMove = (e: PointerEvent) => {
-        if (e.pointerType === 'touch') return;
         if (focusRef.current >= 0) { mount.style.cursor = 'pointer'; return; }
+        if (downIdx >= 0) {
+          if (dragIdx < 0 && Math.hypot(e.clientX - downX, e.clientY - downY) > 6) dragIdx = downIdx; // promote to a drag
+          if (dragIdx >= 0) {
+            const p = cursorOnPlane(e.clientX, e.clientY);
+            if (p) { dragTY = p.y; dragTZ = p.z; }
+            mount.style.cursor = 'grabbing';
+          }
+          return;
+        }
+        if (e.pointerType === 'touch') return;
         hover = landed() && hitsPlanet(e.clientX, e.clientY);
         hoverIdx = !hover && skillsSettled() ? hitsCrystal(e.clientX, e.clientY) : -1;
-        mount.style.cursor = hover || hoverIdx >= 0 ? 'pointer' : '';
+        mount.style.cursor = hover ? 'pointer' : hoverIdx >= 0 ? 'grab' : '';
       };
       const onPointerLeave = (e: PointerEvent) => {
         if (e.pointerType === 'touch') return;
         hover = false; hoverIdx = -1;
+        if (dragIdx < 0) downIdx = -1;
         mount.style.cursor = '';
       };
       const onPointerUp = (e: PointerEvent) => {
+        (canvas as any).releasePointerCapture?.(e.pointerId);
         if (focusRef.current >= 0) return; // the detail-card overlay handles closing
-        if (skillsSettled()) {
-          const ci = hitsCrystal(e.clientX, e.clientY);
-          if (ci >= 0) { focusRef.current = ci; setFocused(ci); }
-          return;
-        }
+        if (dragIdx >= 0) { dragIdx = -1; downIdx = -1; return; } // release a throw — its momentum carries on
+        if (downIdx >= 0) { const ci = downIdx; downIdx = -1; focusRef.current = ci; setFocused(ci); return; } // tap → card
         if (e.pointerType === 'touch' && landed() && hitsPlanet(e.clientX, e.clientY)) pinned = !pinned;
       };
+      canvas.addEventListener('pointerdown', onPointerDown);
       canvas.addEventListener('pointermove', onPointerMove);
       canvas.addEventListener('pointerleave', onPointerLeave);
       canvas.addEventListener('pointerup', onPointerUp);
@@ -490,6 +512,80 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       let labelAlpha = 0;
       let lastEngaged = -1e9;
       const GRACE_MS = 480;
+
+      // ---- crystal physics (active once settled): spring to home, collide/bounce, walls keep them on-screen ----
+      const runCrystalPhysics = (dt: number) => {
+        const pdt = Math.min(dt, 0.03);
+        const halfH = Math.tan(VFOV * 0.5) * CRYS_DEPTH;
+        const halfW = halfH * (mount.clientWidth / Math.max(1, mount.clientHeight));
+        const yTop = 1.3, yBot = -(halfH - CRYS_R - 0.15); // top wall stays below the heading
+        const zMin = 7 - (halfW - CRYS_R - 0.15), zMax = 7 + (halfW - CRYS_R - 0.15);
+        const fixed = (i: number) => i === dragIdx || i === focusRef.current;
+        for (let i = 0; i < crystals.length; i++) {
+          const cr = crystals[i];
+          if (i === focusRef.current) { cr.vy = cr.vz = 0; continue; } // hold the focused gem still under the camera
+          if (i === dragIdx) {
+            // responsive follow with a touch of lag (swing); track velocity so a release throws it
+            const f = Math.min(1, 24 * pdt);
+            const ny = cr.py + (dragTY - cr.py) * f, nz = cr.pz + (dragTZ - cr.pz) * f;
+            cr.vy = (ny - cr.py) / pdt; cr.vz = (nz - cr.pz) / pdt;
+            cr.py = ny; cr.pz = nz;
+            continue;
+          }
+          cr.vy += (cr.homeY - cr.py) * 9 * pdt; cr.vz += (cr.homeZ - cr.pz) * 9 * pdt; // spring back to its slot
+          cr.vy *= 0.88; cr.vz *= 0.88;
+          cr.py += cr.vy * pdt; cr.pz += cr.vz * pdt;
+        }
+        for (let a = 0; a < crystals.length; a++) {
+          for (let b = a + 1; b < crystals.length; b++) {
+            const A = crystals[a], B = crystals[b];
+            const dy = B.py - A.py, dz = B.pz - A.pz;
+            const d = Math.hypot(dy, dz), min = A.r + B.r;
+            if (d > 1e-4 && d < min) {
+              const nx = dy / d, nz = dz / d, overlap = min - d;
+              const aFix = fixed(a), bFix = fixed(b);
+              if (aFix && !bFix) { B.py += nx * overlap; B.pz += nz * overlap; }
+              else if (bFix && !aFix) { A.py -= nx * overlap; A.pz -= nz * overlap; }
+              else if (!aFix && !bFix) { A.py -= nx * overlap * 0.5; A.pz -= nz * overlap * 0.5; B.py += nx * overlap * 0.5; B.pz += nz * overlap * 0.5; }
+              const rel = (B.vy - A.vy) * nx + (B.vz - A.vz) * nz; // closing speed along the contact normal
+              if (rel < 0) {
+                const e = 0.6;
+                if (aFix && !bFix) { const j = -(1 + e) * rel; B.vy += j * nx; B.vz += j * nz; }
+                else if (bFix && !aFix) { const j = -(1 + e) * rel; A.vy -= j * nx; A.vz -= j * nz; }
+                else if (!aFix && !bFix) { const j = -(1 + e) * rel * 0.5; A.vy -= j * nx; A.vz -= j * nz; B.vy += j * nx; B.vz += j * nz; }
+              }
+            }
+          }
+        }
+        for (let i = 0; i < crystals.length; i++) {
+          const cr = crystals[i];
+          if (fixed(i)) continue;
+          if (cr.py < yBot) { cr.py = yBot; cr.vy = Math.abs(cr.vy) * 0.55; }
+          else if (cr.py > yTop) { cr.py = yTop; cr.vy = -Math.abs(cr.vy) * 0.55; }
+          if (cr.pz < zMin) { cr.pz = zMin; cr.vz = Math.abs(cr.vz) * 0.55; }
+          else if (cr.pz > zMax) { cr.pz = zMax; cr.vz = -Math.abs(cr.vz) * 0.55; }
+        }
+      };
+      // HTML logo overlays track each (moving) crystal's projected screen position + apparent size
+      const positionCrystalIcons = () => {
+        const W = mount.clientWidth, H = mount.clientHeight;
+        const hide = focusRef.current >= 0;
+        for (let i = 0; i < crystals.length; i++) {
+          const el = iconElsRef.current[i]; if (!el) continue;
+          if (hide) { el.style.opacity = '0'; continue; }
+          const cr = crystals[i];
+          _v1.set(CRYS_DEPTH, cr.py, cr.pz).project(camera);
+          const sx = (_v1.x * 0.5 + 0.5) * W, sy = (1 - (_v1.y * 0.5 + 0.5)) * H;
+          _v2.set(CRYS_DEPTH, cr.py + cr.r * 0.6, cr.pz).project(camera);
+          const sizePx = Math.max(12, Math.abs((1 - (_v2.y * 0.5 + 0.5)) * H - sy) * 2);
+          el.style.transform = `translate(${sx}px,${sy}px) translate(-50%,-50%)`;
+          el.style.width = el.style.height = el.style.fontSize = sizePx + 'px';
+          el.style.opacity = String(Math.min(1, cr.edgeMat.opacity * 1.4));
+        }
+      };
+      const hideCrystalIcons = () => {
+        for (let i = 0; i < crystals.length; i++) { const el = iconElsRef.current[i]; if (el) el.style.opacity = '0'; }
+      };
 
       // Project nodes to screen and fan the chips outward from the planet's projected centre. Works in
       // pixels (the canvas is full-viewport, not CSS-scaled), so no counter-scale is needed.
@@ -562,7 +658,8 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         if (fIdx >= 0) lastFocusIdx = fIdx;
         focusT += ((fIdx >= 0 ? 1 : 0) - focusT) * Math.min(1, dt * 3.5);
         if (focusT > 0.001 && lastFocusIdx >= 0) {
-          const cp = crystals[lastFocusIdx].gridPos;
+          const fc = crystals[lastFocusIdx];
+          const cp = tmp.set(CRYS_DEPTH, fc.py, fc.pz); // its live position, not the home slot
           const fe = smooth(focusT);
           camera.position.set(0, 0, 7).lerp(_v1.set(cp.x - 3.4, cp.y - 0.4, cp.z), fe);
           camera.up.set(0, 1, 0);
@@ -588,28 +685,36 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           meteorRimMat.uniforms.pwr.value = (0.5 + flyT * 0.7) * (1 - smooth(clamp01(shatterT / 0.4)));
           meteorGlowMat.opacity = (0.3 + flyT * 0.45) * (1 - smooth(clamp01(shatterT / 0.4)));
         }
-        // crystals burst from the meteor centre out to their grid positions
+        // crystals burst from the meteor centre, then settle into a draggable physics field
         crystalsGroup.visible = shatterT > 0.001;
         if (crystalsGroup.visible) {
+          const settled = shatterT > 0.985;
+          if (settled) runCrystalPhysics(dt);
           for (let i = 0; i < crystals.length; i++) {
             const cr = crystals[i];
             const st = smooth(clamp01((shatterT - cr.delay) * 1.3));
-            cr.g.position.lerpVectors(meteorCenterV, cr.gridPos, st);
-            cr.g.position.y += Math.sin(st * Math.PI) * cr.arc + 0.12 * Math.sin(now * 0.0009 + cr.phase) * st;
+            if (settled) {
+              cr.g.position.set(CRYS_DEPTH, cr.py, cr.pz); // physics-driven
+            } else {
+              cr.g.position.lerpVectors(meteorCenterV, cr.gridPos, st); // cinematic delivery
+              cr.g.position.y += Math.sin(st * Math.PI) * cr.arc;
+              cr.py = cr.g.position.y; cr.pz = cr.g.position.z; cr.vy = 0; cr.vz = 0; // sync physics for handoff
+            }
             const isFocusCr = i === lastFocusIdx && focusT > 0.01;
-            cr.hoverT += ((i === hoverIdx || isFocusCr ? 1 : 0) - cr.hoverT) * Math.min(1, dt * 8);
+            cr.hoverT += ((i === hoverIdx || i === dragIdx || isFocusCr ? 1 : 0) - cr.hoverT) * Math.min(1, dt * 8);
             cr.body.rotation.y += dt * (cr.spin + (1 - st) * 4 + cr.hoverT * 1.4);
             cr.body.rotation.x += dt * (1 - st) * 2.5;
-            cr.body.scale.setScalar(1 + cr.hoverT * 0.14);
-            cr.g.position.y += cr.hoverT * 0.22 * st;
+            cr.body.scale.setScalar(1 + cr.hoverT * 0.16);
             const o = clamp01(st * 1.6);
             const dim = isFocusCr ? 1 : 1 - focusT * 0.82; // other crystals fade when one is focused
-            // hover / focus → MORE transparent body (the icon reads clearer) + brighter edges & glow
+            // hover / drag / focus → MORE transparent body + brighter edges & glow
             cr.bodyMat.opacity = o * (0.4 - cr.hoverT * 0.26) * dim;
             cr.edgeMat.opacity = o * (0.8 + cr.hoverT * 0.5) * dim;
-            cr.iconMat.opacity = o * (isFocusCr ? 1 : 1 - focusT * 0.82);
             cr.cgMat.opacity = o * (0.5 + cr.hoverT * 0.6) * dim;
           }
+          positionCrystalIcons();
+        } else {
+          hideCrystalIcons();
         }
         // debris burst — particles fly out from the shatter point, peak then fade
         const debrisA = Math.sin(clamp01(shatterT) * Math.PI);
@@ -707,6 +812,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         io.disconnect();
         ro.disconnect();
         document.removeEventListener('visibilitychange', onVis);
+        canvas.removeEventListener('pointerdown', onPointerDown);
         canvas.removeEventListener('pointermove', onPointerMove);
         canvas.removeEventListener('pointerleave', onPointerLeave);
         canvas.removeEventListener('pointerup', onPointerUp);
@@ -722,7 +828,6 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         starGeo.dispose(); starMat.dispose(); nebTex.dispose(); nebMat.dispose();
         cGeo.dispose(); cEdgeGeo.dispose(); hitGeo.dispose(); hitMat.dispose();
         crystalMats.forEach((m) => m.dispose());
-        iconTexes.forEach((t) => t.dispose());
         meteorGeo.dispose(); meteorMat.dispose(); meteorRimMat.dispose(); meteorGlowMat.dispose();
         debrisGeo.dispose(); debrisMat.dispose();
         shipTex.dispose(); shipMat.dispose(); smallGeo.dispose(); smallMat.dispose(); beamGeo.dispose(); beamMat.dispose();
@@ -762,6 +867,29 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
   return (
     <>
       <div ref={mountRef} aria-hidden="true" className="absolute inset-0 z-0 h-full w-full" />
+      {/* Tech-skill logos — HTML overlays tracking each crystal in px each frame. At z-[5]: above the
+          canvas (z-0) but below the heading (z-10), so "The Tools I Command" stays on top. Real <img>/<i>
+          renders reliably (local SVG → Devicon font → hidden), unlike a WebGL canvas texture. */}
+      <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
+        {TECH_SKILLS.map((s, i) => (
+          <div
+            key={s.name}
+            ref={(el) => (iconElsRef.current[i] = el)}
+            aria-hidden="true"
+            className="absolute left-0 top-0 grid place-items-center will-change-transform"
+            style={{ opacity: 0 }}
+          >
+            <img
+              src={`/assets/tech-icons/${iconSlug(s.dev)}.svg`}
+              alt=""
+              className="h-full w-full object-contain"
+              style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.55))' }}
+              onError={(e) => { const t = e.currentTarget; t.style.display = 'none'; const sib = t.nextElementSibling as HTMLElement | null; if (sib) sib.style.display = ''; }}
+            />
+            <i className={s.dev} style={{ display: 'none', color: s.color, lineHeight: 1 }} />
+          </div>
+        ))}
+      </div>
       {/* Constellation labels — full-viewport overlay above the copy (z-30), positioned in px each frame */}
       <div className="pointer-events-none absolute inset-0 z-30 overflow-visible">
         <svg className="absolute inset-0 h-full w-full overflow-visible" preserveAspectRatio="none" aria-hidden="true">

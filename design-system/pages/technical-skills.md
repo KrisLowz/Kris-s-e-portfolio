@@ -17,12 +17,21 @@
 > name + description) rises in (close via backdrop/✕). **Drama built:** the cyber-cat spaceship weaves in during
 > the turn (`SHIP0..SHIP1`) dodging 3 small meteors, then fires a laser (`beam`, `FIRE0..FIRE1`) at the big
 > meteor just before it shatters. **Meteor polished:** chunkier perturbed rock + a hot fresnel rim, lower base
-> emissive. All scrubbed + reversible; verified at 1440px. **Possible next:** bundle Devicon SVGs locally; tune
-> meteor emissive / ship timing. (`Planet3D.tsx` is superseded/unused.)
+> emissive. All scrubbed + reversible. (`Planet3D.tsx` is superseded/unused.)
 >
-> **Icon note:** logos load from jsdelivr at runtime (couldn't verify live in the network-isolated sandbox, but
-> the loader + text fallback are verified). Consider bundling the 16 SVGs into `public/assets/tech-icons/` for
-> offline/robustness later.
+> **Physics rebuild (latest):** the crystals are now **~20% smaller**, **flattened to one plane** (`x=CRYS_DEPTH`),
+> and laid out in a bounded grid **below the heading**. Once the shatter settles (`shatterT>0.985`),
+> `runCrystalPhysics` takes over: each gem **springs to its home slot**, **collides/bounces** off the others
+> (equal-mass impulse, `e=0.6`), and **bounces off screen-edge walls** so nothing overflows. Interaction is
+> **tap vs drag**: a quick tap opens the detail card (camera zooms to the gem's *live* position); a press-and-drag
+> grabs the gem (lerp-follow with a little swing) and **throws it on release** (velocity carries → bounces
+> neighbours). Verified at 1440px: drag follows the cursor, neighbours bounce, gems spring home, 0 off-screen.
+>
+> **Icons (fixed approach):** the 3D canvas-texture icon is gone; logos are now **HTML overlays** (`z-[5]`, below
+> the heading) that track each gem's projected position every frame — `<img>` of a local SVG
+> (`/assets/tech-icons/<slug>.svg`, via `npm run icons`) → Devicon-font `<i>` → hidden. The overlay render
+> pipeline is **verified** (inline test image renders centred inside each gem); the real logos need either the
+> local SVGs or the Devicon CDN font, which the network-isolated sandbox can't load.
 
 ## Concept
 Coming out of the About planet's landing, the shared camera **yaws 90° to the right** (a real 3D pivot, not a scroll-down) to face a deeper universe. A scroll-scrubbed cinematic plays: the spaceship weaves past small meteors → a **big "undodgeable" meteor** appears → the ship fires and **shatters it into crystal shards**. Each shard is a **faceted, semi-transparent, brand-tinted crystal** with a tech-stack **Devicon icon suspended inside**. There are **two waves**: a *Languages* meteor → 8 language crystals, then a *Tools* meteor → 9 tool crystals (17 total). The meteor = the challenge of mastering the stack; destroying it = command of the craft. Fully reversible (scrub).
