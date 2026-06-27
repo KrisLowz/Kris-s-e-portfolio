@@ -12,8 +12,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Devicon CDN -->
-    <link rel="stylesheet" type='text/css' href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css" />
+    <!-- Devicon CDN (unpkg; jsdelivr is blocked on some networks). Only a fallback now — tech logos
+         render from the committed local SVGs in /assets/tech-icons/ (run `npm run icons` to refresh). -->
+    <link rel="stylesheet" type='text/css' href="https://unpkg.com/devicon@latest/devicon.min.css" />
     
     <!-- GSAP -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>

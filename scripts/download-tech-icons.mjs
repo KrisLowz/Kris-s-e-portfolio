@@ -5,7 +5,13 @@
 // Requires Node 18+ (uses global fetch).
 import { writeFile, mkdir, access } from 'node:fs/promises';
 
-const BASE = 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/';
+// Tried in order until one works — networks block CDNs inconsistently (jsdelivr is blocked in some
+// environments, GitHub-raw / unpkg in others), so we fall through the list per icon.
+const BASES = [
+  'https://raw.githubusercontent.com/devicons/devicon/master/icons/',
+  'https://unpkg.com/devicon@latest/icons/',
+  'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/',
+];
 // slug (local filename) -> Devicon SVG path (colourful "original" variants where available)
 const ICONS = {
   html5: 'html5/html5-original.svg',
@@ -34,18 +40,20 @@ let ok = 0;
 for (const [slug, path] of Object.entries(ICONS)) {
   const file = `${dir}/${slug}.svg`;
   try { await access(file); ok++; continue; } catch { /* not present yet — fetch it */ }
-  try {
-    const res = await fetch(BASE + path);
-    if (!res.ok) {
-      console.warn('  ✗', slug, '->', res.status);
-      continue;
-    }
-    await writeFile(`${dir}/${slug}.svg`, await res.text(), 'utf8');
-    console.log('  ✓', slug);
-    ok++;
-  } catch (e) {
-    console.warn('  ✗', slug, '->', e.message);
+  let saved = false;
+  for (const base of BASES) {
+    try {
+      const res = await fetch(base + path);
+      if (!res.ok) continue;
+      const svg = await res.text();
+      if (!svg.includes('<svg')) continue; // skip an HTML error page masquerading as 200
+      await writeFile(file, svg, 'utf8');
+      console.log('  ✓', slug, '(' + new URL(base).host + ')');
+      ok++; saved = true;
+      break;
+    } catch { /* try the next mirror */ }
   }
+  if (!saved) console.warn('  ✗', slug, '— all mirrors unreachable');
 }
 console.log(`\nDone — ${ok}/${Object.keys(ICONS).length} logos saved to ${dir}/`);
-if (ok < Object.keys(ICONS).length) console.log('(Any that failed will fall back to the Devicon font, then text, at runtime.)');
+if (ok < Object.keys(ICONS).length) console.log('(Any that failed fall back to the Devicon font, then text, at runtime.)');
