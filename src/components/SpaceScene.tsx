@@ -86,68 +86,27 @@ export const TECH_SKILLS: { name: string; short: string; desc: string; color: st
 // The Devicon slug for a skill (e.g. 'devicon-cplusplus-plain' -> 'cplusplus'); names the local SVG file.
 export const iconSlug = (dev: string) => dev.replace(/^devicon-/, '').replace(/-(plain|original|line|wordmark).*$/, '');
 
-// A CanvasTexture for a crystal's icon. Draws the short name immediately, then swaps in the real logo:
-//   1) a locally-bundled SVG  /assets/tech-icons/<slug>.svg  (run `npm run icons` — same-origin, reliable, colour)
-//   2) the Devicon icon-font glyph (tinted), if the CDN font is loaded
-//   3) the text label, if neither is available.
+// A transparent CanvasTexture holding a crystal's logo, drawn from its committed local SVG
+// (/assets/tech-icons/<slug>.svg — same-origin, so no taint and no network needed). It rides a sprite
+// placed INSIDE the gem and drawn before the glass body, so the translucent facets render over it.
 // Guarded so a late draw after unmount doesn't touch a disposed texture.
-function makeIconTexture(THREE: any, skill: { short: string; dev: string; color: string }, isCancelled: () => boolean) {
+function makeIconTexture(THREE: any, slug: string, isCancelled: () => boolean) {
   const size = 128;
   const c = document.createElement('canvas');
   c.width = c.height = size;
   const ctx = c.getContext('2d')!;
   const tex = new THREE.CanvasTexture(c);
-  const drawText = () => {
-    if (isCancelled()) return;
-    ctx.clearRect(0, 0, size, size);
-    ctx.fillStyle = '#eaf6ff';
-    ctx.font = '700 ' + (skill.short.length > 3 ? 30 : 46) + 'px Manrope, system-ui, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(skill.short, size / 2, size / 2 + 2);
-    tex.needsUpdate = true;
-  };
-  drawText();
-  if (typeof document === 'undefined' || !skill.dev) return tex;
-  const tryFont = () => {
-    let glyph = '';
-    try {
-      const probe = document.createElement('i');
-      probe.className = skill.dev;
-      probe.style.cssText = 'position:absolute;left:-9999px;visibility:hidden';
-      document.body.appendChild(probe);
-      const content = getComputedStyle(probe, '::before').content;
-      document.body.removeChild(probe);
-      if (content && content !== 'none' && content !== 'normal') {
-        glyph = content.replace(/^["']|["']$/g, '').replace(/\\([0-9a-fA-F]{1,6})\s?/g, (_, h) => String.fromCodePoint(parseInt(h, 16)));
-      }
-    } catch { /* keep text */ }
-    if (!glyph) return;
-    const draw = () => {
-      if (isCancelled()) return;
-      ctx.clearRect(0, 0, size, size);
-      ctx.fillStyle = skill.color;
-      ctx.font = '92px devicon';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(glyph, size / 2, size / 2 + 4);
-      tex.needsUpdate = true;
-    };
-    draw();
-    const fonts: any = (document as any).fonts;
-    if (fonts && fonts.ready) fonts.ready.then(() => { if (!isCancelled()) draw(); }).catch(() => {});
-  };
-  // 1) try the locally-bundled SVG (same-origin, so it never taints and needs no network at runtime)
+  if (THREE.SRGBColorSpace) tex.colorSpace = THREE.SRGBColorSpace;
+  if (typeof document === 'undefined') return tex;
   const img = new Image();
   img.onload = () => {
     if (isCancelled()) return;
     ctx.clearRect(0, 0, size, size);
-    const pad = 14;
+    const pad = 10;
     ctx.drawImage(img, pad, pad, size - 2 * pad, size - 2 * pad);
     tex.needsUpdate = true;
   };
-  img.onerror = tryFont; // no local file yet → fall back to the icon font
-  img.src = '/assets/tech-icons/' + iconSlug(skill.dev) + '.svg';
+  img.src = '/assets/tech-icons/' + slug + '.svg';
   return tex;
 }
 
@@ -175,7 +134,6 @@ const driftFrac = (p: number) => (p < 0.7 ? 0 : smooth((p - 0.7) / 0.26));
 const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({ progressRef }) => {
   const mountRef = useRef<HTMLDivElement>(null);
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const iconElsRef = useRef<(HTMLDivElement | null)[]>([]); // per-crystal HTML logo overlays
   const lineRefs = useRef<(SVGLineElement | null)[]>([]);
   const [failed, setFailed] = useState(false);
   const [focused, setFocused] = useState(-1); // index of the crystal whose detail card is open (-1 = none)
@@ -319,8 +277,9 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       scene.add(nebula);
 
       // ---- the 17 tech-skill crystals: smaller brand-tinted gems on a flat plane below the heading.
-      // Their logos are HTML overlays (reliable), and once settled they're a draggable physics field
-      // (spring to home, collide/bounce, walls keep them on-screen). ----
+      // The logo sprite sits INSIDE the gem (drawn before the glass body via renderOrder, so the translucent
+      // facets + edges render over it). Once settled they're a draggable physics field (spring to home,
+      // collide/bounce, walls keep them on-screen). ----
       const VFOV = (40 * Math.PI) / 180;
       const crystalsGroup = new THREE.Group();
       crystalsGroup.visible = false;
@@ -329,6 +288,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const cEdgeGeo = new THREE.EdgesGeometry(cGeo);
       const crystals: any[] = [];
       const crystalMats: any[] = [];
+      const iconTexes: any[] = [];
       const crystalHits: any[] = [];
       const hitGeo = new THREE.SphereGeometry(0.85, 8, 8);
       const hitMat = new THREE.MeshBasicMaterial({ visible: false });
@@ -344,16 +304,21 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         g.position.set(CRYS_DEPTH, homeY, homeZ); // flat plane (no depth variation → clean physics + bounds)
         g.rotation.y = Math.random() * Math.PI;
         const color = new THREE.Color(skill.color);
-        const bodyMat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0, roughness: 0.12, metalness: 0.25, emissive: color, emissiveIntensity: 0.3, flatShading: true, depthWrite: false, side: THREE.DoubleSide });
-        const body = new THREE.Mesh(cGeo, bodyMat); g.add(body);
-        const edgeMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
-        const edges = new THREE.LineSegments(cEdgeGeo, edgeMat); body.add(edges);
+        // glow (behind) → icon → glass body → edges, so the translucent body tints the logo from in front
         const cgMat = new THREE.SpriteMaterial({ map: glowTex, color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
-        const cglow = new THREE.Sprite(cgMat); cglow.scale.set(2.2, 2.2, 1); cglow.position.z = -0.15; g.add(cglow);
+        const cglow = new THREE.Sprite(cgMat); cglow.scale.set(2.2, 2.2, 1); cglow.position.z = -0.15; cglow.renderOrder = 0; g.add(cglow);
+        const iconTex = makeIconTexture(THREE, iconSlug(skill.dev), () => cancelled);
+        const iconMat = new THREE.SpriteMaterial({ map: iconTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false });
+        const icon = new THREE.Sprite(iconMat); icon.scale.set(0.66, 0.66, 1); icon.renderOrder = 1; g.add(icon);
+        const bodyMat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0, roughness: 0.12, metalness: 0.25, emissive: color, emissiveIntensity: 0.2, flatShading: true, depthWrite: false, side: THREE.DoubleSide });
+        const body = new THREE.Mesh(cGeo, bodyMat); body.renderOrder = 2; g.add(body);
+        const edgeMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+        const edges = new THREE.LineSegments(cEdgeGeo, edgeMat); edges.renderOrder = 3; body.add(edges);
         const hitProxy = new THREE.Mesh(hitGeo, hitMat); g.add(hitProxy); crystalHits.push(hitProxy);
         crystalsGroup.add(g);
-        crystals.push({ body, bodyMat, edgeMat, cgMat, g, gridPos: new THREE.Vector3(CRYS_DEPTH, homeY, homeZ), homeY, homeZ, py: homeY, pz: homeZ, vy: 0, vz: 0, r: CRYS_R, spin: 0.18 + (i % 3) * 0.05, arc: (Math.random() - 0.5) * 2.0, delay: (i % CRYS_COLS) * 0.015, hoverT: 0 });
-        crystalMats.push(bodyMat, edgeMat, cgMat);
+        crystals.push({ body, bodyMat, edgeMat, iconMat, cgMat, g, gridPos: new THREE.Vector3(CRYS_DEPTH, homeY, homeZ), homeY, homeZ, py: homeY, pz: homeZ, vy: 0, vz: 0, r: CRYS_R, spin: 0.18 + (i % 3) * 0.05, arc: (Math.random() - 0.5) * 2.0, delay: (i % CRYS_COLS) * 0.015, hoverT: 0 });
+        crystalMats.push(bodyMat, edgeMat, iconMat, cgMat);
+        iconTexes.push(iconTex);
       });
 
       // ---- the big meteor: hurtles in during the turn, then SHATTERS into the crystals (v2 cinematic).
@@ -566,27 +531,6 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           else if (cr.pz > zMax) { cr.pz = zMax; cr.vz = -Math.abs(cr.vz) * 0.55; }
         }
       };
-      // HTML logo overlays track each (moving) crystal's projected screen position + apparent size
-      const positionCrystalIcons = () => {
-        const W = mount.clientWidth, H = mount.clientHeight;
-        const hide = focusRef.current >= 0;
-        for (let i = 0; i < crystals.length; i++) {
-          const el = iconElsRef.current[i]; if (!el) continue;
-          if (hide) { el.style.opacity = '0'; continue; }
-          const cr = crystals[i];
-          _v1.set(CRYS_DEPTH, cr.py, cr.pz).project(camera);
-          const sx = (_v1.x * 0.5 + 0.5) * W, sy = (1 - (_v1.y * 0.5 + 0.5)) * H;
-          _v2.set(CRYS_DEPTH, cr.py + cr.r * 0.42, cr.pz).project(camera); // ~30% smaller → sits inside the gem
-          const sizePx = Math.max(12, Math.abs((1 - (_v2.y * 0.5 + 0.5)) * H - sy) * 2);
-          el.style.transform = `translate(${sx}px,${sy}px) translate(-50%,-50%)`;
-          el.style.width = el.style.height = el.style.fontSize = sizePx + 'px';
-          el.style.opacity = String(Math.min(1, cr.edgeMat.opacity * 1.4));
-        }
-      };
-      const hideCrystalIcons = () => {
-        for (let i = 0; i < crystals.length; i++) { const el = iconElsRef.current[i]; if (el) el.style.opacity = '0'; }
-      };
-
       // Project nodes to screen and fan the chips outward from the planet's projected centre. Works in
       // pixels (the canvas is full-viewport, not CSS-scaled), so no counter-scale is needed.
       const positionLabels = () => {
@@ -707,14 +651,12 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             cr.body.scale.setScalar(1 + cr.hoverT * 0.16);
             const o = clamp01(st * 1.6);
             const dim = isFocusCr ? 1 : 1 - focusT * 0.82; // other crystals fade when one is focused
-            // hover / drag / focus → MORE transparent body + brighter edges & glow
-            cr.bodyMat.opacity = o * (0.4 - cr.hoverT * 0.26) * dim;
+            // hover / drag / focus → MORE transparent body (the logo inside reads clearer) + brighter edges & glow
+            cr.bodyMat.opacity = o * (0.3 - cr.hoverT * 0.2) * dim;
             cr.edgeMat.opacity = o * (0.8 + cr.hoverT * 0.5) * dim;
             cr.cgMat.opacity = o * (0.5 + cr.hoverT * 0.6) * dim;
+            cr.iconMat.opacity = o * dim; // logo suspended inside, tinted by the glass body drawn over it
           }
-          positionCrystalIcons();
-        } else {
-          hideCrystalIcons();
         }
         // debris burst — particles fly out from the shatter point, peak then fade
         const debrisA = Math.sin(clamp01(shatterT) * Math.PI);
@@ -828,6 +770,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         starGeo.dispose(); starMat.dispose(); nebTex.dispose(); nebMat.dispose();
         cGeo.dispose(); cEdgeGeo.dispose(); hitGeo.dispose(); hitMat.dispose();
         crystalMats.forEach((m) => m.dispose());
+        iconTexes.forEach((t) => t.dispose());
         meteorGeo.dispose(); meteorMat.dispose(); meteorRimMat.dispose(); meteorGlowMat.dispose();
         debrisGeo.dispose(); debrisMat.dispose();
         shipTex.dispose(); shipMat.dispose(); smallGeo.dispose(); smallMat.dispose(); beamGeo.dispose(); beamMat.dispose();
@@ -867,29 +810,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
   return (
     <>
       <div ref={mountRef} aria-hidden="true" className="absolute inset-0 z-0 h-full w-full" />
-      {/* Tech-skill logos — HTML overlays tracking each crystal in px each frame. At z-[5]: above the
-          canvas (z-0) but below the heading (z-10), so "The Tools I Command" stays on top. Real <img>/<i>
-          renders reliably (local SVG → Devicon font → hidden), unlike a WebGL canvas texture. */}
-      <div className="pointer-events-none absolute inset-0 z-[5] overflow-hidden">
-        {TECH_SKILLS.map((s, i) => (
-          <div
-            key={s.name}
-            ref={(el) => (iconElsRef.current[i] = el)}
-            aria-hidden="true"
-            className="absolute left-0 top-0 grid place-items-center will-change-transform"
-            style={{ opacity: 0 }}
-          >
-            <img
-              src={`/assets/tech-icons/${iconSlug(s.dev)}.svg`}
-              alt=""
-              className="h-full w-full object-contain"
-              style={{ filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.55))' }}
-              onError={(e) => { const t = e.currentTarget; t.style.display = 'none'; const sib = t.nextElementSibling as HTMLElement | null; if (sib) sib.style.display = ''; }}
-            />
-            <i className={s.dev} style={{ display: 'none', color: s.color, lineHeight: 1 }} />
-          </div>
-        ))}
-      </div>
+      {/* (Tech-skill logos now live INSIDE the gems as 3D sprites — see makeIconTexture in the scene.) */}
       {/* Constellation labels — full-viewport overlay above the copy (z-30), positioned in px each frame */}
       <div className="pointer-events-none absolute inset-0 z-30 overflow-visible">
         <svg className="absolute inset-0 h-full w-full overflow-visible" preserveAspectRatio="none" aria-hidden="true">

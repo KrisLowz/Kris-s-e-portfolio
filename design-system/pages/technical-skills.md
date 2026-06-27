@@ -27,13 +27,16 @@
 > grabs the gem (lerp-follow with a little swing) and **throws it on release** (velocity carries → bounces
 > neighbours). Verified at 1440px: drag follows the cursor, neighbours bounce, gems spring home, 0 off-screen.
 >
-> **Icons (DONE — real logos render):** the 3D canvas-texture icon is gone; logos are **HTML overlays** (`z-[5]`,
-> below the heading) tracking each gem's projected position every frame — `<img>` of a **committed local SVG**
-> (`public/assets/tech-icons/<slug>.svg`) → Devicon-font `<i>` → hidden. **The 17 official Devicon SVGs are now
-> bundled in the repo** (zero runtime CDN dependency); verified in-browser — every gem + the detail-card badge
-> shows its real brand logo. Root cause of the earlier blank icons: **jsdelivr is blocked on some networks**, so
-> the Devicon font + the old jsdelivr `npm run icons` both failed. `download-tech-icons.mjs` now falls through
-> GitHub-raw → unpkg → jsdelivr per icon; index.html's Devicon font link moved to unpkg.
+> **Icons (DONE — real logos render, INSIDE the glass):** each gem's logo is a **3D sprite suspended inside the
+> crystal** — drawn before the glass body via renderOrder (glow 0 → icon 1 → body 2 → edges 3), so the
+> translucent facets + wireframe edges render over it (reads as embedded in glass, not a sticker on top).
+> Texture = the **committed local SVG** (`public/assets/tech-icons/<slug>.svg`) drawn to a CanvasTexture
+> (`makeIconTexture`). **The 17 official Devicon SVGs are bundled in the repo** (zero runtime CDN dependency);
+> verified in-browser — every gem shows its real brand logo inside the glass, readable, ~0.66 sprite scale,
+> body opacity 0.3 so the glass tints without burying it. Root cause of the earlier blank icons: **jsdelivr is
+> blocked on some networks**, so the Devicon font + the old jsdelivr `npm run icons` both failed.
+> `download-tech-icons.mjs` now falls through GitHub-raw → unpkg → jsdelivr per icon; index.html's Devicon font
+> link moved to unpkg. (An earlier HTML-overlay approach read as "in front of" the gem and was replaced.)
 
 ## Concept
 Coming out of the About planet's landing, the shared camera **yaws 90° to the right** (a real 3D pivot, not a scroll-down) to face a deeper universe. A scroll-scrubbed cinematic plays: the spaceship weaves past small meteors → a **big "undodgeable" meteor** appears → the ship fires and **shatters it into crystal shards**. Each shard is a **faceted, semi-transparent, brand-tinted crystal** with a tech-stack **Devicon icon suspended inside**. There are **two waves**: a *Languages* meteor → 8 language crystals, then a *Tools* meteor → 9 tool crystals (17 total). The meteor = the challenge of mastering the stack; destroying it = command of the craft. Fully reversible (scrub).
