@@ -14,10 +14,12 @@
 > out to their grid positions (`lerpVectors`, staggered, arc). Fully reversible. **M4 built:** raycast hover →
 > crystal turns more transparent (icon clearer) + lifts/glows; **click → camera zooms to the crystal** (`focusT`
 > lerp of `camera.position`/`lookAt`), body goes transparent, others dim, and an HTML **detail card** (badge +
-> name + description) rises in (close via backdrop/✕). **Drama built:** the cyber-cat spaceship weaves in during
-> the turn (`SHIP0..SHIP1`) dodging 3 small meteors, then fires a laser (`beam`, `FIRE0..FIRE1`) at the big
-> meteor just before it shatters. **Meteor polished:** chunkier perturbed rock + a hot fresnel rim, lower base
-> emissive. All scrubbed + reversible. (`Planet3D.tsx` is superseded/unused.)
+> name + description) rises in (close via backdrop/✕). **Drama (reworked):** the **real 3D cat-ship** (shared
+> `buildShip` from `Spaceship3D.tsx`, lit by a follow PointLight) weaves in (`SHIP0..SHIP1`) dodging 3 small
+> meteors, swings to **aim at the big meteor** and fires a **bright core + cyan-glow laser** (`beam`+`beamGlow`,
+> muzzle + impact flashes, `FIRE0..FIRE1`); the meteor then **breaks into ~15 rock fragments** (`frags`, spin +
+> shrink-away) alongside the crystal/debris burst. The old non-rotating `meteorRim` shell was removed (it read as
+> a second, static meteor stacked on the spinning one). All scrubbed + reversible. (`Planet3D.tsx` is superseded.)
 >
 > **Physics rebuild (latest):** the crystals are now **~20% smaller**, **flattened to one plane** (`x=CRYS_DEPTH`),
 > and laid out in a bounded grid **below the heading**. Once the shatter settles (`shatterT>0.985`),

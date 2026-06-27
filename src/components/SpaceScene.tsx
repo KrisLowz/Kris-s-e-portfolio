@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Lightbulb, MessageCircle, Brain, Repeat2, Users, Timer, ListChecks } from 'lucide-react';
+import { buildShip, makeFlameTexture } from './Spaceship3D';
 
 const PLANET_IMG = '/assets/world/about/origin-planet-cutout-opt.webp';
-const SHIP_IMG = '/assets/world/hero/portfolio-spaceship-cutout.png';
 
 // Soft skills — each is a node on the planet. [lat, lon] (deg) put them on the front hemisphere.
 export const SKILLS: { name: string; desc: string; lat: number; lon: number }[] = [
@@ -334,18 +334,24 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       }
       const meteorMat = new THREE.MeshStandardMaterial({ color: 0x1b140d, roughness: 1, metalness: 0, emissive: 0xff4a12, emissiveIntensity: 0, flatShading: true });
       const meteor = new THREE.Mesh(meteorGeo, meteorMat);
-      // hot fresnel rim — leading edges glow as the rock heats on entry (intensity driven each frame)
-      const meteorRimMat = new THREE.ShaderMaterial({
-        uniforms: { c: { value: new THREE.Color(0xff7a2a) }, pwr: { value: 0 } },
-        vertexShader: 'varying float vF; void main(){ vec3 n=normalize(normalMatrix*normal); vec4 mv=modelViewMatrix*vec4(position,1.0); vec3 v=normalize(-mv.xyz); vF=pow(1.0-max(dot(n,v),0.0),2.0); gl_Position=projectionMatrix*mv; }',
-        fragmentShader: 'uniform vec3 c; uniform float pwr; varying float vF; void main(){ gl_FragColor=vec4(c, vF*pwr); }',
-        transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
-      });
-      const meteorRim = new THREE.Mesh(meteorGeo, meteorRimMat); meteorRim.scale.setScalar(1.04);
       const meteorGlowMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xff5a18, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
       const meteorGlow = new THREE.Sprite(meteorGlowMat); meteorGlow.scale.set(7.5, 7.5, 1);
-      const meteorGroup = new THREE.Group(); meteorGroup.visible = false; meteorGroup.add(meteor); meteorGroup.add(meteorRim); meteorGroup.add(meteorGlow);
+      const meteorGroup = new THREE.Group(); meteorGroup.visible = false; meteorGroup.add(meteor); meteorGroup.add(meteorGlow);
       scene.add(meteorGroup);
+
+      // ---- meteor fragments: chunks of rock that burst out when the laser cracks it open ("break into pieces") ----
+      const fragGeo = new THREE.IcosahedronGeometry(1, 0);
+      { const fp = fragGeo.attributes.position, v = new THREE.Vector3(); for (let i = 0; i < fp.count; i++) { v.fromBufferAttribute(fp, i); v.multiplyScalar(1 + (Math.sin(v.x * 5) + Math.cos(v.z * 6)) * 0.24); fp.setXYZ(i, v.x, v.y, v.z); } fragGeo.computeVertexNormals(); }
+      const fragMat = new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 1, metalness: 0, emissive: 0xff5212, emissiveIntensity: 0.55, flatShading: true });
+      const FRAG_N = isMobile ? 9 : 15;
+      const frags: any[] = [];
+      for (let i = 0; i < FRAG_N; i++) {
+        const m = new THREE.Mesh(fragGeo, fragMat); m.visible = false;
+        const base = 0.16 + Math.random() * 0.32; m.scale.setScalar(base);
+        const u = Math.random() * 2 - 1, th = Math.random() * Math.PI * 2, s = Math.sqrt(1 - u * u);
+        scene.add(m);
+        frags.push({ m, base, dir: new THREE.Vector3(s * Math.cos(th), u, s * Math.sin(th)), dist: 3.5 + Math.random() * 7, spin: new THREE.Vector3((Math.random() - 0.5) * 7, (Math.random() - 0.5) * 7, (Math.random() - 0.5) * 7), delay: Math.random() * 0.12 });
+      }
 
       const DEBRIS_N = isMobile ? 70 : 120;
       const debrisGeo = new THREE.BufferGeometry();
@@ -364,9 +370,16 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       // ---- the drama: a spaceship weaves in dodging small meteors, then fires on the big one ----
       const SHIP0 = 0.63, SHIP1 = 0.85, FIRE0 = 0.835, FIRE1 = 0.862;
       const _yAxis = new THREE.Vector3(0, 1, 0);
-      const shipTex = new THREE.TextureLoader().load(SHIP_IMG);
-      const shipMat = new THREE.SpriteMaterial({ map: shipTex, transparent: true, opacity: 0, depthWrite: false, depthTest: false });
-      const ship = new THREE.Sprite(shipMat); ship.scale.set(2.8, 2.8, 1); ship.renderOrder = 5; ship.visible = false; scene.add(ship);
+      // the actual 3D cat-ship (shared with the hero scene). Model faces +X; it travels +Z here, so we yaw it.
+      const shipDisposables: any[] = [];
+      const trackShip = <T,>(o: T): T => { shipDisposables.push(o); return o; };
+      const flameTex = makeFlameTexture(THREE);
+      const { ship, flames: shipFlames } = buildShip(THREE, isMobile, trackShip, flameTex);
+      const SHIP_SCALE = 0.78;
+      ship.visible = false;
+      scene.add(ship);
+      // a follow-light so the hull reads bright (the scene's planet lights are dim/coloured); ramped with the ship
+      const shipLight = new THREE.PointLight(0xdcefff, 0, 20, 1.1); scene.add(shipLight);
 
       const smallGeo = new THREE.IcosahedronGeometry(0.34, 0);
       { const sp = smallGeo.attributes.position, v = new THREE.Vector3(); for (let i = 0; i < sp.count; i++) { v.fromBufferAttribute(sp, i); v.multiplyScalar(1 + (Math.sin(v.x * 6) + Math.cos(v.y * 7)) * 0.2); sp.setXYZ(i, v.x, v.y, v.z); } smallGeo.computeVertexNormals(); }
@@ -374,9 +387,17 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const smalls: any[] = [];
       for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(smallGeo, smallMat); m.visible = false; scene.add(m); smalls.push({ m, z0: 12 + i * 2.5, y: [2.1, -1.3, 0.7][i], spd: 1 + i * 0.3, off: i * 0.18 }); }
 
-      const beamGeo = new THREE.CylinderGeometry(0.05, 0.05, 1, 6);
-      const beamMat = new THREE.MeshBasicMaterial({ color: 0x6cf0ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      // laser: a bright core beam + a soft outer glow tube, plus a muzzle flash and an impact burst
+      const beamGeo = new THREE.CylinderGeometry(0.06, 0.06, 1, 8);
+      const beamMat = new THREE.MeshBasicMaterial({ color: 0xeafdff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
       const beam = new THREE.Mesh(beamGeo, beamMat); beam.visible = false; scene.add(beam);
+      const beamGlowGeo = new THREE.CylinderGeometry(0.2, 0.2, 1, 8);
+      const beamGlowMat = new THREE.MeshBasicMaterial({ color: 0x49e8ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const beamGlow = new THREE.Mesh(beamGlowGeo, beamGlowMat); beamGlow.visible = false; scene.add(beamGlow);
+      const muzzleMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xbafaff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const muzzle = new THREE.Sprite(muzzleMat); muzzle.visible = false; scene.add(muzzle);
+      const impactMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xffd070, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const impact = new THREE.Sprite(impactMat); impact.visible = false; scene.add(impact);
 
       // ---- interaction (freeze + reveal constellation when the cursor is over the actual sphere) ----
       const raycaster = new THREE.Raycaster();
@@ -474,6 +495,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const _v2 = new THREE.Vector3();
       const _tA = new THREE.Vector3();
       const _tB = new THREE.Vector3();
+      const _quat = new THREE.Quaternion();
       let copyEl: HTMLElement | null = null; // the About copy, carried through the camera turn (looked up lazily)
       let focusT = 0; // 0..1 zoom-to-crystal animation
       let lastFocusIdx = -1;
@@ -657,8 +679,19 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           meteorGroup.scale.setScalar(Math.max(0.001, (0.55 + flyT * 0.45) * shrink));
           meteor.rotation.x += dt * 0.8; meteor.rotation.y += dt * 1.1;
           meteorMat.emissiveIntensity = 0.12 + flyT * 0.33 + shatterT * 1.9;
-          meteorRimMat.uniforms.pwr.value = (0.5 + flyT * 0.7) * (1 - smooth(clamp01(shatterT / 0.4)));
           meteorGlowMat.opacity = (0.3 + flyT * 0.45) * (1 - smooth(clamp01(shatterT / 0.4)));
+        }
+        // meteor fragments burst out as it cracks apart (visible chunks; shrink + spin as they fly)
+        for (let i = 0; i < frags.length; i++) {
+          const fr = frags[i];
+          const ft = smooth(clamp01((shatterT - fr.delay) * 1.45));
+          fr.m.visible = ft > 0.001 && ft < 0.999;
+          if (fr.m.visible) {
+            const d = ft * fr.dist;
+            fr.m.position.set(meteorCenterV.x + fr.dir.x * d, meteorCenterV.y + fr.dir.y * d, meteorCenterV.z + fr.dir.z * d);
+            fr.m.rotation.x += dt * fr.spin.x; fr.m.rotation.y += dt * fr.spin.y; fr.m.rotation.z += dt * fr.spin.z;
+            fr.m.scale.setScalar(fr.base * (1 - smooth(clamp01((ft - 0.55) / 0.45)))); // shrink away near the end
+          }
         }
         // crystals burst from the meteor centre, then settle into a draggable physics field
         crystalsGroup.visible = shatterT > 0.001;
@@ -702,14 +735,26 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           debrisMat.opacity = debrisA * 0.85;
         }
 
-        // ---- drama: spaceship weaves in dodging small meteors, then fires on the big one ----
+        // ---- drama: the 3D cat-ship weaves in dodging small meteors, then fires on the big one ----
         const shipT = clamp01((p - SHIP0) / (SHIP1 - SHIP0));
         const shipFade = 1 - smooth(clamp01(shatterT / 0.35));
+        const fireT = smooth(clamp01((p - FIRE0) / (FIRE1 - FIRE0)));
         ship.visible = shipT > 0.001 && shatterT < 0.5;
+        shipLight.intensity = 0;
         if (ship.visible) {
           ship.position.set(8.5, 1.8 * Math.sin(shipT * Math.PI * 3) * shipFade, 2 + shipT * 8);
-          shipMat.rotation = -0.5 * Math.cos(shipT * Math.PI * 3); // bank with the weave
-          shipMat.opacity = smooth(clamp01(shipT * 4)) * shipFade;
+          const popIn = smooth(clamp01(shipT * 4));
+          ship.scale.setScalar(Math.max(0.0001, SHIP_SCALE * popIn * shipFade)); // grow in / shrink out (model has no opacity)
+          shipLight.position.set(ship.position.x - 1.2, ship.position.y + 1.6, ship.position.z + 1.5);
+          shipLight.intensity = 3.4 * popIn * shipFade;
+          // face travel (+Z); swing to aim at the meteor while firing
+          const aimYaw = Math.atan2(-(meteorGroup.position.z - ship.position.z), meteorGroup.position.x - ship.position.x);
+          const aimBlend = meteorGroup.visible ? smooth(clamp01(fireT / 0.25)) * smooth(clamp01((1 - fireT) / 0.25)) : 0;
+          ship.rotation.y = -Math.PI / 2 + (aimYaw + Math.PI / 2) * aimBlend;
+          ship.rotation.z = -0.4 * Math.cos(shipT * Math.PI * 3) * shipFade;     // bank with the weave
+          ship.rotation.x = Math.sin(now * 0.0021) * 0.06;
+          const flick = 0.7 + 0.3 * Math.sin(now * 0.03);
+          shipFlames.forEach((fl: any, i: number) => { fl.scale.set(0.8 * flick, 0.55 * flick, 1); fl.material.opacity = 0.85 * (0.7 + 0.3 * Math.sin(now * 0.026 + i)); });
         }
         for (let i = 0; i < smalls.length; i++) {
           const sm = smalls[i];
@@ -720,15 +765,17 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             sm.m.rotation.x += dt * 2; sm.m.rotation.y += dt * 1.5;
           }
         }
-        const fireT = smooth(clamp01((p - FIRE0) / (FIRE1 - FIRE0)));
-        beam.visible = fireT > 0.01 && fireT < 0.99 && meteorGroup.visible;
+        beam.visible = beamGlow.visible = muzzle.visible = impact.visible = fireT > 0.01 && fireT < 0.99 && meteorGroup.visible;
         if (beam.visible) {
           _v1.subVectors(meteorGroup.position, ship.position);
           const len = Math.max(0.01, _v1.length());
-          beam.position.copy(ship.position).addScaledVector(_v1, 0.5);
-          beam.scale.set(1, len, 1);
-          beam.quaternion.setFromUnitVectors(_yAxis, _v1.normalize());
-          beamMat.opacity = Math.sin(fireT * Math.PI) * 0.95;
+          const mid = _v2.copy(ship.position).addScaledVector(_v1, 0.5);
+          const a = Math.sin(fireT * Math.PI);
+          const q = _quat.setFromUnitVectors(_yAxis, _v1.clone().normalize());
+          beam.position.copy(mid); beam.scale.set(0.8 + Math.sin(now * 0.05) * 0.25, len, 0.8 + Math.sin(now * 0.05) * 0.25); beam.quaternion.copy(q); beamMat.opacity = a * 0.95;
+          beamGlow.position.copy(mid); beamGlow.scale.set(0.7 + a * 0.4, len, 0.7 + a * 0.4); beamGlow.quaternion.copy(q); beamGlowMat.opacity = a * 0.4;
+          muzzle.position.copy(ship.position); muzzle.scale.setScalar(1.0 + Math.sin(now * 0.06) * 0.4 + a); muzzleMat.opacity = a;
+          impact.position.copy(meteorGroup.position); impact.scale.setScalar(2.2 + a * 2.5); impactMat.opacity = a * 0.95;
         }
 
         const active = landed();
@@ -803,9 +850,13 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         cGeo.dispose(); cEdgeGeo.dispose(); hitGeo.dispose(); hitMat.dispose();
         crystalMats.forEach((m) => m.dispose());
         iconTexes.forEach((t) => t.dispose());
-        meteorGeo.dispose(); meteorMat.dispose(); meteorRimMat.dispose(); meteorGlowMat.dispose();
+        meteorGeo.dispose(); meteorMat.dispose(); meteorGlowMat.dispose();
+        fragGeo.dispose(); fragMat.dispose();
         debrisGeo.dispose(); debrisMat.dispose();
-        shipTex.dispose(); shipMat.dispose(); smallGeo.dispose(); smallMat.dispose(); beamGeo.dispose(); beamMat.dispose();
+        shipDisposables.forEach((d) => { try { d.dispose && d.dispose(); } catch {} });
+        flameTex.dispose(); shipFlames.forEach((fl: any) => fl.material.dispose());
+        smallGeo.dispose(); smallMat.dispose();
+        beamGeo.dispose(); beamMat.dispose(); beamGlowGeo.dispose(); beamGlowMat.dispose(); muzzleMat.dispose(); impactMat.dispose();
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
         try { renderer.forceContextLoss(); } catch {}
         renderer.dispose();
