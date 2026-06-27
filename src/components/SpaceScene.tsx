@@ -472,6 +472,9 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const pe = new THREE.Vector3();
       const _v1 = new THREE.Vector3();
       const _v2 = new THREE.Vector3();
+      const _tA = new THREE.Vector3();
+      const _tB = new THREE.Vector3();
+      let copyEl: HTMLElement | null = null; // the About copy, carried through the camera turn (looked up lazily)
       let focusT = 0; // 0..1 zoom-to-crystal animation
       let lastFocusIdx = -1;
       let labelAlpha = 0;
@@ -611,9 +614,37 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         } else {
           camera.position.set(0, 0, 7);
           camera.rotation.y = -turn * (Math.PI / 2);
+          if (turn > 0 && turn < 1) camera.translateZ(-Math.sin(turn * Math.PI) * 2.0); // dolly in mid-turn, settle back
         }
         starMat.opacity = turn * 0.95;
         nebMat.opacity = turn * 0.7;
+
+        // ---- carry the About copy through the SAME camera move as the planet, so text + planet leave as one
+        // 3D shot (and reverse together on scroll-up). We anchor the copy to the planet's world point and
+        // project it through the LIVE camera, so it inherits the planet's exact screen motion + zoom, then
+        // foreshorten it by the camera yaw. Driven imperatively here (not GSAP) to share the real camera. ----
+        if (!copyEl) copyEl = (typeof document !== 'undefined' ? (document.querySelector('.about-copy') as HTMLElement | null) : null);
+        if (copyEl) {
+          if (turn <= 0.0001 || focusT > 0.001) {
+            copyEl.style.transform = ''; copyEl.style.opacity = ''; copyEl.style.visibility = '';
+          } else {
+            const W = mount.clientWidth, H = mount.clientHeight, aspect = W / H;
+            const halfH0 = Math.tan((camera.fov * Math.PI) / 360) * 7; // apparent half-height at the rest depth (z=7)
+            const px = planet.position.x, py = planet.position.y;      // anchor = planet ⇒ identical screen delta
+            const Tx0 = (px / (halfH0 * aspect) * 0.5 + 0.5) * W;
+            const Ty0 = (1 - (py / halfH0 * 0.5 + 0.5)) * H;
+            const u0 = (0.5 * H) / halfH0;                             // rest px per world unit (vertical)
+            _tA.set(px, py, 0).project(camera);
+            const Tx = (_tA.x * 0.5 + 0.5) * W, Ty = (1 - (_tA.y * 0.5 + 0.5)) * H;
+            _tB.set(px, py + 1, 0).project(camera);
+            const scale = Math.max(0.2, Math.abs((1 - (_tB.y * 0.5 + 0.5)) * H - Ty) / u0);
+            const yawDeg = (camera.rotation.y * 180) / Math.PI;        // = -turn*90
+            copyEl.style.transformOrigin = '50% 50%';
+            copyEl.style.transform = `perspective(1100px) translate3d(${(Tx - Tx0).toFixed(1)}px,${(Ty - Ty0).toFixed(1)}px,0) rotateY(${yawDeg.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+            copyEl.style.opacity = String(clamp01(1.3 - turn * 1.45));
+            copyEl.style.visibility = turn > 0.9 ? 'hidden' : 'visible';
+          }
+        }
 
         // ---- meteor → shatter → crystals (all scrubbed by scroll) ----
         const flyT = smooth(clamp01((p - MET_FLY0) / (MET_FLY1 - MET_FLY0)));
@@ -751,6 +782,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
 
       cleanup = () => {
         stop();
+        if (copyEl) { copyEl.style.transform = ''; copyEl.style.opacity = ''; copyEl.style.visibility = ''; }
         io.disconnect();
         ro.disconnect();
         document.removeEventListener('visibilitychange', onVis);
