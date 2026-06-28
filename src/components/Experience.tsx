@@ -617,9 +617,10 @@ const Experience: React.FC = () => {
   }
 
   return (
-    <section ref={trackRef} id="experience" aria-labelledby="exp-heading" className="relative bg-[#05030f]">
-      <div ref={stageRef} className="relative h-[100svh] w-full overflow-hidden bg-[#05030f]">
-        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_30%,#0a0a24_0%,#06051a_50%,#03020c_100%)]" />
+    <section ref={trackRef} id="experience" aria-labelledby="exp-heading" className="relative bg-[#070512]">
+      <div ref={stageRef} className="relative h-[100svh] w-full overflow-hidden bg-[#070512]">
+        {/* base matches the Journey's #070512 so the section seam is invisible; nebula glow sits lower-centre */}
+        <div className="absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_58%,#110b2c_0%,#0a0820_48%,#070512_100%)]" />
         <div ref={mountRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
 
         <div className="pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 sm:px-10 sm:pt-20">

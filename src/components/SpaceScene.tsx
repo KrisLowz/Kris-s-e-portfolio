@@ -632,6 +632,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         const pa = Math.min(1, p / PHASES.ABOUT_END); // About sub-progress (planet entrance + copy)
         const sc = entranceScale(pa);
         const turn = smooth(clamp01((p - PHASES.TURN_START) / (PHASES.TURN_END - PHASES.TURN_START)));
+        const exitT = smooth(clamp01((p - EXIT0) / (1 - EXIT0))); // skills fly-out / hand-off to Experience
 
         // Hero/idle phase: planet hidden (scale 0), nothing revealed, camera not yet turning — skip the
         // per-frame work; clear the canvas once so no stale frame lingers, keep the loop scheduled.
@@ -667,13 +668,13 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           camera.rotation.set(0, -turn * (Math.PI / 2), 0); // explicit reset clears any pitch left by a focus/exit lookAt
           camera.up.set(0, 1, 0);
           if (turn > 0 && turn < 1) camera.translateZ(-Math.sin(turn * Math.PI) * 2.0); // dolly in mid-turn, settle back
-          // EXIT: dolly the camera straight DOWN (no tilt) so the whole skills field slides UP and out of the top
-          // — one continuous vertical move that the Experience scene below picks up by rising in from beneath.
-          const exitT = smooth(clamp01((p - EXIT0) / (1 - EXIT0)));
-          if (exitT > 0) camera.position.y -= exitT * 8;
+          // EXIT: the camera pushes FORWARD into the field (zoom) while descending, so the crystals rush toward
+          // the camera, grow, and sweep UP past it (out the top) — they physically fly by, no fade. The
+          // Experience scene below picks the motion up by rising in from beneath.
+          if (exitT > 0) { camera.translateZ(-exitT * 7.5); camera.position.y -= exitT * 6; }
         }
         starMat.opacity = turn * 0.95;
-        nebMat.opacity = turn * 0.7;
+        nebMat.opacity = turn * 0.7 * (1 - exitT); // fade the nebula on exit so the bg darkens to match Experience
 
         // ---- carry the About copy through the SAME camera move as the planet, so text + planet leave as one
         // 3D shot (and reverse together on scroll-up). We anchor the copy to the planet's world point and

@@ -200,9 +200,9 @@ const Journey: React.FC = () => {
         // Act 3 — the skills universe: its intro title rises in once the turn completes (settles well before
         // the exit so the two don't fight).
         .to('.skills-intro', { opacity: 1, y: 0, duration: 0.08, ease: 'power3.out' }, TURN_END)
-        // Act 4 — exit: as the camera pitches DOWN into the Experience scene, the title slides up + fades out
-        // with the crystals (so the whole skills frame leaves together).
-        .to('.skills-intro', { autoAlpha: 0, y: -110, duration: 1 - EXIT_START, ease: 'power2.in' }, EXIT_START);
+        // Act 4 — exit: the title flies UP + scales (zooming past the camera like the crystals), only fading
+        // right at the end once it's already swept off the top — not a fade-in-place.
+        .to('.skills-intro', { y: -360, scale: 1.5, autoAlpha: 0, duration: 1 - EXIT_START, ease: 'power3.in' }, EXIT_START);
 
       // Pin the timeline length to exactly 1.0 so scrub maps timeline-time 1:1 onto scroll progress —
       // i.e. a tween at position P fires at progress P, keeping these GSAP phases in lockstep with the
