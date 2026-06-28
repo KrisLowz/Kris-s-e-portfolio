@@ -30,9 +30,9 @@ const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObj
   progressRef,
 }) => (
   <>
-    {/* Deep-space backdrop */}
-    <div className="about-space absolute inset-0 bg-[#070512]">
-      <div className="absolute inset-0 bg-[radial-gradient(125%_90%_at_70%_28%,#1A0B3B_0%,#0A0620_46%,#050410_100%)]"></div>
+    {/* Deep-space backdrop — transparent so the shared stage glow (Experience's purple radial) shows through,
+        giving About the SAME atmosphere as Skills + Experience. Only the starfield + accent blobs are local. */}
+    <div className="about-space absolute inset-0">
       <div className="about-starfield about-twinkle absolute inset-0"></div>
       <div className="pointer-events-none absolute -left-40 top-10 h-96 w-96 rounded-full bg-[#06B6D4]/20 blur-3xl"></div>
       <div className="pointer-events-none absolute -right-24 bottom-0 h-96 w-96 rounded-full bg-[#FF2BD6]/15 blur-3xl"></div>
@@ -258,6 +258,10 @@ const Journey: React.FC = () => {
   return (
     <section ref={trackRef} id="about" aria-labelledby="about-heading" className="relative bg-[#070512]">
       <div ref={stageRef} className="relative h-[100svh] w-full overflow-hidden bg-[#070512]">
+        {/* SHARED deep-space glow behind BOTH acts (fixed — does not slide with the pan), so the skills↔experience
+            seam sits on ONE continuous background. This is Experience's purple radial, now the base for the whole
+            journey, so About/Skills share Experience's atmosphere instead of meeting it at a tonal line. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_58%,#110b2c_0%,#0a0820_48%,#070512_100%)]" />
         {/* Hero layer — held, then zooms past + fades as the planet emerges over it */}
         <div className="jr-hero absolute inset-0">
           <Hero />

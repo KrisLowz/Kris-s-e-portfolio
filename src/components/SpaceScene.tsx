@@ -691,8 +691,9 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           }
         }
         starMat.opacity = turn * 0.95;
-        nebMat.opacity = turn * 0.7 * (1 - exitT * 0.12); // keep the nebula lit through the exit so the skills
-        // scene still looks full as the CSS pan slides it up and off (Experience rises into the vacated space)
+        nebMat.opacity = turn * 0.7 * (1 - exitT); // fade the skills nebula fully BEFORE the pan, so its bright
+        // additive glow doesn't clip into a hard line at the sliding layer edge — the shared stage glow (which is
+        // continuous across the seam) carries the skills background through the hand-off instead.
 
         // ---- carry the About copy through the SAME camera move as the planet, so text + planet leave as one
         // 3D shot (and reverse together on scroll-up). We anchor the copy to the planet's world point and

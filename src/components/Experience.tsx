@@ -612,13 +612,9 @@ const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
   return (
     <div ref={stageRef} id="experience" className="absolute inset-0 h-full w-full overflow-hidden">
       <div className="relative h-full w-full">
-        {/* radial nebula glow, lower-centre; base is transparent so it composites onto the shared stage bg */}
-        <div className="absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_58%,#110b2c_0%,#0a0820_48%,transparent_100%)]" />
+        {/* No local background gradient/scrim: the Experience canvas is transparent and composites over Journey's
+            SHARED stage glow, so this act sits on the SAME continuous background as About/Skills (no seam line). */}
         <div ref={mountRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
-        {/* Seam blend: force the TOP of this scene to the exact Journey-exit colour (#070512) and fade down to
-            clear, so where the two pinned sections scroll past each other there's no brightness step / hard line.
-            Sits above the WebGL canvas so it also dims the topmost stars near the seam. */}
-        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-[15] h-[42%] bg-gradient-to-b from-[#070512] via-[#070512]/85 to-transparent" />
 
         {/* Heading fades in from progress (driven in the tick) so it doesn't pop into view right at the seam. */}
         <div ref={headingRef} style={{ opacity: 0 }} className="pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 sm:px-10 sm:pt-20">
