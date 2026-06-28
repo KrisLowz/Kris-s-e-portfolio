@@ -69,7 +69,7 @@ const Contact: React.FC = () => {
   const backToLaunch = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
   return (
-    <footer id="contact" aria-labelledby="contact-heading" className="relative overflow-hidden bg-[#05030f] py-28 sm:py-36">
+    <footer id="contact" aria-labelledby="contact-heading" className="relative overflow-hidden bg-[#05030f] pt-20 pb-8 sm:pt-28 sm:pb-10">
       {/* ---- calm space backdrop ---- */}
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_16%,#0e0b22_0%,#06051a_46%,#03020c_100%)]" />
       <div aria-hidden="true" className="about-starfield contact-twinkle pointer-events-none absolute inset-0 opacity-70" />
@@ -175,7 +175,7 @@ const Contact: React.FC = () => {
         </div>
 
         {/* ---- footer ---- */}
-        <div className="proj-reveal mt-16 flex flex-col items-center gap-5 border-t border-white/10 pt-8 text-center sm:flex-row sm:justify-between sm:text-left">
+        <div className="proj-reveal mt-12 flex flex-col items-center gap-5 border-t border-white/10 pt-6 text-center sm:flex-row sm:justify-between sm:text-left">
           <p className="text-sm text-[#7d7896]">© 2026 Low Chee Fei · Built with React + Three.js.</p>
           <div className="flex items-center gap-3">
             <a href={PROFILE.social.github} target="_blank" rel="noreferrer" aria-label="GitHub" className="grid h-9 w-9 place-items-center rounded-full border border-white/12 text-[#C3BFD6] transition-colors hover:border-[#22D3EE]/50 hover:text-white">
