@@ -683,13 +683,14 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           // frame as one move, no fade. We end looking downward into empty space, which is exactly how the
           // Experience flight-path enters (camera descending from above) — so the two scenes read as one shot.
           if (exitT > 0) {
-            camera.rotateX(-exitT * 0.62);   // pitch down → field rotates up & out the top
-            camera.translateZ(-exitT * 7.5); // dive forward along the (now down-tilted) view
-            camera.position.y -= exitT * 2.4; // a touch of extra drop
+            camera.rotateX(-exitT * 0.5);    // pitch down → field rotates up & out the top (eased so we don't
+            camera.translateZ(-exitT * 5.2); // bury the view in empty void below the field)
+            camera.position.y -= exitT * 1.5;
           }
         }
         starMat.opacity = turn * 0.95;
-        nebMat.opacity = turn * 0.7 * (1 - exitT); // fade the nebula on exit so the bg darkens to match Experience
+        nebMat.opacity = turn * 0.7 * (1 - exitT * 0.35); // keep most of the nebula glow through the exit so the
+        // hand-off reads as a lit starfield/nebula transition, not a black void (Experience now fills the lower half)
 
         // ---- carry the About copy through the SAME camera move as the planet, so text + planet leave as one
         // 3D shot (and reverse together on scroll-up). We anchor the copy to the planet's world point and

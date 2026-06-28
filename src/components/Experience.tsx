@@ -539,12 +539,13 @@ const Experience: React.FC = () => {
           lookTarget.lerpVectors(BASE_LOOK, tmpStation, focusT);
           camera.lookAt(lookTarget);
         } else {
-          // entrance: continue the Skills exit's vertical camera-DOWN — the camera starts high and DESCENDS to
-          // its base (no tilt: position + look offset equally), so the flight-path rises in from below. Settles
-          // just before the first station docks (p≈0.17), reading as one continuous downward move.
-          const ent = Math.min(1, Math.max(0, p / 0.14));
+          // entrance: a SHORT, shallow camera-down that continues the Skills flip — the scene is framed almost
+          // immediately (small drop, settles by p≈0.05) so the hand-off isn't a long dark descent into empty
+          // space. Because progress is clamped to 0 through the inter-section gap, keeping the drop small means
+          // the flight path (ship + first station + planet) is already on screen during the gap, not a black void.
+          const ent = Math.min(1, Math.max(0, p / 0.05));
           const e = ent * ent * (3 - 2 * ent); // smoothstep
-          const drop = (1 - e) * 9;
+          const drop = (1 - e) * 2.2;
           camera.position.copy(BASE_CAM); camera.position.y += drop;
           lookTarget.copy(BASE_LOOK); lookTarget.y += drop;
           camera.lookAt(lookTarget);
