@@ -25,6 +25,39 @@ declare global {
 
 const PLANET = '/assets/world/about/origin-planet-cutout-opt.webp';
 
+// ---- Text3DFlip (MagicUI), recreated dependency-free for this stack (no shadcn/registry/framer-motion) ----
+// One word as a 3D flip card: front + back render the SAME word, so the copy stays readable; hovering the parent
+// (group/flip) rotates each word 180° around X ("top" flip), staggered. Word-level (not per-char) so a whole
+// paragraph stays light + legible.
+const FlipWord: React.FC<{ word: string; index: number; stagger: number; className?: string }> = ({ word, index, stagger, className = '' }) => (
+  <span className="relative inline-block [perspective:600px]">
+    <span
+      className="flip-3d relative inline-block [transform-style:preserve-3d] transition-transform duration-700 ease-[cubic-bezier(.2,.8,.25,1)] group-hover/flip:[transform:rotateX(180deg)]"
+      style={{ transitionDelay: `${index * stagger}ms` }}
+    >
+      <span className={`inline-block [backface-visibility:hidden] ${className}`}>{word}</span>
+      <span aria-hidden="true" className={`absolute left-0 top-0 inline-block select-none [backface-visibility:hidden] [transform:rotateX(-180deg)] ${className}`}>{word}</span>
+    </span>
+  </span>
+);
+
+// Splits children (plain strings AND nested elements like the bold <span>) into per-word FlipWords, preserving
+// the nested element's styling on its words. Returns one inline group so hovering the text ripples the flip.
+const FlipText: React.FC<{ children: React.ReactNode; stagger?: number }> = ({ children, stagger = 26 }) => {
+  let n = 0;
+  const walk = (node: React.ReactNode, cls: string): React.ReactNode => {
+    if (typeof node === 'string')
+      return node.split(/(\s+)/).map((seg, i) =>
+        seg === '' ? null : /^\s+$/.test(seg) ? <span key={`sp${i}-${n}`}>{' '}</span> : <FlipWord key={`w${n}`} word={seg} index={n++} stagger={stagger} className={cls} />,
+      );
+    if (typeof node === 'number') return walk(String(node), cls);
+    if (Array.isArray(node)) return node.map((c, i) => <React.Fragment key={`fr${i}`}>{walk(c, cls)}</React.Fragment>);
+    if (React.isValidElement(node)) return walk((node.props as any).children, `${cls} ${(node.props as any).className || ''}`.trim());
+    return node;
+  };
+  return <span className="group/flip inline">{walk(children, '')}</span>;
+};
+
 // Space + planet + About copy. Reused by the animated journey (inside .jr-overlay) and the
 // reduced-motion static fallback (rendered directly). Targets the shared .about-* CSS.
 const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObject<number> }> = ({
@@ -99,18 +132,22 @@ const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObj
               </span>
             </h2>
           </div>
-          <div className="mt-4 overflow-hidden pb-1 sm:mt-7">
+          <div className="mt-4 pb-1 sm:mt-7">
             <p className="about-line max-w-lg text-base leading-relaxed text-[#C3BFD6] sm:text-xl">
-              I&apos;m a software developer who believes great code should be invisible to the user. Whether it&apos;s a
-              mobile app or a website, the experience should feel fluid, intuitive, and reliable.
+              <FlipText>
+                I&apos;m a software developer who believes great code should be invisible to the user. Whether it&apos;s a
+                mobile app or a website, the experience should feel fluid, intuitive, and reliable.
+              </FlipText>
             </p>
           </div>
-          <div className="mt-3 overflow-hidden pb-1 sm:mt-4">
+          <div className="mt-3 pb-1 sm:mt-4">
             <p className="about-line max-w-lg text-base leading-relaxed text-[#C3BFD6] sm:text-xl">
-              Having graduated from{' '}
-              <span className="font-semibold text-[#F5F3FF]">Swinburne University of Technology</span> in 2026, I&apos;m now
-              a Junior Software Developer — already helping businesses solve real-world logistics challenges through my
-              award-winning work.
+              <FlipText>
+                Having graduated from{' '}
+                <span className="font-semibold text-[#F5F3FF]">Swinburne University of Technology</span> in 2026, I&apos;m now
+                a Junior Software Developer — already helping businesses solve real-world logistics challenges through my
+                award-winning work.
+              </FlipText>
             </p>
           </div>
           {/* Reduced-motion / no-WebGL: skills can't be revealed by hovering the 3D planet, so list them */}

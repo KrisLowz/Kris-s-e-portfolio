@@ -456,6 +456,9 @@
 .shine-border { animation: shineBorder var(--duration, 14s) linear infinite; }
 @media (prefers-reduced-motion: reduce) { .shine-border { animation: none; } }
 
+/* Text3DFlip: respect reduced-motion — never flip, never transition (keeps the copy perfectly static/readable). */
+@media (prefers-reduced-motion: reduce) { .flip-3d { transform: none !important; transition: none !important; } }
+
 /* ============================================================
    About — cosmic scroll scene (dark space journey)
    ============================================================ */
