@@ -64,10 +64,10 @@
 ### Technical Skills (Solar System icons)
 
 **Inner ring (Languages / Core):**
-HTML5, CSS3, JavaScript, Python, Java, C++, C#, SQL
+HTML5, CSS3, JavaScript, TypeScript, Python, Java, C++, C#, SQL
 
 **Outer ring (Tools / Frameworks):**
-Figma, Tailwind CSS, PostgreSQL, Firebase, Kotlin, Flutter, Android, Git, VS Code
+Figma, Tailwind CSS, PostgreSQL, Firebase, Kotlin, Flutter, Android, Git, VS Code, Node.js
 
 ---
 
@@ -80,8 +80,8 @@ Figma, Tailwind CSS, PostgreSQL, Firebase, Kotlin, Flutter, Android, Git, VS Cod
 | **Problem Solving** | Analyzing complex issues to find efficient, scalable solutions. |
 | **Critical Thinking** | Evaluating data objectively to make informed technical decisions. |
 | **Communication** | Translating technical concepts for non-technical stakeholders. |
-| **Project Mgmt** | Agile methodologies, sprint planning, and backlog management. |
-| **Time Mgmt** | Prioritizing tasks effectively to meet strict deployment deadlines. |
+| **Project Management** | Agile methodologies, sprint planning, and backlog management. |
+| **Time Management** | Prioritizing tasks effectively to meet strict deployment deadlines. |
 | **Teamwork** | Collaborating across cross-functional teams to drive product success. |
 | **Adaptability** | Quickly learning new stacks (like Flutter/React) as project needs evolve. |
 

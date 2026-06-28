@@ -1,84 +1,23 @@
-import React, { useEffect } from 'react';
-import Navigation from './components/Navigation';
-import Hero from './components/Hero';
-import About from './components/About';
-import Experience from './components/Experience';
-import ProjectsShowcase from './components/ProjectsShowcase';
-import Contact from './components/Contact';
-import AIChatBot from './components/AIChatBot';
-import MeshBackground from './components/MeshBackground';
-import GhostCursors from './components/GhostCursors';
-import ReactionButton from './components/ReactionButton';
-import WireframeGlobe from './components/WireframeGlobe';
-import MeteorShower from './components/MeteorShower';
-import FogBackground from './components/FogBackground';
-import ProfessionalSkills from './components/ProfessionalSkills';
+import React from 'react';
 import CustomCursor from './components/CustomCursor';
-import ScrollProgressBar from './components/ScrollProgressBar';
-import SectionHoverGlow from './components/SectionHoverGlow';
-import ScrollRippleEffect from './components/ScrollRippleEffect';
+import FloatingScrollbar from './components/FloatingScrollbar';
+import FloatingNav from './components/FloatingNav';
+import Journey from './components/Journey';
+import Projects from './components/Projects';
+import Contact from './components/Contact';
 
-declare global {
-  interface Window {
-    gsap: any;
-    ScrollTrigger: any;
-  }
-}
-
+// 2026 rebuild. Journey is now ONE pinned stage that fuses Hero → About → Skills → Experience into a single
+// scroll-driven 3D shot (the Experience flight-path is mounted as a crossfading layer inside Journey, so there
+// is no dead gap between the skills exit and the docking scene). Remaining old sections stay in the repo.
 const App: React.FC = () => {
-  useEffect(() => {
-    // GLOBAL SCROLL TRIGGER LOGIC
-    // This handles the "Bi-Directional" (Reversible) animation for all elements with class .reveal-on-scroll
-    if (window.gsap && window.ScrollTrigger) {
-      window.gsap.registerPlugin(window.ScrollTrigger);
-
-      const elements = document.querySelectorAll('.reveal-on-scroll');
-      
-      elements.forEach((el) => {
-        // Reset any previous state
-        window.gsap.set(el, { y: 60, opacity: 0 });
-
-        window.gsap.to(el, {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: el,
-            start: "top 85%",
-            end: "bottom 15%",
-            // play on enter, reverse on leave, play on enter back, reverse on leave back
-            toggleActions: "play reverse play reverse", 
-            markers: false
-          }
-        });
-      });
-    }
-  }, []);
-
   return (
-    <main className="relative min-h-screen text-pop-text-main font-sans selection:bg-pop-primary selection:text-white transition-colors duration-300 cursor-none">
+    <main className="relative overflow-x-clip bg-white font-sans text-[#14121A] antialiased">
       <CustomCursor />
-      <ScrollProgressBar />
-      <SectionHoverGlow />
-      <ScrollRippleEffect />
-      <FogBackground />
-      <MeshBackground />
-      <WireframeGlobe />
-      <MeteorShower />
-      
-      <GhostCursors />
-      
-      <Navigation />
-      <Hero />
-      <About />
-      <ProfessionalSkills />
-      <Experience />
-      <ProjectsShowcase />
+      <FloatingScrollbar />
+      <FloatingNav />
+      <Journey />
+      <Projects />
       <Contact />
-      
-      <ReactionButton />
-      <AIChatBot />
     </main>
   );
 };

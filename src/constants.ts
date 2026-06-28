@@ -6,6 +6,7 @@ export const PROFILE = {
   headline: "Bridging Mobile Innovation with Enterprise Solutions",
   bio: `I am a Computer Science graduate from Swinburne University (Class of 2026) specializing in Software Development, now working as a Junior Software Developer. With a strong foundation in both mobile application development and enterprise ERP implementation, I bridge the gap between user-centric design and robust backend systems. My passion lies in solving real-world inefficiencies through technology, demonstrated by my award-winning final year project.`,
   email: "horuslow0218@gmail.com",
+  cv: "https://drive.google.com/file/d/10t-OUA1b0qfzzDt6ggl6EEy-NgRhFRrP/view?usp=sharing",
   social: {
     github: "https://github.com/KrisLowz",
     linkedin: "https://www.linkedin.com/in/lowcheefei/"
@@ -194,8 +195,8 @@ Current Role: Junior Software Developer (completed all studies).
 Key Awards: "Best Project on Display" (ICT Tradeshow 2025) for Final Year Project "TrackPoint".
 
 Skills:
-- Languages: Kotlin, Python, JavaScript, HTML, CSS, SQL.
-- Frameworks: Django, Firebase, React, MySQL Workbench.
+- Languages: Kotlin, Python, JavaScript, TypeScript, HTML, CSS, SQL.
+- Frameworks: Django, Firebase, React, Node.js, MySQL Workbench.
 - Enterprise: Oracle JD Edwards (JDE) Implementation.
 
 Experience:

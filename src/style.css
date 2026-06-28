@@ -64,8 +64,6 @@
 /* Base Transition for EVERYTHING */
 *, *::before, *::after {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, fill 0.3s ease, stroke 0.3s ease;
-  /* HIDE DEFAULT CURSOR GLOBALLY */
-  cursor: none !important;
 }
 
 /* Utilities using Variables */
@@ -131,7 +129,8 @@
   }
 }
 
-/* Scrollbar */
+/* Scrollbar — inner scroll areas keep this themed bar; the PAGE bar is hidden below
+   and replaced by the floating indicator (FloatingScrollbar.tsx). */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -145,6 +144,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* Hide the native PAGE scrollbar only (scrolling still works) — a floating custom
+   indicator stands in for it. Inner scroll containers keep their own bars above. */
+html { scrollbar-width: none; }                       /* Firefox */
+html::-webkit-scrollbar { width: 0; height: 0; }      /* WebKit */
 
 .reaction-emoji {
   position: absolute;
@@ -322,47 +326,257 @@
   opacity: 1;
 }
 
-/* CUSTOM CURSOR */
+/* CUSTOM CURSOR — neon ring + dot (2026 redesign). Desktop only; the system cursor is hidden below. */
 .custom-cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--accent-primary);
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid rgba(34, 211, 238, 0.75);   /* cyan ring */
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
-  transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.35), inset 0 0 6px rgba(34, 211, 238, 0.12);
+  transition: width 0.28s ease, height 0.28s ease, background-color 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
 }
 
 .custom-cursor-dot {
   position: fixed;
   top: 0;
   left: 0;
-  width: 4px;
-  height: 4px;
-  background-color: var(--accent-primary);
+  width: 5px;
+  height: 5px;
+  background-color: #22d3ee;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
+  /* glow for dark sections + a faint dark ring so it stays visible on the light Hero */
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.9), 0 0 0 1.5px rgba(5, 3, 15, 0.22);
 }
 
 .custom-cursor.hovering {
-  width: 50px;
-  height: 50px;
-  background-color: rgba(var(--spotlight-rgb), 0.1);
-  border-color: transparent;
+  width: 52px;
+  height: 52px;
+  background-color: rgba(34, 211, 238, 0.12);
+  border-color: rgba(124, 92, 255, 0.7);          /* violet on hover */
+  box-shadow: 0 0 22px rgba(124, 92, 255, 0.4);
 }
 
 .click-particle {
   position: fixed;
   width: 6px;
   height: 6px;
-  background-color: var(--accent-primary);
+  background-color: #22d3ee;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+}
+
+/* Hide the system cursor on real-pointer (desktop) devices — the custom cursor replaces it.
+   cursor inherits, so html/body covers everything; restore the text caret on form fields. */
+@media (hover: hover) and (pointer: fine) {
+  html, body { cursor: none; }
+  input, textarea, select, [contenteditable="true"] { cursor: auto; }
+}
+
+/* ============================================================
+   2026 REBUILD — new theme (Glass-over-footage hero)
+   Light / airy canvas, teal accent, pink spark.
+   ============================================================ */
+
+/* Magenta caret on the hero typewriter (Typed.js injects .typed-cursor) */
+.hero-role .typed-cursor {
+  color: #FF2BD6;
+  font-weight: 400;
+  margin-left: 2px;
+}
+
+/* Pop Arcade — social icon wobble on hover */
+@keyframes wobble {
+  0%, 100% { transform: rotate(0deg); }
+  20% { transform: rotate(-9deg); }
+  40% { transform: rotate(7deg); }
+  60% { transform: rotate(-5deg); }
+  80% { transform: rotate(3deg); }
+}
+
+/* Pop Arcade — staggered entrance (CSS keyframes; StrictMode-proof).
+   fill-mode: backwards hides each element only during its delay, then releases it
+   back to normal styles so button hover transforms still work afterwards. */
+@keyframes heroPop {
+  0%   { opacity: 0; transform: translateY(26px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.hero-pop {
+  animation: heroPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-pop { animation: none; }
+}
+
+/* Pop Arcade — mascot spaceship patrolling back and forth above the tagline.
+   scaleX flips the facing at each turn (source art faces left; scaleX(-1) faces right).
+   Travel stays within ~0%–70% of the lane so it never hugs the cat, and it never fades. */
+@keyframes flyPatrol {
+  0%   { left: 0%;  transform: scaleX(-1) translateY(0); }    /* facing right, fly right */
+  12%  { transform: scaleX(-1) translateY(-9px); }
+  33%  { transform: scaleX(-1) translateY(-3px); }
+  44%  { left: 70%; transform: scaleX(-1) translateY(0); }    /* reach right end */
+  50%  { left: 70%; transform: scaleX(1)  translateY(0); }    /* turn around (flip through edge-on) */
+  62%  { transform: scaleX(1)  translateY(-9px); }
+  83%  { transform: scaleX(1)  translateY(-3px); }
+  94%  { left: 0%;  transform: scaleX(1)  translateY(0); }    /* reach left end */
+  100% { left: 0%;  transform: scaleX(-1) translateY(0); }    /* turn around again */
+}
+.hero-ship {
+  position: absolute;
+  bottom: 0;
+  left: 0%;
+  animation: flyPatrol 8s ease-in-out infinite;
+  will-change: left, transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-ship { display: none; }
+}
+
+/* Experience radar — rotating sweep wedge */
+@keyframes radarSweep { to { transform: rotate(360deg); } }
+.radar-sweep {
+  background: conic-gradient(from 0deg, rgba(34,211,238,0.28), rgba(34,211,238,0) 70deg);
+  animation: radarSweep 3.4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) { .radar-sweep { animation: none; } }
+
+/* Projects — cinematic scroll-reveal (GTA-VI style image cards + screenshot gallery) */
+.proj-reveal { opacity: 0; transform: translateY(34px); transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.proj-reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .proj-reveal { opacity: 1; transform: none; transition: none; } }
+
+/* Directional scroll-reveals — slide + fade in from a side (or bottom) as the element enters view.
+   Same one-way IntersectionObserver as .proj-reveal (it also watches .reveal-dir). */
+.reveal-dir { opacity: 0; will-change: transform, opacity; transition: opacity 0.85s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.85s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.reveal-dir.from-left { transform: translateX(-58px); }
+.reveal-dir.from-right { transform: translateX(58px); }
+.reveal-dir.from-bottom { transform: translateY(48px); }
+.reveal-dir.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal-dir { opacity: 1 !important; transform: none !important; transition: none !important; } }
+
+/* Horizontal gallery — frames slide in from the right as they scroll into view */
+.shot-reveal { opacity: 0; transform: translateX(64px) scale(0.96); transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.shot-reveal.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .shot-reveal { opacity: 1; transform: none; transition: none; } }
+
+/* Thin, theme-tinted scrollbar for the horizontal gallery rail */
+.gallery-rail { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.22) transparent; }
+.gallery-rail::-webkit-scrollbar { height: 8px; }
+.gallery-rail::-webkit-scrollbar-track { background: transparent; }
+.gallery-rail::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 999px; }
+.gallery-rail::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.32); }
+
+/* ShineBorder — an animated gradient that travels around a card's edge (MagicUI's ShineBorder, recreated for
+   this stack). The <ShineBorder> div sets --duration + the masked gradient; this just drives the motion. */
+@keyframes shineBorder { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+.shine-border { animation: shineBorder var(--duration, 14s) linear infinite; }
+@media (prefers-reduced-motion: reduce) { .shine-border { animation: none; } }
+
+/* Text3DFlip: respect reduced-motion — never flip, never transition (keeps the copy perfectly static/readable). */
+@media (prefers-reduced-motion: reduce) { .flip-3d { transform: none !important; transition: none !important; } }
+
+/* ============================================================
+   Contact — "The Relay" (calm space backdrop: stars + floating satellite + signal pulse)
+   ============================================================ */
+.contact-twinkle { animation: twinkle 5.5s ease-in-out infinite; }
+@keyframes satelliteFloat { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-16px) rotate(1.5deg); } }
+.contact-satellite { animation: satelliteFloat 9s ease-in-out infinite; }
+@keyframes signalPulse { 0% { transform: scale(0.55); opacity: 0.55; } 100% { transform: scale(2.3); opacity: 0; } }
+.signal-ring { animation: signalPulse 3.6s ease-out infinite; }
+.signal-ring.delay { animation-delay: 1.8s; }
+@media (prefers-reduced-motion: reduce) {
+  .contact-twinkle, .contact-satellite, .signal-ring { animation: none; }
+  .signal-ring { opacity: 0; }
+}
+
+/* ============================================================
+   About — cosmic scroll scene (dark space journey)
+   ============================================================ */
+.about-starfield {
+  background-image:
+    radial-gradient(1.4px 1.4px at 16% 24%, rgba(255,255,255,0.9), transparent),
+    radial-gradient(1px 1px at 34% 62%, rgba(180,220,255,0.85), transparent),
+    radial-gradient(1.6px 1.6px at 52% 36%, rgba(255,255,255,0.85), transparent),
+    radial-gradient(1px 1px at 68% 80%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1.3px 1.3px at 80% 26%, rgba(255,200,255,0.75), transparent),
+    radial-gradient(1px 1px at 91% 58%, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 24% 86%, rgba(180,255,255,0.7), transparent),
+    radial-gradient(1.5px 1.5px at 60% 14%, rgba(255,255,255,0.8), transparent),
+    radial-gradient(1px 1px at 44% 94%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 7% 56%, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1px 1px at 75% 70%, rgba(255,255,255,0.6), transparent);
+  background-repeat: repeat;
+  background-size: 360px 360px;
+}
+@keyframes twinkle { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.85; } }
+.about-twinkle { animation: twinkle 5s ease-in-out infinite; animation-play-state: paused; }
+@keyframes planetBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.4%); } }
+.about-planet-img { animation: planetBob 7s ease-in-out infinite; animation-play-state: paused; }
+/* run the idle loops only while the About stage is the active ScrollTrigger (on-screen) */
+.about-active .about-twinkle,
+.about-active .about-planet-img { animation-play-state: running; }
+@media (prefers-reduced-motion: reduce) {
+  .about-twinkle, .about-planet-img { animation: none; }
+}
+
+/* Planet resting ("landed") position — the no-JS / reduced-motion fallback.
+   GSAP overrides this with an inline transform while the scroll timeline is active. */
+.about-planet { transform: translate(-50%, calc(-50% - 14vh)) scale(1.25); } /* mobile: up, text below */
+@media (min-width: 640px) {
+  .about-planet { transform: translate(calc(-50% + 16vw), -50%) scale(1.65); } /* desktop: right, text left */
+}
+
+/* Short viewports: the pinned 100svh stage clips overflow, so scale the copy to fit (no internal scroll) */
+@media (max-height: 740px) {
+  .about-copy h2 { font-size: clamp(2.6rem, 8.4vh, 4.4rem); line-height: 1.05; }
+  .about-copy p  { font-size: 1.1rem; line-height: 1.5; }
+  .about-copy > div + div { margin-top: 0.8rem; }
+}
+@media (max-height: 560px) {
+  .about-copy h2 { font-size: clamp(1.8rem, 7vh, 2.7rem); }
+  .about-copy p  { font-size: 0.9rem; line-height: 1.42; }
+  .about-copy > div + div { margin-top: 0.5rem; }
+}
+
+/* 3D text reveal — perspective projects each .about-line as it stands up from a backward tilt */
+.about-copy { perspective: 900px; }
+.about-line { backface-visibility: hidden; }
+
+/* Focused tech-skill detail card entrance */
+@keyframes skillCardIn {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Skill chips low on screen flip their detail card upward so it never clips off the bottom.
+   Two-class selector (.skill-up .skill-detail) outranks the Tailwind top-* utility. */
+.skill-up .skill-detail {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+
+/* Flowing gradient + glow on the heading word (gated to on-screen; off for reduced motion) */
+@keyframes aboutGradientShift {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.about-gradient {
+  background-size: 200% auto;
+  animation: aboutGradientShift 7s linear infinite;
+  animation-play-state: paused;
+}
+.about-active .about-gradient { animation-play-state: running; }
+@media (prefers-reduced-motion: reduce) {
+  .about-gradient { animation: none; }
 }
