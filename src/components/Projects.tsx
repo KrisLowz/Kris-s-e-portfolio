@@ -1,431 +1,219 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PROJECTS } from '../constants';
-import { buildShip, makeFlameTexture, makeGlowTexture } from './Spaceship3D';
-import { makeStarLayer, makeStreakTexture } from './Experience';
 
-declare global { interface Window { gsap: any; ScrollTrigger: any } }
+/* ============================================================================
+   Projects — a cinematic, scroll-driven gallery (GTA-VI style). A vertical
+   stack of full-bleed project cards (promo image + title + hook + "Learn More").
+   Clicking one opens a full-screen gallery that scrolls HORIZONTALLY: a tall
+   cinematic info column first (all the story laid out vertically), then every
+   screenshot in a device frame flowing off to the right — wheel/scroll moves
+   the page rightward. TrackPoint is a phone (mobile app); Cinemate & Splash
+   Aquatics are browser windows (web apps). No 3D; pure HTML/CSS + an
+   IntersectionObserver reveal + a wheel→horizontal mapper. Reduced motion
+   shows everything at once.
+   ============================================================================ */
 
-const THEME: Record<string, number> = { trackpoint: 0xf59e0b, cinemate: 0x8b5cf6, splashaquatics: 0x06b6d4 };
-const hex = (n: number) => '#' + n.toString(16).padStart(6, '0');
+const ACCENT: Record<string, string> = { trackpoint: '#f59e0b', cinemate: '#8b5cf6', splashaquatics: '#06b6d4' };
+// Which device frame each project lives in.
+const DEVICE: Record<string, 'mobile' | 'desktop'> = { trackpoint: 'mobile', cinemate: 'desktop', splashaquatics: 'desktop' };
 
-const ProjectWorld: React.FC<{ project: typeof PROJECTS[number]; accent: string; onExit: () => void }> = ({ project, accent, onExit }) => {
-  const [shot, setShot] = useState(0);
-  const [lightbox, setLightbox] = useState(false);
-  const [shown, setShown] = useState(false);
-
-  useEffect(() => {
-    const r = requestAnimationFrame(() => setShown(true));
-    return () => cancelAnimationFrame(r);
-  }, []);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key !== 'Escape') return;
-      if (lightbox) setLightbox(false);
-      else onExit();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [lightbox, onExit]);
-
-  return (
-    <div data-exp-ui className="absolute inset-0 z-30 overflow-y-auto px-6 py-16 sm:px-12">
-      <div className="mx-auto max-w-3xl">
-        <button data-exp-ui onClick={onExit} className="mb-6 rounded-full border border-white/15 px-4 py-1.5 text-xs font-bold text-[#C3BFD6] hover:bg-white/10">← Exit</button>
-        <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{project.subtitle}</p>
-        <h3 className="mt-1 font-display text-3xl font-extrabold text-[#F5F3FF] sm:text-5xl">{project.title}</h3>
-        {project.achievements?.length ? <ul className="mt-4 space-y-1 text-sm text-[#ffe8a3]">{project.achievements.map((a) => <li key={a}>{a}</li>)}</ul> : null}
-        <p className="mt-5 leading-relaxed text-[#C3BFD6]">{project.overview}</p>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2">
-          <div className={`rounded-2xl border border-[#FF2BD6]/25 bg-[#160a18]/60 p-4 transition-all duration-500 ${shown ? 'translate-x-0 opacity-100' : '-translate-x-6 opacity-0'}`}><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#FF2BD6]">The challenge</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.challenges?.map((c) => <li key={c}>{c}</li>)}</ul></div>
-          <div className={`rounded-2xl border border-[#22D3EE]/25 bg-[#08161a]/60 p-4 transition-all duration-500 ${shown ? 'translate-x-0 opacity-100' : 'translate-x-6 opacity-0'}`}><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]">The solution</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.solutions?.map((s) => <li key={s}>{s}</li>)}</ul></div>
-        </div>
-        <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]/80">Tech deployed</p>
-        <div className="mt-2 space-y-2">{project.techStackDetails?.map((g) => (<div key={g.category} className="flex flex-wrap items-center gap-2"><span className="text-[11px] font-bold uppercase text-[#7c5cff]">{g.category}</span>{g.tools.map((t) => <span key={t} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-2.5 py-0.5 text-[11px] font-semibold text-[#dffaff]">{t}</span>)}</div>))}</div>
-
-        {/* Cover-flow screenshot gallery */}
-        {project.screenshots?.length ? (
-          <div data-exp-ui className="mt-10">
-            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]/80">Gallery</p>
-            <div className="relative mt-4 h-[300px] sm:h-[420px]" style={{ perspective: '1200px' }}>
-              {project.screenshots.map((s, i) => {
-                const o = i - shot;
-                if (Math.abs(o) > 3) return null;
-                const isActive = o === 0;
-                return (
-                  <img
-                    key={s}
-                    loading="lazy"
-                    src={s}
-                    alt=""
-                    onClick={() => { if (isActive) setLightbox(true); else setShot(i); }}
-                    className="absolute left-1/2 top-1/2 w-[150px] sm:w-[230px] aspect-[9/16] rounded-xl object-cover"
-                    style={{
-                      transform: `translate(-50%, -50%) translateX(${o * 56}%) rotateY(${o * -38}deg) scale(${Math.max(0.4, 1 - Math.abs(o) * 0.18)})`,
-                      zIndex: 100 - Math.abs(o),
-                      opacity: Math.max(0, 1 - Math.abs(o) * 0.4),
-                      cursor: isActive ? 'zoom-in' : 'pointer',
-                      transition: 'transform 0.35s ease, opacity 0.35s ease',
-                    }}
-                  />
-                );
-              })}
-            </div>
-            <div data-exp-ui className="mt-4 flex items-center justify-center gap-4">
-              <button
-                data-exp-ui
-                onClick={() => setShot((prev) => Math.max(0, prev - 1))}
-                className="rounded-full border border-white/15 px-4 py-1.5 text-sm font-bold text-[#C3BFD6] hover:bg-white/10 disabled:opacity-30"
-                disabled={shot === 0}
-              >‹</button>
-              <span className="text-sm text-[#A8A3C2]">{shot + 1} / {project.screenshots.length}</span>
-              <button
-                data-exp-ui
-                onClick={() => setShot((prev) => Math.min(project.screenshots.length - 1, prev + 1))}
-                className="rounded-full border border-white/15 px-4 py-1.5 text-sm font-bold text-[#C3BFD6] hover:bg-white/10 disabled:opacity-30"
-                disabled={shot === project.screenshots.length - 1}
-              >›</button>
-            </div>
-          </div>
-        ) : null}
-
-        {/* Lightbox */}
-        {lightbox && project.screenshots?.length ? (
-          <div data-exp-ui className="fixed inset-0 z-50 flex items-center justify-center">
-            <div
-              data-exp-ui
-              className="absolute inset-0 bg-black/85"
-              onClick={() => setLightbox(false)}
-            />
-            <img
-              src={project.screenshots[shot]}
-              alt=""
-              className="relative max-h-[90vh] object-contain rounded-xl"
-              style={{ zIndex: 1 }}
-            />
-            <button
-              data-exp-ui
-              onClick={() => setLightbox(false)}
-              className="absolute right-5 top-5 rounded-full border border-white/15 px-3 py-1 text-sm font-bold text-[#C3BFD6] hover:bg-white/10"
-              style={{ zIndex: 2 }}
-            >✕</button>
-          </div>
-        ) : null}
-      </div>
+// A phone mockup wrapping a portrait screenshot (mobile apps).
+const Phone: React.FC<{ src: string }> = ({ src }) => (
+  <figure className="shot-reveal flex h-full shrink-0 items-center">
+    <div className="relative rounded-[2.2rem] border-[10px] border-[#17151f] bg-[#17151f] shadow-[0_40px_90px_-25px_rgba(0,0,0,0.85)]">
+      <div className="absolute left-1/2 top-[7px] z-10 h-[15px] w-20 -translate-x-1/2 rounded-full bg-[#17151f]" />
+      <img src={src} alt="" loading="lazy" className="block h-[60vh] w-auto rounded-[1.5rem] sm:h-[68vh]" />
     </div>
-  );
-};
+  </figure>
+);
+
+// A browser-window mockup wrapping a landscape screenshot (web apps).
+const Browser: React.FC<{ src: string }> = ({ src }) => (
+  <figure className="shot-reveal flex h-full shrink-0 items-center">
+    <div className="overflow-hidden rounded-xl border border-white/10 bg-[#0d0b16] shadow-[0_40px_90px_-25px_rgba(0,0,0,0.85)]">
+      <div className="flex items-center gap-2 border-b border-white/10 bg-[#17141f] px-4 py-2.5">
+        <span className="h-3 w-3 rounded-full bg-[#ff5f57]" />
+        <span className="h-3 w-3 rounded-full bg-[#febc2e]" />
+        <span className="h-3 w-3 rounded-full bg-[#28c840]" />
+        <div className="ml-3 hidden h-5 flex-1 rounded-md bg-[#0d0b16] sm:block" />
+      </div>
+      <img src={src} alt="" loading="lazy" className="block h-[52vh] w-auto sm:h-[58vh]" />
+    </div>
+  </figure>
+);
 
 const Projects: React.FC = () => {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const mountRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef(0);
-  const previewRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [failed, setFailed] = useState(false);
-  const [reduced] = useState(() => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const [open, setOpen] = useState(-1); // index of the project whose gallery is open (-1 = card list)
+  const railRef = useRef<HTMLDivElement>(null);
 
-  // Step 1: mode state machine
-  const modeRef = useRef<'cruise' | 'warpIn' | 'world' | 'warpOut'>('cruise');
-  const worldIdxRef = useRef(-1);
-  const [worldIdx, setWorldIdx] = useState(-1);
-  // Lock BOTH <html> and <body> — the viewport scrollport is <html>, so body-only doesn't hold.
-  const lockScroll = (on: boolean) => { const v = on ? 'hidden' : ''; document.documentElement.style.overflow = v; document.body.style.overflow = v; };
-  const enterWorld = (i: number) => { lockScroll(true); worldIdxRef.current = i; modeRef.current = 'warpIn'; setWorldIdx(i); };
-  const exitWorld = () => { lockScroll(false); modeRef.current = 'warpOut'; setWorldIdx(-1); };
-
-  // Safety: restore scroll if component unmounts while a world is open
-  useEffect(() => () => { lockScroll(false); }, []);
-
-  // scroll pin (mirror Experience.tsx): scrub writes progress for the 3D scene
+  // scroll-reveal: add `.in` to reveal elements as they enter view (one-way).
+  // In the open gallery this fires horizontally — frames off to the right are
+  // not intersecting the viewport, so they reveal as you scroll into them.
   useEffect(() => {
-    if (reduced) return;
-    const gsap = window.gsap, ScrollTrigger = window.ScrollTrigger;
-    if (!gsap || !ScrollTrigger || !stageRef.current) return;
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: stageRef.current, start: 'top top',
-        end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 2.4 : 3.2),
-        scrub: 1, pin: true, pinSpacing: true, anticipatePin: 1, invalidateOnRefresh: true,
-        onUpdate: (self: any) => { progressRef.current = self.progress; },
-      });
-    }, trackRef);
-    return () => ctx.revert();
-  }, [reduced]);
-
-  // ---- 3D scene ----
-  useEffect(() => {
-    if (reduced) return;
-    let cancelled = false;
-    let cleanup = () => {};
-
-    (async () => {
-      let THREE: any;
-      try { THREE = await import('three'); } catch { if (!cancelled) setFailed(true); return; }
-      const mount = mountRef.current;
-      if (cancelled || !mount) return;
-
-      const isMobile = window.innerWidth < 640;
-      const size = () => ({ w: Math.max(1, mount.clientWidth), h: Math.max(1, mount.clientHeight) });
-      let { w, h } = size();
-
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
-      camera.position.set(0, 1.3, 10);
-      camera.lookAt(0, 0, 0);
-
-      let renderer: any;
-      try { renderer = new THREE.WebGLRenderer({ alpha: true, antialias: !isMobile, powerPreference: 'default' }); }
-      catch { if (!cancelled) setFailed(true); return; }
-      renderer.setClearColor(0x000000, 0);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(w, h, false);
-      const canvas = renderer.domElement;
-      canvas.style.width = '100%'; canvas.style.height = '100%'; canvas.style.display = 'block'; canvas.style.pointerEvents = 'none';
-      mount.appendChild(canvas);
-
-      const onContextLost = (e: Event) => { e.preventDefault(); if (cancelled) return; cleanup(); cleanup = () => {}; setFailed(true); };
-      canvas.addEventListener('webglcontextlost', onContextLost, false);
-
-      const disposables: any[] = [];
-      const track = <T,>(o: T): T => { disposables.push(o); return o; };
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-      const l1 = new THREE.DirectionalLight(0x22d3ee, 1.4); l1.position.set(-3, 2, 4); scene.add(l1);
-      const l2 = new THREE.DirectionalLight(0xff2bd6, 1.0); l2.position.set(3, -1, 2); scene.add(l2);
-      const l3 = new THREE.DirectionalLight(0xffffff, 0.6); l3.position.set(0, 4, 3); scene.add(l3);
-
-      const flameTex = track(makeFlameTexture(THREE));
-      const glowTex = track(makeGlowTexture(THREE));
-
-      // backdrop (reuse): 3 star layers + nebula (lighter than Experience — projects are the focus)
-      const starDefs = [
-        { n: 150, sx: 70, sy: 36, z0: -17, z1: -11, c: 0x8fa6ff, sz: 1.4, par: 0.02 },
-        { n: 150, sx: 64, sy: 32, z0: -10, z1: -5, c: 0xbfe6ff, sz: 2.0, par: 0.05 },
-        { n: 110, sx: 56, sy: 28, z0: -5, z1: -1.5, c: 0xeafcff, sz: 2.6, par: 0.09 },
-      ];
-      const starLayers = starDefs.map((d) => { const L = makeStarLayer(THREE, isMobile ? Math.round(d.n * 0.6) : d.n, d.sx, d.sy, d.z0, d.z1, d.c, d.sz); track(L.geo); track(L.mat); scene.add(L.points); return { ...L, par: d.par }; });
-
-      // ship escorts bottom-left (reuse hero model)
-      const { ship, flames } = buildShip(THREE, isMobile, track, flameTex);
-      ship.scale.setScalar(0.7); scene.add(ship);
-      const SHIP_BASE = new THREE.Vector3(-3.6, -1.9, 2.6);
-
-      // portal rail
-      const STEP = 8;
-      const rail = new THREE.Group(); scene.add(rail);
-      const RAIL_A = 4, RAIL_B = -(STEP * PROJECTS.length + 4);
-      const builtPortals = PROJECTS.map((p, i) => {
-        const accent = THEME[p.id] ?? 0x22d3ee;
-        const g = new THREE.Group(); g.position.x = i * STEP;
-        // segmented neon ring = torus + a thinner bright inner torus
-        const ringMat = track(new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.9 }));
-        const ring = new THREE.Mesh(track(new THREE.TorusGeometry(1.4, 0.12, isMobile ? 10 : 16, isMobile ? 28 : 64)), ringMat); g.add(ring);
-        const innerMat = track(new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 }));
-        const inner = new THREE.Mesh(track(new THREE.TorusGeometry(1.18, 0.03, isMobile ? 8 : 12, isMobile ? 28 : 64)), innerMat); g.add(inner);
-        // event-horizon disc (additive glow) that brightens when active
-        const glowMat = track(new THREE.SpriteMaterial({ map: glowTex, color: accent, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false }));
-        const glow = new THREE.Sprite(glowMat); glow.scale.set(3.2, 3.2, 1); glow.position.z = -0.2; g.add(glow);
-        // award beacon: pulsing gold sprite for portals with achievements
-        let beacon: any = null;
-        if (p.achievements?.length) {
-          const beaconMat = track(new THREE.SpriteMaterial({ map: glowTex, color: 0xffd36b, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
-          beacon = new THREE.Sprite(beaconMat);
-          beacon.scale.setScalar(0.9);
-          beacon.position.set(0, 1.9, 0);
-          g.add(beacon);
-        }
-        rail.add(g);
-        const hit = new THREE.Mesh(track(new THREE.SphereGeometry(1.5, 8, 8)), track(new THREE.MeshBasicMaterial({ visible: false }))); hit.position.x = i * STEP; rail.add(hit);
-        return { group: g, ring, glow, glowMat, idx: i, hit, accent, beacon };
-      });
-
-      // Step 3: wormhole warp tunnel
-      const warpTex = track(makeStreakTexture(THREE));
-      const warpMat = track(new THREE.MeshBasicMaterial({ map: warpTex, color: 0x9be6ff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
-      const warpTunnel = new THREE.Mesh(track(new THREE.CylinderGeometry(0.2, 3.5, 14, 24, 1, true)), warpMat);
-      warpTunnel.rotation.x = Math.PI / 2; warpTunnel.visible = false; scene.add(warpTunnel);
-      let warpT = 0;
-
-      // Step 2: raycaster + NDC vector for click routing
-      const raycaster = new THREE.Raycaster();
-      const ndc = new THREE.Vector2();
-      let hoverIdx = -1;
-
-      const onPointerDown = (e: PointerEvent) => {
-        const el = e.target as HTMLElement | null;
-        if (el && el.closest('a, button, [data-exp-ui]')) return;
-        if (modeRef.current !== 'cruise') return;
-        const rect = canvas.getBoundingClientRect(); if (!rect.width) return;
-        const fx = (e.clientX - rect.left) / rect.width, fy = (e.clientY - rect.top) / rect.height;
-        if (fx < 0 || fx > 1 || fy < 0 || fy > 1) return;
-        ndc.set(fx * 2 - 1, -(fy * 2 - 1)); raycaster.setFromCamera(ndc, camera);
-        const hitResult = raycaster.intersectObjects(builtPortals.map((b) => b.hit), false)[0];
-        if (hitResult) { const idx = builtPortals.findIndex((b) => b.hit === hitResult.object); const worldX = idx * STEP + rail.position.x; if (Math.abs(worldX) < 3) enterWorld(idx); }
-      };
-      window.addEventListener('pointerdown', onPointerDown);
-
-      const onPointerMove = (e: PointerEvent) => {
-        if (modeRef.current !== 'cruise') return;
-        const rect = canvas.getBoundingClientRect(); if (!rect.width) return;
-        const fx = (e.clientX - rect.left) / rect.width, fy = (e.clientY - rect.top) / rect.height;
-        if (fx < 0 || fx > 1 || fy < 0 || fy > 1) { hoverIdx = -1; stageRef.current!.style.cursor = ''; return; }
-        ndc.set(fx * 2 - 1, -(fy * 2 - 1)); raycaster.setFromCamera(ndc, camera);
-        const hitResult = raycaster.intersectObjects(builtPortals.map((b) => b.hit), false)[0];
-        if (hitResult) { hoverIdx = builtPortals.findIndex((b) => b.hit === hitResult.object); stageRef.current!.style.cursor = 'pointer'; }
-        else { hoverIdx = -1; stageRef.current!.style.cursor = ''; }
-      };
-      window.addEventListener('pointermove', onPointerMove, { passive: true });
-
-      const tmp = new THREE.Vector3();
-      let raf = 0, visible = true, last = performance.now();
-      const tick = () => {
-        const now = performance.now();
-        const dt = Math.min((now - last) / 1000, 0.05);
-        last = now;
-        const t = now * 0.001;
-        const p = progressRef.current;
-
-        // Step 4: mode machine
-        const mode = modeRef.current;
-        if (mode === 'warpIn') { warpT = Math.min(1, warpT + dt / 0.6); if (warpT >= 1) modeRef.current = 'world'; }
-        else if (mode === 'warpOut') { warpT = Math.max(0, warpT - dt / 0.5); if (warpT <= 0) { modeRef.current = 'cruise'; worldIdxRef.current = -1; } }
-
-        // warp visuals
-        warpTunnel.visible = warpT > 0.01;
-        warpMat.opacity = Math.sin(Math.min(1, warpT) * Math.PI) * 0.8;
-        warpTunnel.position.z = 6 - warpT * 12;
-        warpTunnel.rotation.y += dt * 6;
-
-        // camera: cruise base, pushed forward (into the portal) by warpT, settling in 'world'
-        const camZ = 10 - warpT * 7;
-        camera.position.set(0, 1.3 - warpT * 0.6, camZ); camera.lookAt(0, 0, 0);
-
-        // hide cruise actors while in world
-        const inWorld = mode === 'world' || warpT > 0.5;
-        rail.visible = !inWorld; ship.visible = !inWorld;
-
-        if (!inWorld) {
-          // cruise-only updates (Task 2)
-          rail.position.x = RAIL_A + p * (RAIL_B - RAIL_A);
-          const railX = rail.position.x;
-          for (const L of starLayers) { L.mat.uniforms.uTime.value = t; L.points.position.x = -railX * L.par; }
-          ship.position.set(SHIP_BASE.x, SHIP_BASE.y + Math.sin(t * 1.4) * 0.12, SHIP_BASE.z);
-          ship.rotation.set(Math.sin(t * 0.9) * 0.05, 0, Math.sin(t * 1.1) * 0.06);
-          const flick = 0.8 + 0.2 * Math.sin(t * 26);
-          flames.forEach((fl: any) => { fl.scale.set(0.7 * flick, 0.5 * flick, 1); fl.material.opacity = 0.85; });
-          builtPortals.forEach((pt) => {
-            const worldX = pt.idx * STEP + railX;
-            const act = Math.max(0, 1 - Math.abs(worldX) / 3);
-            pt.group.scale.setScalar(0.7 + act * 0.4);
-            pt.group.rotation.z += dt * (0.2 + act * 0.5);
-            pt.glowMat.opacity = 0.15 + act * 0.5 + (hoverIdx === pt.idx ? 0.3 : 0);
-            if (pt.beacon) pt.beacon.scale.setScalar(0.8 + 0.15 * Math.sin(t * 4));
-            // preview card position (HTML)
-            const card = previewRefs.current[pt.idx];
-            if (card) { pt.group.getWorldPosition(tmp).project(camera); card.style.left = (tmp.x * 0.5 + 0.5) * 100 + '%'; card.style.top = (1 - (tmp.y * 0.5 + 0.5)) * 100 + '%'; card.style.opacity = String(act); card.style.pointerEvents = act > 0.5 ? 'auto' : 'none'; }
-          });
-        } else {
-          // hide all preview cards while in world
-          previewRefs.current.forEach((card) => { if (card) { card.style.opacity = '0'; card.style.pointerEvents = 'none'; } });
-          // still animate star layers (subtle parallax keeps scene alive)
-          for (const L of starLayers) { L.mat.uniforms.uTime.value = t; }
-        }
-
-        renderer.render(scene, camera);
-        raf = visible ? requestAnimationFrame(tick) : 0;
-      };
-      const start = () => { if (!raf && visible) { last = performance.now(); raf = requestAnimationFrame(tick); } };
-      const stop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
-
-      const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting && !document.hidden; visible ? start() : stop(); }, { threshold: 0 });
-      io.observe(mount);
-      const onVis = () => { visible = !document.hidden; visible ? start() : stop(); };
-      document.addEventListener('visibilitychange', onVis);
-
-      const ro = new ResizeObserver(() => {
-        const s = size();
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-        renderer.setSize(s.w, s.h, false);
-        camera.aspect = s.w / s.h; camera.updateProjectionMatrix();
-        if (!raf) renderer.render(scene, camera);
-      });
-      ro.observe(mount);
-      start();
-
-      cleanup = () => {
-        stop(); io.disconnect(); ro.disconnect();
-        document.removeEventListener('visibilitychange', onVis);
-        canvas.removeEventListener('webglcontextlost', onContextLost);
-        // Step 6: remove click router and hover listener
-        window.removeEventListener('pointerdown', onPointerDown);
-        window.removeEventListener('pointermove', onPointerMove);
-        if (stageRef.current) stageRef.current.style.cursor = '';
-        disposables.forEach((d) => { try { (d as any).dispose && (d as any).dispose(); } catch {} });
-        if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
-        try { renderer.forceContextLoss(); } catch {}
-        renderer.dispose();
-      };
-    })();
-
-    return () => { cancelled = true; cleanup(); };
-  }, [reduced]);
-
-  if (reduced || failed) {
-    return (
-      <section id="projects" aria-labelledby="proj-heading" className="relative w-full bg-[#05030f] py-24 sm:py-32">
-        <div className="mx-auto max-w-4xl px-6">
-          <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Destinations // Projects</p>
-          <h2 id="proj-heading" className="mt-4 font-display text-4xl font-extrabold text-[#F5F3FF] sm:text-6xl">Worlds I&apos;ve built</h2>
-          <div className="mt-12 space-y-16">
-            {PROJECTS.map((p) => (
-              <article key={p.id} className="rounded-3xl border border-white/10 bg-[#0a0814]/80 p-6 sm:p-8">
-                <h3 className="font-display text-2xl font-extrabold text-[#F5F3FF]">{p.title}</h3>
-                <p className="text-[#22D3EE]">{p.subtitle}</p>
-                <p className="mt-3 text-[#A8A3C2]">{p.overview}</p>
-                {p.achievements?.length ? (
-                  <ul className="mt-4 space-y-1 text-sm text-[#dcd9ee]">{p.achievements.map((a) => <li key={a}>{a}</li>)}</ul>
-                ) : null}
-                <div className="mt-5 grid gap-4 sm:grid-cols-2">
-                  <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#FF2BD6]">Challenges</p><ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-[#A8A3C2]">{p.challenges?.map((c) => <li key={c}>{c}</li>)}</ul></div>
-                  <div><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]">Solutions</p><ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-[#A8A3C2]">{p.solutions?.map((s) => <li key={s}>{s}</li>)}</ul></div>
-                </div>
-                <ul className="mt-5 flex flex-wrap gap-2">{p.tags.map((t) => <li key={t} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-3 py-1 text-xs font-semibold text-[#dffaff]">{t}</li>)}</ul>
-                <div className="mt-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-                  {p.screenshots.slice(0, 8).map((s) => <img key={s} src={s} alt="" loading="lazy" className="aspect-[9/16] w-full rounded-lg object-cover" />)}
-                </div>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
+    const els = Array.from(document.querySelectorAll('.proj-reveal, .shot-reveal'));
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }),
+      { threshold: 0.12 }
     );
-  }
+    els.forEach((el) => { if (!el.classList.contains('in')) io.observe(el); });
+    return () => io.disconnect();
+  }, [open]);
+
+  // lock the page scroll while a gallery is open (it scrolls internally)
+  useEffect(() => {
+    const v = open >= 0 ? 'hidden' : '';
+    document.documentElement.style.overflow = v;
+    document.body.style.overflow = v;
+    return () => { document.documentElement.style.overflow = ''; document.body.style.overflow = ''; };
+  }, [open]);
+
+  // Escape closes the gallery
+  useEffect(() => {
+    if (open < 0) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(-1); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  // Map vertical wheel onto horizontal scroll so "keep scrolling goes right".
+  // Over the info column, let it scroll vertically until its bounds, then hand
+  // the remaining delta to the horizontal rail.
+  useEffect(() => {
+    if (open < 0) return;
+    const rail = railRef.current;
+    if (!rail) return;
+    rail.scrollLeft = 0; // always start at the info column
+    const onWheel = (e: WheelEvent) => {
+      const delta = Math.abs(e.deltaY) > Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+      if (delta === 0) return;
+      const col = (e.target as HTMLElement)?.closest?.('[data-info-col]') as HTMLElement | null;
+      if (col && col.scrollHeight > col.clientHeight + 1) {
+        const atTop = col.scrollTop <= 0;
+        const atBottom = col.scrollTop + col.clientHeight >= col.scrollHeight - 1;
+        if (!(delta < 0 && atTop) && !(delta > 0 && atBottom)) return; // let the column scroll vertically
+      }
+      rail.scrollLeft += delta;
+      e.preventDefault();
+    };
+    rail.addEventListener('wheel', onWheel, { passive: false });
+    return () => rail.removeEventListener('wheel', onWheel);
+  }, [open]);
+
+  const p = open >= 0 ? PROJECTS[open] : null;
+  const accent = p ? ACCENT[p.id] ?? '#22D3EE' : '#22D3EE';
+  const device = p ? DEVICE[p.id] ?? 'mobile' : 'mobile';
 
   return (
-    <section ref={trackRef} id="projects" aria-labelledby="proj-heading" className="relative bg-[#05030f]">
-      <div ref={stageRef} className="relative h-[100svh] w-full overflow-hidden bg-[#05030f]">
-        <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_30%,#0a0a24_0%,#06051a_50%,#03020c_100%)]" />
-        <div ref={mountRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
-        {PROJECTS.map((p, i) => (
-          <div key={p.id} ref={(el) => (previewRefs.current[i] = el)} className="absolute z-20 w-64 -translate-x-1/2 -translate-y-[150%]" style={{ left: '50%', top: '50%', opacity: 0, pointerEvents: 'none' }}>
-            <div data-exp-ui className="rounded-2xl border border-white/12 bg-[#0a0814]/90 p-4 text-center shadow-[0_16px_44px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-              <h3 className="font-display text-lg font-extrabold text-[#F5F3FF]">{p.title}</h3>
-              <p className="text-sm text-[#22D3EE]">{p.subtitle}</p>
-              <ul className="mt-2 flex flex-wrap justify-center gap-1.5">{p.tags.slice(0, 4).map((t) => <li key={t} className="rounded-full border border-white/15 px-2 py-0.5 text-[11px] text-[#dcd9ee]">{t}</li>)}</ul>
-              <button data-exp-ui onClick={() => enterWorld(i)} className="proj-enter mt-3 rounded-full border border-[#22D3EE]/50 bg-[#22D3EE]/10 px-4 py-1.5 text-xs font-bold text-[#22D3EE]" data-idx={i}>▶ Enter</button>
+    <section id="projects" aria-labelledby="proj-heading" className="relative bg-[#05030f] py-24 sm:py-32">
+      <div className="absolute inset-0 bg-[radial-gradient(120%_80%_at_50%_0%,#0e0b22_0%,#06051a_45%,#03020c_100%)]" />
+
+      {/* ---- card list ---- */}
+      <div className="relative mx-auto max-w-6xl px-6">
+        <p className="proj-reveal text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Destinations // Projects</p>
+        <h2 id="proj-heading" className="proj-reveal mt-3 max-w-3xl font-display text-5xl font-extrabold leading-[1.05] text-[#F5F3FF] sm:text-7xl">
+          Worlds I&apos;ve built
+        </h2>
+        <p className="proj-reveal mt-5 max-w-xl text-lg text-[#A8A3C2]">Real products shipped for real people. Open one to fly through the full story and every screen.</p>
+
+        <div className="mt-16 space-y-10 sm:mt-20 sm:space-y-14">
+          {PROJECTS.map((proj, i) => (
+            <button
+              key={proj.id}
+              onClick={() => setOpen(i)}
+              className="proj-reveal group relative block h-[62vh] min-h-[400px] w-full overflow-hidden rounded-[2rem] text-left ring-1 ring-white/10 transition-shadow duration-500 hover:ring-white/25 hover:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE]"
+            >
+              <img src={proj.image} alt="" className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-[1.2s] ease-out group-hover:scale-[1.06]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-black/15" />
+              <div className="absolute inset-x-0 bottom-0 p-7 sm:p-10">
+                <p className="text-xs font-bold uppercase tracking-[0.28em]" style={{ color: ACCENT[proj.id] }}>{String(i + 1).padStart(2, '0')} — {proj.subtitle}</p>
+                <h3 className="mt-2 font-display text-4xl font-extrabold tracking-tight text-white drop-shadow sm:text-6xl">{proj.title}</h3>
+                <p className="mt-3 max-w-xl text-[#dcd9ee] sm:text-lg">{proj.description}</p>
+                <span className="mt-6 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-[#14121A] transition-all duration-300 group-hover:gap-3.5">
+                  Learn More <span aria-hidden="true">→</span>
+                </span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* ---- full-screen horizontal gallery ---- */}
+      {p && (
+        <div className="fixed inset-0 z-50 bg-[#05030f]">
+          {/* top bar (floats over the rail) */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-4 sm:px-8">
+            <button onClick={() => setOpen(-1)} className="pointer-events-auto inline-flex items-center gap-2 rounded-full border border-white/15 bg-[#05030f]/70 px-4 py-1.5 text-xs font-bold text-[#C3BFD6] backdrop-blur transition-colors hover:bg-white/10 hover:text-white">
+              <span aria-hidden="true">←</span> All projects
+            </button>
+            <span className="font-display text-sm font-extrabold text-white drop-shadow sm:text-base">{p.title}</span>
+            <button onClick={() => setOpen(-1)} aria-label="Close" className="pointer-events-auto grid h-9 w-9 place-items-center rounded-full border border-white/15 bg-[#05030f]/70 text-[#C3BFD6] backdrop-blur transition-colors hover:bg-white/10 hover:text-white">✕</button>
+          </div>
+
+          {/* horizontal rail */}
+          <div ref={railRef} className="gallery-rail flex h-full items-center gap-6 overflow-x-auto overflow-y-hidden px-6 sm:gap-12 sm:px-16">
+            {/* column 1 — cinematic hero: promo image + title + hook + award */}
+            <div className="relative flex h-[80vh] w-[86vw] max-w-[440px] shrink-0 overflow-hidden rounded-[1.8rem] ring-1 ring-white/10">
+              <img src={p.image} alt="" className="absolute inset-0 h-full w-full object-cover object-center" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#05030f] via-[#05030f]/80 to-[#05030f]/35" />
+              <div className="relative flex w-full flex-col justify-end px-7 py-9">
+                <p className="text-[11px] font-bold uppercase tracking-[0.28em]" style={{ color: accent }}>{String(open + 1).padStart(2, '0')} — {p.subtitle}</p>
+                <h2 className="mt-2 font-display text-4xl font-extrabold leading-[1.04] text-white sm:text-5xl">{p.title}</h2>
+                <p className="mt-3 text-sm leading-relaxed text-[#dcd9ee]">{p.description}</p>
+                {p.achievements?.length ? (
+                  <ul className="mt-4 space-y-1 text-[13px] leading-snug text-[#ffe3a0]">{p.achievements.map((a) => <li key={a}>{a}</li>)}</ul>
+                ) : null}
+                <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.25em] text-white/60">Scroll to explore <span aria-hidden="true">→</span></p>
+              </div>
+            </div>
+
+            {/* column 2 — the brief: overview, challenge → solution, tech */}
+            <div data-info-col className="flex h-[80vh] w-[86vw] max-w-[480px] shrink-0 flex-col overflow-y-auto rounded-[1.8rem] border border-white/10 bg-white/[0.03] px-7 py-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <div className="my-auto">
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#9b96b8]">Overview</p>
+                <p className="mt-2 text-[13px] leading-snug text-[#cfcbe4]">{p.overview}</p>
+
+                <div className="mt-5 grid grid-cols-2 gap-3">
+                  <div className="rounded-xl border border-[#FF2BD6]/25 bg-[#160a18]/40 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#FF2BD6]">Challenge</p>
+                    <ul className="mt-1.5 space-y-1 text-[11px] leading-snug text-[#a8a3c2]">{p.challenges?.map((c) => <li key={c}>{c}</li>)}</ul>
+                  </div>
+                  <div className="rounded-xl border border-[#22D3EE]/25 bg-[#08161a]/40 p-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#22D3EE]">Solution</p>
+                    <ul className="mt-1.5 space-y-1 text-[11px] leading-snug text-[#a8a3c2]">{p.solutions?.map((s) => <li key={s}>{s}</li>)}</ul>
+                  </div>
+                </div>
+
+                <p className="mt-5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#22D3EE]/80">Tech deployed</p>
+                <div className="mt-2 space-y-1.5">
+                  {p.techStackDetails?.map((g) => (
+                    <div key={g.category} className="flex flex-wrap items-center gap-1.5">
+                      <span className="w-16 shrink-0 text-[10px] font-bold uppercase text-[#7c5cff]">{g.category}</span>
+                      {g.tools.map((t) => <span key={t} className="rounded-full border border-[#22D3EE]/35 bg-[#0a0820]/60 px-2.5 py-0.5 text-[10px] font-semibold text-[#dffaff]">{t}</span>)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* screenshots — device frame per project type, flowing rightward */}
+            {p.screenshots.map((s) => (device === 'desktop' ? <Browser key={s} src={s} /> : <Phone key={s} src={s} />))}
+
+            {/* end card */}
+            <div className="flex h-[80vh] w-[78vw] max-w-[340px] shrink-0 flex-col items-center justify-center gap-5 rounded-[1.8rem] border border-white/10 bg-white/[0.03] px-8 text-center">
+              <p className="font-display text-2xl font-extrabold text-white">End of the tour</p>
+              <p className="text-sm text-[#A8A3C2]">{p.screenshots.length} screens from {p.title}.</p>
+              <button onClick={() => setOpen(-1)} className="inline-flex items-center gap-2 rounded-full border border-white/15 px-6 py-3 text-sm font-bold text-[#C3BFD6] transition-colors hover:bg-white/10 hover:text-white">
+                <span aria-hidden="true">←</span> Back to all projects
+              </button>
             </div>
           </div>
-        ))}
-        {/* Step 5: Project World HTML shell */}
-        {worldIdx >= 0 && <ProjectWorld project={PROJECTS[worldIdx]} accent={hex(THEME[PROJECTS[worldIdx].id] ?? 0x22d3ee)} onExit={exitWorld} />}
-        <div className={`pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 transition-opacity duration-300 sm:px-10 sm:pt-20 ${worldIdx >= 0 ? 'opacity-0' : 'opacity-100'}`}>
-          <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Destinations // Projects</p>
-          <h2 id="proj-heading" className="mt-3 font-display text-4xl font-extrabold leading-tight text-[#F5F3FF] sm:text-6xl">Worlds I&apos;ve built</h2>
+
+          {/* scroll hint */}
+          <div className="pointer-events-none absolute bottom-4 left-1/2 z-20 -translate-x-1/2 text-[11px] font-bold uppercase tracking-[0.3em] text-white/40">
+            Scroll <span aria-hidden="true">→</span>
+          </div>
         </div>
-        <ul className="sr-only">{PROJECTS.map((p) => <li key={p.id}><strong>{p.title}</strong>: {p.overview}</li>)}</ul>
-      </div>
+      )}
     </section>
   );
 };
