@@ -7,8 +7,10 @@ import Experience, { ExperienceStatic } from './Experience';
 // into two remapped sub-progresses: the skills act (SpaceScene) lives in [0, SEAM_HI]; the Experience act in
 // [SEAM_LO, 1]. They overlap across [SEAM_LO, SEAM_HI] where the two canvases crossfade — that overlap is what
 // removes the old ~1-viewport dead gap between the two formerly-separate pinned sections.
-const SEAM_LO = 0.64;
 const SEAM_HI = 0.7;
+// crossfade starts where SpaceScene's flip-down exit begins (EXIT_START 0.95 × SEAM_HI) so the settled
+// crystal grid gets a clean, fully-opaque beat BEFORE it starts flipping out + crossfading to Experience.
+const SEAM_LO = 0.665;
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const smooth01 = (a: number, b: number, x: number) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
