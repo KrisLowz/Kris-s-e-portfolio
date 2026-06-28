@@ -44,7 +44,7 @@ const ProjectWorld: React.FC<{ project: typeof PROJECTS[number]; accent: string;
         {project.screenshots?.length ? (
           <div data-exp-ui className="mt-10">
             <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]/80">Gallery</p>
-            <div className="relative mt-4 h-[420px]" style={{ perspective: '1200px' }}>
+            <div className="relative mt-4 h-[300px] sm:h-[420px]" style={{ perspective: '1200px' }}>
               {project.screenshots.map((s, i) => {
                 const o = i - shot;
                 if (Math.abs(o) > 3) return null;
@@ -56,7 +56,7 @@ const ProjectWorld: React.FC<{ project: typeof PROJECTS[number]; accent: string;
                     src={s}
                     alt=""
                     onClick={() => { if (isActive) setLightbox(true); else setShot(i); }}
-                    className="absolute left-1/2 top-1/2 w-[230px] aspect-[9/16] rounded-xl object-cover"
+                    className="absolute left-1/2 top-1/2 w-[150px] sm:w-[230px] aspect-[9/16] rounded-xl object-cover"
                     style={{
                       transform: `translate(-50%, -50%) translateX(${o * 56}%) rotateY(${o * -38}deg) scale(${Math.max(0.4, 1 - Math.abs(o) * 0.18)})`,
                       zIndex: 100 - Math.abs(o),
@@ -213,9 +213,9 @@ const Projects: React.FC = () => {
         const g = new THREE.Group(); g.position.x = i * STEP;
         // segmented neon ring = torus + a thinner bright inner torus
         const ringMat = track(new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.9 }));
-        const ring = new THREE.Mesh(track(new THREE.TorusGeometry(1.4, 0.12, 16, 64)), ringMat); g.add(ring);
+        const ring = new THREE.Mesh(track(new THREE.TorusGeometry(1.4, 0.12, isMobile ? 10 : 16, isMobile ? 28 : 64)), ringMat); g.add(ring);
         const innerMat = track(new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.5 }));
-        const inner = new THREE.Mesh(track(new THREE.TorusGeometry(1.18, 0.03, 12, 64)), innerMat); g.add(inner);
+        const inner = new THREE.Mesh(track(new THREE.TorusGeometry(1.18, 0.03, isMobile ? 8 : 12, isMobile ? 28 : 64)), innerMat); g.add(inner);
         // event-horizon disc (additive glow) that brightens when active
         const glowMat = track(new THREE.SpriteMaterial({ map: glowTex, color: accent, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false }));
         const glow = new THREE.Sprite(glowMat); glow.scale.set(3.2, 3.2, 1); glow.position.z = -0.2; g.add(glow);
