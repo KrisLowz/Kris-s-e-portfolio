@@ -664,17 +664,13 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           camera.lookAt(_v2.set(30, 0, 7).lerp(cp, fe));
         } else {
           camera.position.set(0, 0, 7);
-          camera.rotation.y = -turn * (Math.PI / 2);
+          camera.rotation.set(0, -turn * (Math.PI / 2), 0); // explicit reset clears any pitch left by a focus/exit lookAt
+          camera.up.set(0, 1, 0);
           if (turn > 0 && turn < 1) camera.translateZ(-Math.sin(turn * Math.PI) * 2.0); // dolly in mid-turn, settle back
-          // EXIT: after the crystals settle, pitch the camera DOWN (+ slight descent) so the field swings up and
-          // out of the top — the vertical mirror of the 90° turn, handing off into the Experience scene below.
+          // EXIT: dolly the camera straight DOWN (no tilt) so the whole skills field slides UP and out of the top
+          // — one continuous vertical move that the Experience scene below picks up by rising in from beneath.
           const exitT = smooth(clamp01((p - EXIT0) / (1 - EXIT0)));
-          if (exitT > 0) {
-            const phi = exitT * (Math.PI * 0.5); // pitch down toward straight-down
-            camera.position.y -= exitT * 2.0;
-            camera.up.set(0, 1, 0);
-            camera.lookAt(_v1.set(Math.cos(phi), camera.position.y - Math.sin(phi), 7));
-          }
+          if (exitT > 0) camera.position.y -= exitT * 8;
         }
         starMat.opacity = turn * 0.95;
         nebMat.opacity = turn * 0.7;

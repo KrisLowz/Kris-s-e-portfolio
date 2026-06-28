@@ -538,12 +538,14 @@ const Experience: React.FC = () => {
           lookTarget.lerpVectors(BASE_LOOK, tmpStation, focusT);
           camera.lookAt(lookTarget);
         } else {
-          // entrance: continue the Skills exit's camera-DOWN — drop in from high above looking down, then
-          // level out into the flight-path view (settles just before the first station docks at p≈0.17).
+          // entrance: continue the Skills exit's vertical camera-DOWN — the camera starts high and DESCENDS to
+          // its base (no tilt: position + look offset equally), so the flight-path rises in from below. Settles
+          // just before the first station docks (p≈0.17), reading as one continuous downward move.
           const ent = Math.min(1, Math.max(0, p / 0.14));
           const e = ent * ent * (3 - 2 * ent); // smoothstep
-          camera.position.copy(BASE_CAM); camera.position.y += (1 - e) * 9;
-          lookTarget.copy(BASE_LOOK); lookTarget.y -= (1 - e) * 6;
+          const drop = (1 - e) * 9;
+          camera.position.copy(BASE_CAM); camera.position.y += drop;
+          lookTarget.copy(BASE_LOOK); lookTarget.y += drop;
           camera.lookAt(lookTarget);
         }
 
