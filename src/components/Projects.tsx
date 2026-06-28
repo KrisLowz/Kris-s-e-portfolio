@@ -71,16 +71,25 @@ const Projects: React.FC = () => {
   const [open, setOpen] = useState(-1); // index of the project whose gallery is open (-1 = card list)
   const railRef = useRef<HTMLDivElement>(null);
 
-  // scroll-reveal: add `.in` to reveal elements as they enter view (one-way).
-  // In the open gallery this fires horizontally — frames off to the right are
-  // not intersecting the viewport, so they reveal as you scroll into them.
+  // scroll-reveal. `.reveal-dir` cards are BIDIRECTIONAL — they slide in from their edge as they enter
+  // the viewport and slide back OUT when you scroll away (the IO keeps watching + toggles `.in`). The
+  // `.proj-reveal` headings/text and the gallery `.shot-reveal` frames stay one-way (reveal once).
   useEffect(() => {
     const els = Array.from(document.querySelectorAll('.proj-reveal, .shot-reveal, .reveal-dir'));
     const io = new IntersectionObserver(
-      (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }),
+      (entries) =>
+        entries.forEach((e) => {
+          const t = e.target as HTMLElement;
+          if (t.classList.contains('reveal-dir')) {
+            t.classList.toggle('in', e.isIntersecting); // slide in entering / slide back out leaving
+          } else if (e.isIntersecting) {
+            t.classList.add('in');
+            io.unobserve(t); // one-way for headings/text/shots
+          }
+        }),
       { threshold: 0.12 }
     );
-    els.forEach((el) => { if (!el.classList.contains('in')) io.observe(el); });
+    els.forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [open]);
 
