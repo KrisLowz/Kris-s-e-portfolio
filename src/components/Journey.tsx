@@ -189,8 +189,10 @@ const Journey: React.FC = () => {
         // fades past, scrim + copy reveal as the planet lands.
         .to('.about-space', { opacity: 1, duration: 0.12 }, 0.0)
         .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.12 }, 0.02)
-        .to('.about-scrim', { opacity: 1, duration: 0.1 }, ABOUT_END - 0.16)
-        .to('.about-line', { yPercent: 0, opacity: 1, stagger: 0.04, duration: 0.12, ease: 'power3.out' }, ABOUT_END - 0.15)
+        .to('.about-scrim', { opacity: 1, duration: 0.1 }, ABOUT_END - 0.26)
+        // reveal earlier + finish well before the turn (was completing ~0.59, right as the camera leaves) so the
+        // copy is fully readable and holds, instead of still wiping in as it sweeps away.
+        .to('.about-line', { yPercent: 0, opacity: 1, stagger: 0.035, duration: 0.1, ease: 'power3.out' }, ABOUT_END - 0.25)
         // Act 2 — the camera zooms + turns 90° right into the skills universe. The About copy is NOT animated
         // here: SpaceScene drives it through the LIVE scene camera each frame (projecting it from the planet's
         // world point + foreshortening by the yaw), so the copy and the planet sweep off as one 3D shot and
