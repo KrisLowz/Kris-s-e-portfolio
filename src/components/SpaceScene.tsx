@@ -680,19 +680,19 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           camera.rotation.set(0, -turn * (Math.PI / 2), 0); // explicit reset clears any pitch left by a focus/exit lookAt
           camera.up.set(0, 1, 0);
           if (turn > 0 && turn < 1) camera.translateZ(-Math.sin(turn * Math.PI) * 2.0); // dolly in mid-turn, settle back
-          // EXIT: the camera FLIPS DOWN — it pitches toward the floor while diving forward, so the ENTIRE skills
-          // field (crystals + the intro title, which rides the same exitT) swings UP and sweeps off the top of
-          // frame as one move, no fade. We end looking downward into empty space, which is exactly how the
-          // Experience flight-path enters (camera descending from above) — so the two scenes read as one shot.
+          // EXIT: the vertical hand-off to Experience is now carried by a CSS pan (the whole skills LAYER slides
+          // up while Experience rises from below — see Journey). So the internal camera only adds a GENTLE tilt +
+          // dolly for parallax depth; the crystal grid stays framed and rides the pan up (instead of flying off
+          // into empty void, which made the slide look empty / like a fade).
           if (exitT > 0) {
-            camera.rotateX(-exitT * 0.5);    // pitch down → field rotates up & out the top (eased so we don't
-            camera.translateZ(-exitT * 5.2); // bury the view in empty void below the field)
-            camera.position.y -= exitT * 1.5;
+            camera.rotateX(-exitT * 0.12);
+            camera.translateZ(-exitT * 1.4);
+            camera.position.y -= exitT * 0.3;
           }
         }
         starMat.opacity = turn * 0.95;
-        nebMat.opacity = turn * 0.7 * (1 - exitT * 0.35); // keep most of the nebula glow through the exit so the
-        // hand-off reads as a lit starfield/nebula transition, not a black void (Experience now fills the lower half)
+        nebMat.opacity = turn * 0.7 * (1 - exitT * 0.12); // keep the nebula lit through the exit so the skills
+        // scene still looks full as the CSS pan slides it up and off (Experience rises into the vacated space)
 
         // ---- carry the About copy through the SAME camera move as the planet, so text + planet leave as one
         // 3D shot (and reverse together on scroll-up). We anchor the copy to the planet's world point and

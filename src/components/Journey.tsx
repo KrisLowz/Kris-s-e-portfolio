@@ -3,14 +3,14 @@ import Hero from './Hero';
 import SpaceScene, { SKILLS, PHASES } from './SpaceScene';
 import Experience, { ExperienceStatic } from './Experience';
 
-// The merged journey is ONE pinned stage / ONE ScrollTrigger. The shared scroll progress p∈[0,1] is split
-// into two remapped sub-progresses: the skills act (SpaceScene) lives in [0, SEAM_HI]; the Experience act in
-// [SEAM_LO, 1]. They overlap across [SEAM_LO, SEAM_HI] where the two canvases crossfade — that overlap is what
-// removes the old ~1-viewport dead gap between the two formerly-separate pinned sections.
-const SEAM_HI = 0.7;
-// crossfade starts where SpaceScene's flip-down exit begins (EXIT_START 0.95 × SEAM_HI) so the settled
-// crystal grid gets a clean, fully-opaque beat BEFORE it starts flipping out + crossfading to Experience.
-const SEAM_LO = 0.665;
+// The merged journey is ONE pinned stage / ONE ScrollTrigger. The shared scroll progress p∈[0,1] is split into
+// two remapped sub-progresses: the skills act (SpaceScene) plays in [0, SKILLS_END]; the Experience act in
+// [PAN_LO, 1]. Across the PAN window the two scenes physically SLIDE UP in tandem — skills exits the top while
+// Experience rises from below, flush-stacked like one continuous vertical space — so it reads as a real camera
+// pan DOWN through one dimension (an opacity crossfade looked like Experience just fading in over the top).
+const SKILLS_END = 0.7;  // skills/about sub-progress fills [0, SKILLS_END] of the shared scroll (SpaceScene)
+const PAN_LO = 0.665;    // pan starts where SpaceScene's flip-down begins (right after the settled-crystal beat)
+const PAN_HI = 0.8;      // pan ends once the Experience scene has fully slid up into view (slow + deliberate)
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const smooth01 = (a: number, b: number, x: number) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
@@ -189,18 +189,19 @@ const Journey: React.FC = () => {
             stageRef.current && stageRef.current.classList.toggle('about-active', self.isActive),
           onUpdate: (self: any) => {
             const p = self.progress;
-            spaceProgRef.current = clamp01(p / SEAM_HI);            // skills/about occupy [0, SEAM_HI]
-            expProgRef.current = clamp01((p - SEAM_LO) / (1 - SEAM_LO)); // experience occupies [SEAM_LO, 1]
-            const cf = smooth01(SEAM_LO, SEAM_HI, p);              // 0 = skills, 1 = experience
+            spaceProgRef.current = clamp01(p / SKILLS_END);          // skills/about occupy [0, SKILLS_END]
+            expProgRef.current = clamp01((p - PAN_LO) / (1 - PAN_LO)); // experience occupies [PAN_LO, 1]
+            // Vertical "camera-down" pan: both layers translate UP in tandem (flush-stacked), so skills slides
+            // off the top as Experience rises from below — one continuous downward move, not a fade.
+            const pan = smooth01(PAN_LO, PAN_HI, p);                // 0 = skills framed, 1 = experience framed
             const overlay = stageRef.current && (stageRef.current.querySelector('.jr-overlay') as HTMLElement | null);
             if (overlay) {
-              overlay.style.opacity = String(1 - cf);             // fade the skills act out across the seam
-              // interactive only once About has taken over AND before the seam hands off to Experience
-              overlay.style.pointerEvents = p > 0.42 * SEAM_HI && cf < 0.5 ? 'auto' : 'none';
+              overlay.style.transform = `translateY(${(-pan * 100).toFixed(2)}%)`; // exits upward
+              overlay.style.pointerEvents = p > 0.42 * SKILLS_END && pan < 0.5 ? 'auto' : 'none';
             }
             if (expLayerRef.current) {
-              expLayerRef.current.style.opacity = String(cf);     // fade the Experience act in across the seam
-              expLayerRef.current.style.pointerEvents = cf > 0.5 ? 'auto' : 'none';
+              expLayerRef.current.style.transform = `translateY(${((1 - pan) * 100).toFixed(2)}%)`; // rises from below
+              expLayerRef.current.style.pointerEvents = pan > 0.5 ? 'auto' : 'none';
             }
           },
         },
@@ -212,7 +213,7 @@ const Journey: React.FC = () => {
       // shared scroll. These HTML crossfades must live in the SAME band → multiply every position+duration by
       // SEAM_HI so they stay locked to the 3D turn (otherwise the backdrop fade desyncs from the camera turn).
       const { ABOUT_END, TURN_START } = PHASES;
-      const W = SEAM_HI;
+      const W = SKILLS_END;
       tl
         // Act 1 — About: deep space washes in over the hero, hero fades past, scrim reveals as the planet lands.
         .to('.about-space', { opacity: 1, duration: 0.12 * W }, 0.0)
@@ -261,13 +262,14 @@ const Journey: React.FC = () => {
         <div className="jr-hero absolute inset-0">
           <Hero />
         </div>
-        {/* Skills/About act — the shared SpaceScene canvas + its overlays. Crossfaded OUT across the seam. */}
-        <div className="jr-overlay absolute inset-0" style={{ opacity: 0, pointerEvents: 'none' }}>
+        {/* Skills/About act — the shared SpaceScene canvas + its overlays. Slides UP and off across the pan. */}
+        <div className="jr-overlay absolute inset-0 will-change-transform" style={{ opacity: 0, pointerEvents: 'none' }}>
           <AboutLayers use3D progressRef={spaceProgRef} />
         </div>
-        {/* Experience act — its own canvas + overlays, in the SAME pinned stage. Crossfaded IN across the seam,
-            so there is no longer a dead viewport between the two. Driven by the remapped Experience sub-progress. */}
-        <div ref={expLayerRef} className="absolute inset-0" style={{ opacity: 0, pointerEvents: 'none' }}>
+        {/* Experience act — its own canvas + overlays, in the SAME pinned stage. Starts below the fold and SLIDES
+            UP into view across the pan window (flush-stacked under the skills act), so the hand-off reads as one
+            continuous camera-down move. Driven by the remapped Experience sub-progress. */}
+        <div ref={expLayerRef} className="absolute inset-0 will-change-transform" style={{ transform: 'translateY(100%)', pointerEvents: 'none' }}>
           <Experience progressRef={expProgRef} />
         </div>
       </div>
