@@ -14,12 +14,14 @@
 > out to their grid positions (`lerpVectors`, staggered, arc). Fully reversible. **M4 built:** raycast hover →
 > crystal turns more transparent (icon clearer) + lifts/glows; **click → camera zooms to the crystal** (`focusT`
 > lerp of `camera.position`/`lookAt`), body goes transparent, others dim, and an HTML **detail card** (badge +
-> name + description) rises in (close via backdrop/✕). **Drama (reworked):** the **real 3D cat-ship** (shared
-> `buildShip` from `Spaceship3D.tsx`, lit by a follow PointLight) weaves in (`SHIP0..SHIP1`) dodging 3 small
-> meteors, swings to **aim at the big meteor** and fires a **bright core + cyan-glow laser** (`beam`+`beamGlow`,
-> muzzle + impact flashes, `FIRE0..FIRE1`); the meteor then **breaks into ~15 rock fragments** (`frags`, spin +
-> shrink-away) alongside the crystal/debris burst. The old non-rotating `meteorRim` shell was removed (it read as
-> a second, static meteor stacked on the spinning one). All scrubbed + reversible. (`Planet3D.tsx` is superseded.)
+> name + description) rises in (close via backdrop/✕). **Combat sequence (scrubbed, polished):** the **real 3D
+> cat-ship** (`buildShip` from `Spaceship3D.tsx`, follow PointLight) weaves in (`SHIP0`) dodging 3 small meteors,
+> holds beside the big meteor and fires a **sustained laser** (`FIRE0`) that **keeps firing until destroyed**.
+> While held, the meteor takes **progressive damage** (`dmgT`): glows hotter + flickers, spins up, recoils/shudders,
+> chips down. A **camera shake** builds with `dmgT` and **spikes on the kill**. The kill = a **big blast** (white
+> `flash` + expanding `blastRing` shockwave) → the meteor **breaks into ~18 rock fragments** (`frags`) + debris,
+> then the **crystals** form. Finally the ship **banks + flies off** (`SHIP_OUT0..1`, thruster flare) leaving the
+> grid. The old non-rotating `meteorRim` was removed (it read as a 2nd static meteor). All scrubbed + reversible.
 >
 > **Physics rebuild (latest):** the crystals are now **~20% smaller**, **flattened to one plane** (`x=CRYS_DEPTH`),
 > and laid out in a bounded grid **below the heading**. Once the shatter settles (`shatterT>0.985`),

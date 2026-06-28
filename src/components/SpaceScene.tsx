@@ -40,6 +40,23 @@ function makeGlowTexture(THREE: any) {
   return new THREE.CanvasTexture(c);
 }
 
+// A glowing ring (hot core → transparent) for the meteor's destruction shockwave.
+function makeRingTexture(THREE: any) {
+  const s = 256;
+  const c = document.createElement('canvas');
+  c.width = c.height = s;
+  const ctx = c.getContext('2d')!;
+  const g = ctx.createRadialGradient(s / 2, s / 2, 0, s / 2, s / 2, s / 2);
+  g.addColorStop(0.0, 'rgba(255,255,255,0)');
+  g.addColorStop(0.62, 'rgba(255,150,60,0)');
+  g.addColorStop(0.8, 'rgba(255,210,140,0.95)');
+  g.addColorStop(0.9, 'rgba(255,120,40,0.55)');
+  g.addColorStop(1.0, 'rgba(255,90,20,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, s, s);
+  return new THREE.CanvasTexture(c);
+}
+
 // Soft galaxy/nebula for the skills universe (cyan core → violet → magenta falloff).
 function makeNebulaTexture(THREE: any) {
   const s = 256;
@@ -323,7 +340,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
 
       // ---- the big meteor: hurtles in during the turn, then SHATTERS into the crystals (v2 cinematic).
       // Scrubbed: scroll forward = meteor flies in → explodes → fragments fly out to the grid; reverse = re-forms.
-      const MET_FLY0 = 0.66, MET_FLY1 = 0.86, SHA0 = 0.86, SHA1 = 0.97;
+      const MET_FLY0 = 0.64, MET_FLY1 = 0.80, SHA0 = 0.87, SHA1 = 0.975;
       const meteorCenterV = new THREE.Vector3(CRYS_DEPTH, -0.2, 7);
       const meteorStartV = new THREE.Vector3(CRYS_DEPTH + 5, 8.5, 7 + 15);
       const meteorGeo = new THREE.IcosahedronGeometry(1.7, 1);
@@ -343,7 +360,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const fragGeo = new THREE.IcosahedronGeometry(1, 0);
       { const fp = fragGeo.attributes.position, v = new THREE.Vector3(); for (let i = 0; i < fp.count; i++) { v.fromBufferAttribute(fp, i); v.multiplyScalar(1 + (Math.sin(v.x * 5) + Math.cos(v.z * 6)) * 0.24); fp.setXYZ(i, v.x, v.y, v.z); } fragGeo.computeVertexNormals(); }
       const fragMat = new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 1, metalness: 0, emissive: 0xff5212, emissiveIntensity: 0.55, flatShading: true });
-      const FRAG_N = isMobile ? 9 : 15;
+      const FRAG_N = isMobile ? 11 : 18;
       const frags: any[] = [];
       for (let i = 0; i < FRAG_N; i++) {
         const m = new THREE.Mesh(fragGeo, fragMat); m.visible = false;
@@ -368,7 +385,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       scene.add(debris);
 
       // ---- the drama: a spaceship weaves in dodging small meteors, then fires on the big one ----
-      const SHIP0 = 0.63, SHIP1 = 0.85, FIRE0 = 0.835, FIRE1 = 0.862;
+      const SHIP0 = 0.66, FIRE0 = 0.81, SHIP_OUT0 = 0.885, SHIP_OUT1 = 0.99;
       const _yAxis = new THREE.Vector3(0, 1, 0);
       // the actual 3D cat-ship (shared with the hero scene). Model faces +X; it travels +Z here, so we yaw it.
       const shipDisposables: any[] = [];
@@ -398,6 +415,12 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const muzzle = new THREE.Sprite(muzzleMat); muzzle.visible = false; scene.add(muzzle);
       const impactMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xffd070, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
       const impact = new THREE.Sprite(impactMat); impact.visible = false; scene.add(impact);
+      // final-blast FX: a white flash + an expanding shockwave ring (peak right on the kill)
+      const flashMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xffffff, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const flash = new THREE.Sprite(flashMat); flash.visible = false; scene.add(flash);
+      const blastRingTex = makeRingTexture(THREE);
+      const blastRingMat = new THREE.SpriteMaterial({ map: blastRingTex, color: 0xffd9a0, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const blastRing = new THREE.Sprite(blastRingMat); blastRing.visible = false; scene.add(blastRing);
 
       // ---- interaction (freeze + reveal constellation when the cursor is over the actual sphere) ----
       const raycaster = new THREE.Raycaster();
@@ -668,18 +691,33 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           }
         }
 
-        // ---- meteor → shatter → crystals (all scrubbed by scroll) ----
+        // ---- meteor: flies in → HOLDS under sustained fire (progressive damage) → final blast → fragments ----
         const flyT = smooth(clamp01((p - MET_FLY0) / (MET_FLY1 - MET_FLY0)));
         const shatterT = smooth(clamp01((p - SHA0) / (SHA1 - SHA0)));
-        // the meteor hurtles in, heats up, then flares + vanishes as it shatters
-        meteorGroup.visible = flyT > 0.001 && shatterT < 0.55;
+        const dmgT = clamp01((p - FIRE0) / Math.max(0.001, SHA0 - FIRE0)); // 0 at first shot → 1 at the kill
+        const blastPulse = Math.sin(clamp01(shatterT / 0.4) * Math.PI);     // sharp flash right after the kill
+        meteorGroup.visible = flyT > 0.001 && shatterT < 0.5;
         if (meteorGroup.visible) {
           meteorGroup.position.lerpVectors(meteorStartV, meteorCenterV, flyT);
+          if (dmgT > 0 && shatterT < 0.001) { // shudder/recoil as it's hammered (escalating), before it blows
+            meteorGroup.position.x += (Math.random() - 0.5) * dmgT * 0.5;
+            meteorGroup.position.y += (Math.random() - 0.5) * dmgT * 0.5;
+            meteorGroup.position.z += (Math.random() - 0.5) * dmgT * 0.5;
+          }
           const shrink = 1 - smooth(clamp01(shatterT / 0.35));
-          meteorGroup.scale.setScalar(Math.max(0.001, (0.55 + flyT * 0.45) * shrink));
-          meteor.rotation.x += dt * 0.8; meteor.rotation.y += dt * 1.1;
-          meteorMat.emissiveIntensity = 0.12 + flyT * 0.33 + shatterT * 1.9;
-          meteorGlowMat.opacity = (0.3 + flyT * 0.45) * (1 - smooth(clamp01(shatterT / 0.4)));
+          meteorGroup.scale.setScalar(Math.max(0.001, (0.55 + flyT * 0.45) * (1 - dmgT * 0.18) * shrink)); // chips down as hit
+          meteor.rotation.x += dt * (0.8 + dmgT * 3); meteor.rotation.y += dt * (1.1 + dmgT * 3); // spins up under fire
+          meteorMat.emissiveIntensity = 0.12 + flyT * 0.33 + dmgT * 1.6 + dmgT * 0.5 * Math.sin(now * 0.04) + shatterT * 2.2; // glows hotter + flickers
+          meteorGlowMat.opacity = (0.3 + flyT * 0.4 + dmgT * 0.5) * (1 - smooth(clamp01(shatterT / 0.4)));
+        }
+        // camera shake — builds while the meteor is hammered, spikes on the blast (skipped during crystal focus)
+        if (focusT < 0.001) {
+          const shake = (shatterT < 0.001 ? dmgT * 0.045 : 0) + blastPulse * 0.18;
+          if (shake > 0.0001) {
+            camera.position.x += (Math.random() - 0.5) * shake;
+            camera.position.y += (Math.random() - 0.5) * shake;
+            camera.position.z += (Math.random() - 0.5) * shake;
+          }
         }
         // meteor fragments burst out as it cracks apart (visible chunks; shrink + spin as they fly)
         for (let i = 0; i < frags.length; i++) {
@@ -734,48 +772,57 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           dp.needsUpdate = true;
           debrisMat.opacity = debrisA * 0.85;
         }
+        // final blast: a white flash + an expanding shockwave ring, peaking right on the kill
+        flash.visible = blastPulse > 0.01;
+        if (flash.visible) { flash.position.copy(meteorCenterV); flash.scale.setScalar(3 + blastPulse * 7); flashMat.opacity = blastPulse; }
+        blastRing.visible = shatterT > 0.001 && shatterT < 0.6;
+        if (blastRing.visible) { blastRing.position.copy(meteorCenterV); const rr = 2 + smooth(clamp01(shatterT / 0.5)) * 18; blastRing.scale.set(rr, rr, 1); blastRingMat.opacity = blastPulse * 0.9; }
 
-        // ---- drama: the 3D cat-ship weaves in dodging small meteors, then fires on the big one ----
-        const shipT = clamp01((p - SHIP0) / (SHIP1 - SHIP0));
-        const shipFade = 1 - smooth(clamp01(shatterT / 0.35));
-        const fireT = smooth(clamp01((p - FIRE0) / (FIRE1 - FIRE0)));
-        ship.visible = shipT > 0.001 && shatterT < 0.5;
+        // ---- drama: the 3D cat-ship flies in, holds + fires until the meteor's destroyed, then banks away ----
+        const inT = clamp01((p - SHIP0) / (FIRE0 - SHIP0));               // fly-in
+        const outT = clamp01((p - SHIP_OUT0) / (SHIP_OUT1 - SHIP_OUT0));  // bank + leave
+        ship.visible = p > SHIP0 + 0.001 && outT < 0.999;
         shipLight.intensity = 0;
+        let shx = 8.5, shy = 0.5 + Math.sin(now * 0.002) * 0.22, shz = 9.5; // hold position beside the meteor
         if (ship.visible) {
-          ship.position.set(8.5, 1.8 * Math.sin(shipT * Math.PI * 3) * shipFade, 2 + shipT * 8);
-          const popIn = smooth(clamp01(shipT * 4));
-          ship.scale.setScalar(Math.max(0.0001, SHIP_SCALE * popIn * shipFade)); // grow in / shrink out (model has no opacity)
-          shipLight.position.set(ship.position.x - 1.2, ship.position.y + 1.6, ship.position.z + 1.5);
-          shipLight.intensity = 3.4 * popIn * shipFade;
-          // face travel (+Z); swing to aim at the meteor while firing
-          const aimYaw = Math.atan2(-(meteorGroup.position.z - ship.position.z), meteorGroup.position.x - ship.position.x);
-          const aimBlend = meteorGroup.visible ? smooth(clamp01(fireT / 0.25)) * smooth(clamp01((1 - fireT) / 0.25)) : 0;
+          if (p < FIRE0) { shy = 1.8 * Math.sin(inT * Math.PI * 3) * (1 - inT) + 0.5 * inT; shz = 2 + inT * 7.5; } // weave in
+          if (outT > 0) { const e = outT * outT; shz = 9.5 + e * 24; shy += e * 5; shx = 8.5 - e * 2; }            // whoosh off-right + up
+          ship.position.set(shx, shy, shz);
+          const popIn = smooth(clamp01(inT * 4));
+          ship.scale.setScalar(Math.max(0.0001, SHIP_SCALE * popIn * (1 - smooth(outT) * 0.85)));                  // grow in / shrink out
+          shipLight.position.set(shx - 1.2, shy + 1.6, shz + 1.5);
+          shipLight.intensity = 3.6 * popIn * (1 - outT * 0.6);
+          // face travel (+Z); swing to aim at the meteor while firing; hard bank on the way out
+          const aimYaw = Math.atan2(-(meteorCenterV.z - shz), meteorCenterV.x - shx);
+          const aimBlend = clamp01((p - FIRE0) / 0.02) * (1 - clamp01((p - SHA0) / 0.025));
           ship.rotation.y = -Math.PI / 2 + (aimYaw + Math.PI / 2) * aimBlend;
-          ship.rotation.z = -0.4 * Math.cos(shipT * Math.PI * 3) * shipFade;     // bank with the weave
+          ship.rotation.z = (p < FIRE0 ? -0.4 * Math.cos(inT * Math.PI * 3) : 0) - outT * 0.9;
           ship.rotation.x = Math.sin(now * 0.0021) * 0.06;
           const flick = 0.7 + 0.3 * Math.sin(now * 0.03);
-          shipFlames.forEach((fl: any, i: number) => { fl.scale.set(0.8 * flick, 0.55 * flick, 1); fl.material.opacity = 0.85 * (0.7 + 0.3 * Math.sin(now * 0.026 + i)); });
+          shipFlames.forEach((fl: any, i: number) => { const s = (0.8 + outT * 1.2) * flick; fl.scale.set(s, (0.55 + outT * 0.6) * flick, 1); fl.material.opacity = 0.9 * (0.7 + 0.3 * Math.sin(now * 0.026 + i)); });
         }
         for (let i = 0; i < smalls.length; i++) {
           const sm = smalls[i];
-          const t = clamp01((shipT - sm.off) * 1.4);
-          sm.m.visible = t > 0.001 && t < 0.999 && shatterT < 0.4;
+          const t = clamp01((inT - sm.off) * 1.4);
+          sm.m.visible = t > 0.001 && t < 0.999 && p < FIRE0 + 0.02;
           if (sm.m.visible) {
             sm.m.position.set(8.5, sm.y, sm.z0 - t * 16 * sm.spd);
             sm.m.rotation.x += dt * 2; sm.m.rotation.y += dt * 1.5;
           }
         }
-        beam.visible = beamGlow.visible = muzzle.visible = impact.visible = fireT > 0.01 && fireT < 0.99 && meteorGroup.visible;
-        if (beam.visible) {
+        // sustained laser from the ship's nose to the meteor — keeps firing until the meteor's destroyed
+        const firing = p >= FIRE0 && shatterT < 0.06 && meteorGroup.visible;
+        beam.visible = beamGlow.visible = muzzle.visible = impact.visible = firing;
+        if (firing) {
           _v1.subVectors(meteorGroup.position, ship.position);
           const len = Math.max(0.01, _v1.length());
           const mid = _v2.copy(ship.position).addScaledVector(_v1, 0.5);
-          const a = Math.sin(fireT * Math.PI);
+          const flick = 0.78 + 0.22 * Math.sin(now * 0.05);                // sustained, flickering core
           const q = _quat.setFromUnitVectors(_yAxis, _v1.clone().normalize());
-          beam.position.copy(mid); beam.scale.set(0.8 + Math.sin(now * 0.05) * 0.25, len, 0.8 + Math.sin(now * 0.05) * 0.25); beam.quaternion.copy(q); beamMat.opacity = a * 0.95;
-          beamGlow.position.copy(mid); beamGlow.scale.set(0.7 + a * 0.4, len, 0.7 + a * 0.4); beamGlow.quaternion.copy(q); beamGlowMat.opacity = a * 0.4;
-          muzzle.position.copy(ship.position); muzzle.scale.setScalar(1.0 + Math.sin(now * 0.06) * 0.4 + a); muzzleMat.opacity = a;
-          impact.position.copy(meteorGroup.position); impact.scale.setScalar(2.2 + a * 2.5); impactMat.opacity = a * 0.95;
+          beam.position.copy(mid); beam.scale.set(flick, len, flick); beam.quaternion.copy(q); beamMat.opacity = 0.92 * flick;
+          beamGlow.position.copy(mid); beamGlow.scale.set(0.8 + dmgT * 0.5, len, 0.8 + dmgT * 0.5); beamGlow.quaternion.copy(q); beamGlowMat.opacity = 0.38 * flick;
+          muzzle.position.copy(ship.position); muzzle.scale.setScalar(1.0 + Math.sin(now * 0.08) * 0.4); muzzleMat.opacity = flick;
+          impact.position.copy(meteorGroup.position); impact.scale.setScalar(2.0 + dmgT * 2.0 + Math.sin(now * 0.09) * 0.5); impactMat.opacity = 0.85 * flick; // contact grows hotter as damage builds
         }
 
         const active = landed();
@@ -857,6 +904,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         flameTex.dispose(); shipFlames.forEach((fl: any) => fl.material.dispose());
         smallGeo.dispose(); smallMat.dispose();
         beamGeo.dispose(); beamMat.dispose(); beamGlowGeo.dispose(); beamGlowMat.dispose(); muzzleMat.dispose(); impactMat.dispose();
+        flashMat.dispose(); blastRingTex.dispose(); blastRingMat.dispose();
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
         try { renderer.forceContextLoss(); } catch {}
         renderer.dispose();
