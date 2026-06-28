@@ -129,7 +129,8 @@
   }
 }
 
-/* Scrollbar */
+/* Scrollbar — inner scroll areas keep this themed bar; the PAGE bar is hidden below
+   and replaced by the floating indicator (FloatingScrollbar.tsx). */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -143,6 +144,11 @@
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* Hide the native PAGE scrollbar only (scrolling still works) — a floating custom
+   indicator stands in for it. Inner scroll containers keep their own bars above. */
+html { scrollbar-width: none; }                       /* Firefox */
+html::-webkit-scrollbar { width: 0; height: 0; }      /* WebKit */
 
 .reaction-emoji {
   position: absolute;
@@ -320,49 +326,61 @@
   opacity: 1;
 }
 
-/* CUSTOM CURSOR */
+/* CUSTOM CURSOR — neon ring + dot (2026 redesign). Desktop only; the system cursor is hidden below. */
 .custom-cursor {
   position: fixed;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
-  border: 1px solid var(--accent-primary);
+  width: 28px;
+  height: 28px;
+  border: 1.5px solid rgba(34, 211, 238, 0.75);   /* cyan ring */
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
-  transition: transform 0.1s ease, width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+  box-shadow: 0 0 12px rgba(34, 211, 238, 0.35), inset 0 0 6px rgba(34, 211, 238, 0.12);
+  transition: width 0.28s ease, height 0.28s ease, background-color 0.28s ease, border-color 0.28s ease, box-shadow 0.28s ease;
 }
 
 .custom-cursor-dot {
   position: fixed;
   top: 0;
   left: 0;
-  width: 4px;
-  height: 4px;
-  background-color: var(--accent-primary);
+  width: 5px;
+  height: 5px;
+  background-color: #22d3ee;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9999;
   transform: translate(-50%, -50%);
+  /* glow for dark sections + a faint dark ring so it stays visible on the light Hero */
+  box-shadow: 0 0 10px rgba(34, 211, 238, 0.9), 0 0 0 1.5px rgba(5, 3, 15, 0.22);
 }
 
 .custom-cursor.hovering {
-  width: 50px;
-  height: 50px;
-  background-color: rgba(var(--spotlight-rgb), 0.1);
-  border-color: transparent;
+  width: 52px;
+  height: 52px;
+  background-color: rgba(34, 211, 238, 0.12);
+  border-color: rgba(124, 92, 255, 0.7);          /* violet on hover */
+  box-shadow: 0 0 22px rgba(124, 92, 255, 0.4);
 }
 
 .click-particle {
   position: fixed;
   width: 6px;
   height: 6px;
-  background-color: var(--accent-primary);
+  background-color: #22d3ee;
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
+  box-shadow: 0 0 8px rgba(34, 211, 238, 0.8);
+}
+
+/* Hide the system cursor on real-pointer (desktop) devices — the custom cursor replaces it.
+   cursor inherits, so html/body covers everything; restore the text caret on form fields. */
+@media (hover: hover) and (pointer: fine) {
+  html, body { cursor: none; }
+  input, textarea, select, [contenteditable="true"] { cursor: auto; }
 }
 
 /* ============================================================
@@ -437,6 +455,15 @@
 .proj-reveal { opacity: 0; transform: translateY(34px); transition: opacity 0.8s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1); }
 .proj-reveal.in { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .proj-reveal { opacity: 1; transform: none; transition: none; } }
+
+/* Directional scroll-reveals — slide + fade in from a side (or bottom) as the element enters view.
+   Same one-way IntersectionObserver as .proj-reveal (it also watches .reveal-dir). */
+.reveal-dir { opacity: 0; will-change: transform, opacity; transition: opacity 0.85s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.85s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.reveal-dir.from-left { transform: translateX(-58px); }
+.reveal-dir.from-right { transform: translateX(58px); }
+.reveal-dir.from-bottom { transform: translateY(48px); }
+.reveal-dir.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .reveal-dir { opacity: 1 !important; transform: none !important; transition: none !important; } }
 
 /* Horizontal gallery — frames slide in from the right as they scroll into view */
 .shot-reveal { opacity: 0; transform: translateX(64px) scale(0.96); transition: opacity 0.7s cubic-bezier(0.2, 0.7, 0.2, 1), transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1); }

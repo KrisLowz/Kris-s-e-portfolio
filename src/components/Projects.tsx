@@ -75,7 +75,7 @@ const Projects: React.FC = () => {
   // In the open gallery this fires horizontally — frames off to the right are
   // not intersecting the viewport, so they reveal as you scroll into them.
   useEffect(() => {
-    const els = Array.from(document.querySelectorAll('.proj-reveal, .shot-reveal'));
+    const els = Array.from(document.querySelectorAll('.proj-reveal, .shot-reveal, .reveal-dir'));
     const io = new IntersectionObserver(
       (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }),
       { threshold: 0.12 }
@@ -145,7 +145,7 @@ const Projects: React.FC = () => {
             <button
               key={proj.id}
               onClick={() => setOpen(i)}
-              className="proj-reveal group relative block h-[62vh] min-h-[400px] w-full overflow-hidden rounded-[2rem] text-left ring-1 ring-white/10 transition-shadow duration-500 hover:ring-white/25 hover:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE]"
+              className={`reveal-dir ${i % 2 === 0 ? 'from-left' : 'from-right'} group relative block h-[62vh] min-h-[400px] w-full overflow-hidden rounded-[2rem] text-left ring-1 ring-white/10 transition-all duration-700 ease-[cubic-bezier(0.2,0.7,0.2,1)] hover:ring-white/25 hover:shadow-[0_40px_120px_-30px_rgba(0,0,0,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#22D3EE]`}
             >
               <img src={proj.image} alt="" className="absolute inset-0 h-full w-full object-cover object-center transition-transform duration-[1.2s] ease-out group-hover:scale-[1.06]" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-black/15" />

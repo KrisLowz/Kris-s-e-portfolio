@@ -101,7 +101,7 @@ const Contact: React.FC = () => {
         </p>
 
         {/* ---- the comms console ---- */}
-        <div className="proj-reveal mt-14 grid overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl md:grid-cols-2">
+        <div className="reveal-dir from-bottom mt-14 grid overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-[0_40px_120px_-40px_rgba(0,0,0,0.9)] backdrop-blur-xl md:grid-cols-2">
           {/* left — direct frequencies + CV */}
           <div className="flex flex-col gap-6 p-8 sm:p-10">
             <div>
