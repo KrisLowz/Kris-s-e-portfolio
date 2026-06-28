@@ -11,6 +11,12 @@ const hex = (n: number) => '#' + n.toString(16).padStart(6, '0');
 const ProjectWorld: React.FC<{ project: typeof PROJECTS[number]; accent: string; onExit: () => void }> = ({ project, accent, onExit }) => {
   const [shot, setShot] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const r = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(r);
+  }, []);
 
   useEffect(() => {
     if (!lightbox) return;
@@ -28,8 +34,8 @@ const ProjectWorld: React.FC<{ project: typeof PROJECTS[number]; accent: string;
         {project.achievements?.length ? <ul className="mt-4 space-y-1 text-sm text-[#ffe8a3]">{project.achievements.map((a) => <li key={a}>{a}</li>)}</ul> : null}
         <p className="mt-5 leading-relaxed text-[#C3BFD6]">{project.overview}</p>
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
-          <div className="rounded-2xl border border-[#FF2BD6]/25 bg-[#160a18]/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#FF2BD6]">The challenge</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.challenges?.map((c) => <li key={c}>{c}</li>)}</ul></div>
-          <div className="rounded-2xl border border-[#22D3EE]/25 bg-[#08161a]/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]">The solution</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.solutions?.map((s) => <li key={s}>{s}</li>)}</ul></div>
+          <div className={`rounded-2xl border border-[#FF2BD6]/25 bg-[#160a18]/60 p-4 transition-all duration-500 ${shown ? 'translate-x-0 opacity-100' : '-translate-x-6 opacity-0'}`}><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#FF2BD6]">The challenge</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.challenges?.map((c) => <li key={c}>{c}</li>)}</ul></div>
+          <div className={`rounded-2xl border border-[#22D3EE]/25 bg-[#08161a]/60 p-4 transition-all duration-500 ${shown ? 'translate-x-0 opacity-100' : 'translate-x-6 opacity-0'}`}><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]">The solution</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.solutions?.map((s) => <li key={s}>{s}</li>)}</ul></div>
         </div>
         <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]/80">Tech deployed</p>
         <div className="mt-2 space-y-2">{project.techStackDetails?.map((g) => (<div key={g.category} className="flex flex-wrap items-center gap-2"><span className="text-[11px] font-bold uppercase text-[#7c5cff]">{g.category}</span>{g.tools.map((t) => <span key={t} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-2.5 py-0.5 text-[11px] font-semibold text-[#dffaff]">{t}</span>)}</div>))}</div>
@@ -213,9 +219,18 @@ const Projects: React.FC = () => {
         // event-horizon disc (additive glow) that brightens when active
         const glowMat = track(new THREE.SpriteMaterial({ map: glowTex, color: accent, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false }));
         const glow = new THREE.Sprite(glowMat); glow.scale.set(3.2, 3.2, 1); glow.position.z = -0.2; g.add(glow);
+        // award beacon: pulsing gold sprite for portals with achievements
+        let beacon: any = null;
+        if (p.achievements?.length) {
+          const beaconMat = track(new THREE.SpriteMaterial({ map: glowTex, color: 0xffd36b, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false }));
+          beacon = new THREE.Sprite(beaconMat);
+          beacon.scale.setScalar(0.9);
+          beacon.position.set(0, 1.9, 0);
+          g.add(beacon);
+        }
         rail.add(g);
         const hit = new THREE.Mesh(track(new THREE.SphereGeometry(1.5, 8, 8)), track(new THREE.MeshBasicMaterial({ visible: false }))); hit.position.x = i * STEP; rail.add(hit);
-        return { group: g, ring, glow, glowMat, idx: i, hit, accent };
+        return { group: g, ring, glow, glowMat, idx: i, hit, accent, beacon };
       });
 
       // Step 3: wormhole warp tunnel
@@ -228,6 +243,7 @@ const Projects: React.FC = () => {
       // Step 2: raycaster + NDC vector for click routing
       const raycaster = new THREE.Raycaster();
       const ndc = new THREE.Vector2();
+      let hoverIdx = -1;
 
       const onPointerDown = (e: PointerEvent) => {
         const el = e.target as HTMLElement | null;
@@ -241,6 +257,18 @@ const Projects: React.FC = () => {
         if (hitResult) { const idx = builtPortals.findIndex((b) => b.hit === hitResult.object); const worldX = idx * STEP + rail.position.x; if (Math.abs(worldX) < 3) enterWorld(idx); }
       };
       window.addEventListener('pointerdown', onPointerDown);
+
+      const onPointerMove = (e: PointerEvent) => {
+        if (modeRef.current !== 'cruise') return;
+        const rect = canvas.getBoundingClientRect(); if (!rect.width) return;
+        const fx = (e.clientX - rect.left) / rect.width, fy = (e.clientY - rect.top) / rect.height;
+        if (fx < 0 || fx > 1 || fy < 0 || fy > 1) { hoverIdx = -1; stageRef.current!.style.cursor = ''; return; }
+        ndc.set(fx * 2 - 1, -(fy * 2 - 1)); raycaster.setFromCamera(ndc, camera);
+        const hitResult = raycaster.intersectObjects(builtPortals.map((b) => b.hit), false)[0];
+        if (hitResult) { hoverIdx = builtPortals.findIndex((b) => b.hit === hitResult.object); stageRef.current!.style.cursor = 'pointer'; }
+        else { hoverIdx = -1; stageRef.current!.style.cursor = ''; }
+      };
+      window.addEventListener('pointermove', onPointerMove, { passive: true });
 
       const tmp = new THREE.Vector3();
       let raf = 0, visible = true, last = performance.now();
@@ -286,7 +314,8 @@ const Projects: React.FC = () => {
             if (Math.abs(worldX) < bestAbs) { bestAbs = Math.abs(worldX); activeIdx = act > 0.4 ? pt.idx : activeIdx; }
             pt.group.scale.setScalar(0.7 + act * 0.4);
             pt.group.rotation.z += dt * (0.2 + act * 0.5);
-            pt.glowMat.opacity = 0.15 + act * 0.5;
+            pt.glowMat.opacity = 0.15 + act * 0.5 + (hoverIdx === pt.idx ? 0.3 : 0);
+            if (pt.beacon) pt.beacon.scale.setScalar(0.8 + 0.15 * Math.sin(t * 4));
             // preview card position (HTML)
             const card = previewRefs.current[pt.idx];
             if (card) { pt.group.getWorldPosition(tmp).project(camera); card.style.left = (tmp.x * 0.5 + 0.5) * 100 + '%'; card.style.top = (1 - (tmp.y * 0.5 + 0.5)) * 100 + '%'; card.style.opacity = String(act); card.style.pointerEvents = act > 0.5 ? 'auto' : 'none'; }
@@ -323,8 +352,10 @@ const Projects: React.FC = () => {
         stop(); io.disconnect(); ro.disconnect();
         document.removeEventListener('visibilitychange', onVis);
         canvas.removeEventListener('webglcontextlost', onContextLost);
-        // Step 6: remove click router
+        // Step 6: remove click router and hover listener
         window.removeEventListener('pointerdown', onPointerDown);
+        window.removeEventListener('pointermove', onPointerMove);
+        if (stageRef.current) stageRef.current.style.cursor = '';
         disposables.forEach((d) => { try { (d as any).dispose && (d as any).dispose(); } catch {} });
         if (canvas.parentNode) canvas.parentNode.removeChild(canvas);
         try { renderer.forceContextLoss(); } catch {}
