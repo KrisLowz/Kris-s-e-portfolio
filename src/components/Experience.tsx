@@ -41,7 +41,7 @@ const RAIL_A = 4, RAIL_B = -20;
 
 // A twinkling star layer: round points with per-star random phase so each blinks independently,
 // size scaled by depth. Returned geo/mat are tracked + the caller sets parallax.
-function makeStarLayer(THREE: any, count: number, sx: number, sy: number, z0: number, z1: number, color: number, size: number) {
+export function makeStarLayer(THREE: any, count: number, sx: number, sy: number, z0: number, z1: number, color: number, size: number) {
   const pos = new Float32Array(count * 3);
   const aph = new Float32Array(count);
   for (let i = 0; i < count; i++) {
@@ -65,7 +65,7 @@ function makeStarLayer(THREE: any, count: number, sx: number, sy: number, z0: nu
 }
 
 // Horizontal streak gradient (transparent tail → bright head) for meteors + the comet tail.
-function makeStreakTexture(THREE: any) {
+export function makeStreakTexture(THREE: any) {
   const w = 64, h = 8;
   const c = document.createElement('canvas'); c.width = w; c.height = h;
   const ctx = c.getContext('2d')!;
@@ -78,7 +78,7 @@ function makeStreakTexture(THREE: any) {
 }
 
 // Soft cloud (several overlapping additive blobs) for nebulae.
-function makeNebulaTexture(THREE: any) {
+export function makeNebulaTexture(THREE: any) {
   const s = 128;
   const c = document.createElement('canvas'); c.width = c.height = s;
   const ctx = c.getContext('2d')!;
@@ -94,7 +94,7 @@ function makeNebulaTexture(THREE: any) {
 }
 
 // A dim shaded planet disc (light from upper-left, transparent outside the circle).
-function makePlanetTexture(THREE: any, c1: string, c2: string) {
+export function makePlanetTexture(THREE: any, c1: string, c2: string) {
   const s = 128;
   const c = document.createElement('canvas'); c.width = c.height = s;
   const ctx = c.getContext('2d')!;
