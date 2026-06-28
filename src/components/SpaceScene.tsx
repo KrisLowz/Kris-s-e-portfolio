@@ -651,6 +651,8 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             for (let i = 0; i < chipRefs.current.length; i++) { const c = chipRefs.current[i]; if (c) c.style.opacity = '0'; }
             if (!copyEl) copyEl = (typeof document !== 'undefined' ? (document.querySelector('.about-copy') as HTMLElement | null) : null);
             if (copyEl) { copyEl.style.opacity = '0'; copyEl.style.visibility = 'hidden'; copyEl.style.transform = ''; } // keep copy off the hero
+            if (!introEl) introEl = (typeof document !== 'undefined' ? (document.querySelector('.skills-intro') as HTMLElement | null) : null);
+            if (introEl) { introEl.style.opacity = '0'; introEl.style.visibility = 'hidden'; introEl.style.transform = ''; } // keep the skills title off the hero (no stale lingering on fast scroll-up)
           }
           raf = visible ? requestAnimationFrame(tick) : 0;
           return;
