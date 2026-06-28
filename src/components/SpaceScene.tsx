@@ -533,7 +533,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const GRACE_MS = 480;
 
       // ---- crystal physics (active once settled): spring to home, collide/bounce, walls keep them on-screen ----
-      const runCrystalPhysics = (dt: number) => {
+      const runCrystalPhysics = (dt: number, now: number) => {
         const pdt = Math.min(dt, 0.03);
         const halfH = Math.tan(VFOV * 0.5) * CRYS_DEPTH;
         const halfW = halfH * (mount.clientWidth / Math.max(1, mount.clientHeight));
@@ -551,8 +551,13 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             cr.py = ny; cr.pz = nz;
             continue;
           }
-          cr.vy += (cr.homeY - cr.py) * 9 * pdt; cr.vz += (cr.homeZ - cr.pz) * 9 * pdt; // spring back to its slot
-          cr.vy *= 0.88; cr.vz *= 0.88;
+          // flow: spring toward a slowly-drifting target — a gentle Lissajous around the home slot — so the
+          // whole field floats/breathes instead of sitting frozen (still draggable, still collides).
+          const ph = i * 0.7;
+          const tY = cr.homeY + Math.sin(now * 0.00045 + ph) * 0.22;
+          const tZ = cr.homeZ + Math.cos(now * 0.00037 + ph * 1.3) * 0.30;
+          cr.vy += (tY - cr.py) * 8 * pdt; cr.vz += (tZ - cr.pz) * 8 * pdt;
+          cr.vy *= 0.9; cr.vz *= 0.9;
           cr.py += cr.vy * pdt; cr.pz += cr.vz * pdt;
         }
         for (let a = 0; a < crystals.length; a++) {
@@ -758,7 +763,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         crystalsGroup.visible = shatterT > 0.001;
         if (crystalsGroup.visible) {
           const settled = shatterT > 0.985;
-          if (settled) runCrystalPhysics(dt);
+          if (settled) runCrystalPhysics(dt, now);
           for (let i = 0; i < crystals.length; i++) {
             const cr = crystals[i];
             const st = smooth(clamp01((shatterT - cr.delay) * 1.3));
