@@ -64,10 +64,10 @@
 ### Technical Skills (Solar System icons)
 
 **Inner ring (Languages / Core):**
-HTML5, CSS3, JavaScript, Python, Java, C++, C#, SQL
+HTML5, CSS3, JavaScript, TypeScript, Python, Java, C++, C#, SQL
 
 **Outer ring (Tools / Frameworks):**
-Figma, Tailwind CSS, PostgreSQL, Firebase, Kotlin, Flutter, Android, Git, VS Code
+Figma, Tailwind CSS, PostgreSQL, Firebase, Kotlin, Flutter, Android, Git, VS Code, Node.js
 
 ---
 

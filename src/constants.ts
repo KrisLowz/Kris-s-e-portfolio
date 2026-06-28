@@ -194,8 +194,8 @@ Current Role: Junior Software Developer (completed all studies).
 Key Awards: "Best Project on Display" (ICT Tradeshow 2025) for Final Year Project "TrackPoint".
 
 Skills:
-- Languages: Kotlin, Python, JavaScript, HTML, CSS, SQL.
-- Frameworks: Django, Firebase, React, MySQL Workbench.
+- Languages: Kotlin, Python, JavaScript, TypeScript, HTML, CSS, SQL.
+- Frameworks: Django, Firebase, React, Node.js, MySQL Workbench.
 - Enterprise: Oracle JD Edwards (JDE) Implementation.
 
 Experience:

@@ -17,6 +17,7 @@ const ICONS = {
   html5: 'html5/html5-original.svg',
   css3: 'css3/css3-original.svg',
   javascript: 'javascript/javascript-original.svg',
+  typescript: 'typescript/typescript-original.svg',
   python: 'python/python-original.svg',
   java: 'java/java-original.svg',
   cplusplus: 'cplusplus/cplusplus-original.svg',
@@ -31,6 +32,7 @@ const ICONS = {
   android: 'android/android-original.svg',
   git: 'git/git-original.svg',
   vscode: 'vscode/vscode-original.svg',
+  nodejs: 'nodejs/nodejs-original.svg',
 };
 
 const dir = 'public/assets/tech-icons';

@@ -84,6 +84,7 @@ export const TECH_SKILLS: { name: string; short: string; desc: string; color: st
   { name: 'HTML5', short: 'HTML', desc: 'The semantic, accessible backbone of every interface I build.', color: '#E34F26', dev: 'devicon-html5-plain', group: 'lang' },
   { name: 'CSS3', short: 'CSS', desc: 'Layout, motion, and responsive design — where structure becomes experience.', color: '#1572B6', dev: 'devicon-css3-plain', group: 'lang' },
   { name: 'JavaScript', short: 'JS', desc: 'My go-to for interactivity, from DOM logic to async APIs.', color: '#F7DF1E', dev: 'devicon-javascript-plain', group: 'lang' },
+  { name: 'TypeScript', short: 'TS', desc: 'Typed JavaScript that catches bugs early and scales a codebase with confidence.', color: '#3178C6', dev: 'devicon-typescript-plain', group: 'lang' },
   { name: 'Python', short: 'PY', desc: 'My toolkit for backends, scripting, and data-heavy problem solving.', color: '#3776AB', dev: 'devicon-python-plain', group: 'lang' },
   { name: 'Java', short: 'Java', desc: 'OOP fundamentals and robust application logic from my CS foundation.', color: '#5382A1', dev: 'devicon-java-plain', group: 'lang' },
   { name: 'C++', short: 'C++', desc: 'Low-level performance and the algorithms that taught me how machines think.', color: '#00599C', dev: 'devicon-cplusplus-plain', group: 'lang' },
@@ -98,6 +99,7 @@ export const TECH_SKILLS: { name: string; short: string; desc: string; color: st
   { name: 'Android', short: 'Android', desc: "Native mobile development for the world's biggest platform.", color: '#3DDC84', dev: 'devicon-android-plain', group: 'tool' },
   { name: 'Git', short: 'Git', desc: 'Version control and collaboration: the spine of every project.', color: '#F05032', dev: 'devicon-git-plain', group: 'tool' },
   { name: 'VS Code', short: 'Code', desc: 'My daily driver, tuned for speed and flow.', color: '#007ACC', dev: 'devicon-vscode-plain', group: 'tool' },
+  { name: 'Node.js', short: 'Node', desc: 'Server-side JavaScript for APIs, tooling, and real-time backends.', color: '#339933', dev: 'devicon-nodejs-plain', group: 'tool' },
 ];
 
 // The Devicon slug for a skill (e.g. 'devicon-cplusplus-plain' -> 'cplusplus'); names the local SVG file.
@@ -309,7 +311,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const crystalHits: any[] = [];
       const hitGeo = new THREE.SphereGeometry(0.85, 8, 8);
       const hitMat = new THREE.MeshBasicMaterial({ visible: false });
-      const CRYS_DEPTH = 11, CRYS_R = 0.62, CRYS_COLS = 6, COL_GAP = 2.05, ROW_GAP = 1.5, Y_TOP = 1.15;
+      const CRYS_DEPTH = 11, CRYS_R = 0.62, CRYS_COLS = 7, COL_GAP = 1.9, ROW_GAP = 1.5, Y_TOP = 1.15;
       const rowCounts: number[] = [];
       for (let r = 0; r * CRYS_COLS < TECH_SKILLS.length; r++) rowCounts.push(Math.min(CRYS_COLS, TECH_SKILLS.length - r * CRYS_COLS));
       TECH_SKILLS.forEach((skill, i) => {
