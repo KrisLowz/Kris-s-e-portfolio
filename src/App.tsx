@@ -1,4 +1,5 @@
 import React from 'react';
+import FloatingNav from './components/FloatingNav';
 import Journey from './components/Journey';
 import Projects from './components/Projects';
 import Contact from './components/Contact';
@@ -9,6 +10,7 @@ import Contact from './components/Contact';
 const App: React.FC = () => {
   return (
     <main className="relative overflow-x-clip bg-white font-sans text-[#14121A] antialiased">
+      <FloatingNav />
       <Journey />
       <Projects />
       <Contact />

@@ -215,6 +215,7 @@ const Journey: React.FC = () => {
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
+          id: 'journey', // FloatingNav reads this to scroll to the About beat inside the pin
           trigger: stageRef.current,
           start: 'top top',
           // one pin spans the WHOLE journey (About+Skills+Experience) — no inter-section gap
