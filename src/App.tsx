@@ -1,4 +1,6 @@
 import React from 'react';
+import CustomCursor from './components/CustomCursor';
+import FloatingScrollbar from './components/FloatingScrollbar';
 import FloatingNav from './components/FloatingNav';
 import Journey from './components/Journey';
 import Projects from './components/Projects';
@@ -10,6 +12,8 @@ import Contact from './components/Contact';
 const App: React.FC = () => {
   return (
     <main className="relative overflow-x-clip bg-white font-sans text-[#14121A] antialiased">
+      <CustomCursor />
+      <FloatingScrollbar />
       <FloatingNav />
       <Journey />
       <Projects />

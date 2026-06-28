@@ -9,9 +9,12 @@ declare global {
 const CustomCursor: React.FC = () => {
   const cursorRef = useRef<HTMLDivElement>(null);
   const dotRef = useRef<HTMLDivElement>(null);
+  // Only on real-pointer devices (desktop). Touch devices keep the native behaviour.
+  const finePointer =
+    typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
   useEffect(() => {
-    if (!window.gsap) return;
+    if (!finePointer || !window.gsap) return;
 
     const cursor = cursorRef.current;
     const dot = dotRef.current;
@@ -100,6 +103,8 @@ const CustomCursor: React.FC = () => {
       window.removeEventListener('click', handleClick);
     };
   }, []);
+
+  if (!finePointer) return null;
 
   return (
     <>
