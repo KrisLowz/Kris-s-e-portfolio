@@ -187,6 +187,62 @@ export const ExperienceStatic: React.FC = () => (
 // The Experience flight-path as a LAYER inside the shared merged stage (Journey owns the single pin +
 // ScrollTrigger). It reads the parent's remapped `progressRef` (0..1 across the Experience band) and
 // renders its own WebGL canvas + HTML overlays absolutely-positioned to fill the stage.
+// Cursor-following glow border + soft inner spotlight — a dependency-free take on MagicUI's MagicCard, adapted
+// for this project's stack (no shadcn/next-themes/registry) and the dark glass cards. The pointer position is
+// pushed into CSS vars; the glow only appears while hovered (interactive cards only). `className` carries the
+// card's own bg/border/rounding/padding so the glow clips to its shape.
+const MagicCard: React.FC<{
+  className?: string;
+  children: React.ReactNode;
+  gradientColor?: string; // soft inner spotlight
+  borderColor?: string;   // glowing edge that follows the cursor
+  size?: number;          // spotlight diameter in px
+}> = ({ className = '', children, gradientColor = 'rgba(34,211,238,0.16)', borderColor = 'rgba(34,211,238,0.85)', size = 280 }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const onMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+    el.style.setProperty('--my', `${e.clientY - r.top}px`);
+    el.style.setProperty('--mo', '1');
+  };
+  const onLeave = () => ref.current && ref.current.style.setProperty('--mo', '0');
+  return (
+    <div
+      ref={ref}
+      onPointerMove={onMove}
+      onPointerLeave={onLeave}
+      className={`relative overflow-hidden ${className}`}
+      style={{ '--mx': '50%', '--my': '50%', '--mo': '0' } as React.CSSProperties}
+    >
+      {/* glowing border ring that tracks the cursor (gradient masked to the 1px edge) */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-300"
+        style={{
+          opacity: 'var(--mo)',
+          padding: '1px',
+          background: `radial-gradient(${size}px circle at var(--mx) var(--my), ${borderColor}, transparent 60%)`,
+          WebkitMask: 'linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0)',
+          WebkitMaskComposite: 'xor',
+          maskComposite: 'exclude',
+        } as React.CSSProperties}
+      />
+      {/* soft inner spotlight */}
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 rounded-[inherit] transition-opacity duration-300"
+        style={{
+          opacity: 'var(--mo)',
+          background: `radial-gradient(${size}px circle at var(--mx) var(--my), ${gradientColor}, transparent 70%)`,
+        } as React.CSSProperties}
+      />
+      <div className="relative">{children}</div>
+    </div>
+  );
+};
+
 const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({ progressRef }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
@@ -652,12 +708,18 @@ const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             style={{ left: '50%', top: '50%', opacity: 0, pointerEvents: 'none' }}
           >
             {stop.beacon ? (
-              <a href="#contact" className="block rounded-2xl border border-[#FF2BD6]/40 bg-[#0a0814]/90 p-4 text-center shadow-[0_16px_44px_rgba(0,0,0,0.6)] backdrop-blur-xl">
-                <p className="font-display text-lg font-extrabold text-[#F5F3FF]">→ 2026</p>
-                <p className="mt-1 text-sm text-[#C3BFD6]">Open for new missions — let&apos;s talk.</p>
+              <a href="#contact" className="block">
+                <MagicCard
+                  className="rounded-2xl border border-[#FF2BD6]/40 bg-[#0a0814]/90 p-4 text-center shadow-[0_16px_44px_rgba(0,0,0,0.6)] backdrop-blur-xl"
+                  gradientColor="rgba(255,43,214,0.18)"
+                  borderColor="rgba(255,43,214,0.9)"
+                >
+                  <p className="font-display text-lg font-extrabold text-[#F5F3FF]">→ 2026</p>
+                  <p className="mt-1 text-sm text-[#C3BFD6]">Open for new missions — let&apos;s talk.</p>
+                </MagicCard>
               </a>
             ) : stop.exp ? (
-              <div className="rounded-2xl border border-white/12 bg-[#0a0814]/90 p-4 shadow-[0_16px_44px_rgba(0,0,0,0.6)] backdrop-blur-xl">
+              <MagicCard className="rounded-2xl border border-white/12 bg-[#0a0814]/90 p-4 shadow-[0_16px_44px_rgba(0,0,0,0.6)] backdrop-blur-xl">
                 <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]">{stop.exp.period}</p>
                 <h3 className="mt-1.5 font-display text-lg font-extrabold leading-tight text-[#F5F3FF]">{stop.exp.role}</h3>
                 <p className="text-sm font-semibold text-[#C3BFD6]">{stop.exp.company}</p>
@@ -667,7 +729,7 @@ const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
                     <li key={s} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-2.5 py-0.5 text-[11px] font-semibold text-[#dffaff]">{s}</li>
                   ))}
                 </ul>
-              </div>
+              </MagicCard>
             ) : null}
           </div>
         ))}
@@ -676,8 +738,8 @@ const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         {focusedIdx >= 0 && (
           <div data-exp-ui className="absolute inset-0 z-30 flex items-center justify-center p-6">
             <div data-exp-ui onClick={closeFocus} className="absolute inset-0 bg-black/55 backdrop-blur-sm" />
-            <div className="relative z-10 w-full max-w-md rounded-3xl border border-white/12 bg-[#0a0814]/95 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.7)]">
-              <button data-exp-ui onClick={closeFocus} aria-label="Close" className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-full border border-white/15 text-[#C3BFD6] transition-colors hover:bg-white/10 hover:text-white">✕</button>
+            <MagicCard className="z-10 w-full max-w-md rounded-3xl border border-white/12 bg-[#0a0814]/95 p-6 shadow-[0_24px_70px_rgba(0,0,0,0.7)]" size={340}>
+              <button data-exp-ui onClick={closeFocus} aria-label="Close" className="absolute right-4 top-4 z-10 grid h-8 w-8 place-items-center rounded-full border border-white/15 text-[#C3BFD6] transition-colors hover:bg-white/10 hover:text-white">✕</button>
               {STOPS[focusedIdx].beacon ? (
                 <div className="text-center">
                   <p className="font-display text-3xl font-extrabold text-[#F5F3FF]">→ 2026</p>
@@ -698,7 +760,7 @@ const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
                   </ul>
                 </>
               ) : null}
-            </div>
+            </MagicCard>
           </div>
         )}
 
