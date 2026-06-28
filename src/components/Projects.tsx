@@ -8,6 +8,105 @@ declare global { interface Window { gsap: any; ScrollTrigger: any } }
 const THEME: Record<string, number> = { trackpoint: 0xf59e0b, cinemate: 0x8b5cf6, splashaquatics: 0x06b6d4 };
 const hex = (n: number) => '#' + n.toString(16).padStart(6, '0');
 
+const ProjectWorld: React.FC<{ project: typeof PROJECTS[number]; accent: string; onExit: () => void }> = ({ project, accent, onExit }) => {
+  const [shot, setShot] = useState(0);
+  const [lightbox, setLightbox] = useState(false);
+
+  useEffect(() => {
+    if (!lightbox) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightbox(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightbox]);
+
+  return (
+    <div data-exp-ui className="absolute inset-0 z-30 overflow-y-auto px-6 py-16 sm:px-12">
+      <div className="mx-auto max-w-3xl">
+        <button data-exp-ui onClick={onExit} className="mb-6 rounded-full border border-white/15 px-4 py-1.5 text-xs font-bold text-[#C3BFD6] hover:bg-white/10">← Exit</button>
+        <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{project.subtitle}</p>
+        <h3 className="mt-1 font-display text-3xl font-extrabold text-[#F5F3FF] sm:text-5xl">{project.title}</h3>
+        {project.achievements?.length ? <ul className="mt-4 space-y-1 text-sm text-[#ffe8a3]">{project.achievements.map((a) => <li key={a}>{a}</li>)}</ul> : null}
+        <p className="mt-5 leading-relaxed text-[#C3BFD6]">{project.overview}</p>
+        <div className="mt-8 grid gap-5 sm:grid-cols-2">
+          <div className="rounded-2xl border border-[#FF2BD6]/25 bg-[#160a18]/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#FF2BD6]">The challenge</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.challenges?.map((c) => <li key={c}>{c}</li>)}</ul></div>
+          <div className="rounded-2xl border border-[#22D3EE]/25 bg-[#08161a]/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]">The solution</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{project.solutions?.map((s) => <li key={s}>{s}</li>)}</ul></div>
+        </div>
+        <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]/80">Tech deployed</p>
+        <div className="mt-2 space-y-2">{project.techStackDetails?.map((g) => (<div key={g.category} className="flex flex-wrap items-center gap-2"><span className="text-[11px] font-bold uppercase text-[#7c5cff]">{g.category}</span>{g.tools.map((t) => <span key={t} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-2.5 py-0.5 text-[11px] font-semibold text-[#dffaff]">{t}</span>)}</div>))}</div>
+
+        {/* Cover-flow screenshot gallery */}
+        {project.screenshots?.length ? (
+          <div data-exp-ui className="mt-10">
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]/80">Gallery</p>
+            <div className="relative mt-4 h-[420px]" style={{ perspective: '1200px' }}>
+              {project.screenshots.map((s, i) => {
+                const o = i - shot;
+                if (Math.abs(o) > 3) return null;
+                const isActive = o === 0;
+                return (
+                  <img
+                    key={s}
+                    loading="lazy"
+                    src={s}
+                    alt=""
+                    onClick={() => { if (isActive) setLightbox(true); else setShot(i); }}
+                    className="absolute left-1/2 top-1/2 w-[230px] aspect-[9/16] rounded-xl object-cover"
+                    style={{
+                      transform: `translate(-50%, -50%) translateX(${o * 56}%) rotateY(${o * -38}deg) scale(${Math.max(0.4, 1 - Math.abs(o) * 0.18)})`,
+                      zIndex: 100 - Math.abs(o),
+                      opacity: Math.max(0, 1 - Math.abs(o) * 0.4),
+                      cursor: isActive ? 'zoom-in' : 'pointer',
+                      transition: 'transform 0.35s ease, opacity 0.35s ease',
+                    }}
+                  />
+                );
+              })}
+            </div>
+            <div data-exp-ui className="mt-4 flex items-center justify-center gap-4">
+              <button
+                data-exp-ui
+                onClick={() => setShot((prev) => Math.max(0, prev - 1))}
+                className="rounded-full border border-white/15 px-4 py-1.5 text-sm font-bold text-[#C3BFD6] hover:bg-white/10 disabled:opacity-30"
+                disabled={shot === 0}
+              >‹</button>
+              <span className="text-sm text-[#A8A3C2]">{shot + 1} / {project.screenshots.length}</span>
+              <button
+                data-exp-ui
+                onClick={() => setShot((prev) => Math.min(project.screenshots.length - 1, prev + 1))}
+                className="rounded-full border border-white/15 px-4 py-1.5 text-sm font-bold text-[#C3BFD6] hover:bg-white/10 disabled:opacity-30"
+                disabled={shot === project.screenshots.length - 1}
+              >›</button>
+            </div>
+          </div>
+        ) : null}
+
+        {/* Lightbox */}
+        {lightbox && project.screenshots?.length ? (
+          <div data-exp-ui className="fixed inset-0 z-50 flex items-center justify-center">
+            <div
+              data-exp-ui
+              className="absolute inset-0 bg-black/85"
+              onClick={() => setLightbox(false)}
+            />
+            <img
+              src={project.screenshots[shot]}
+              alt=""
+              className="relative max-h-[90vh] object-contain rounded-xl"
+              style={{ zIndex: 1 }}
+            />
+            <button
+              data-exp-ui
+              onClick={() => setLightbox(false)}
+              className="absolute right-5 top-5 rounded-full border border-white/15 px-3 py-1 text-sm font-bold text-[#C3BFD6] hover:bg-white/10"
+              style={{ zIndex: 2 }}
+            >✕</button>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+};
+
 const Projects: React.FC = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -283,24 +382,7 @@ const Projects: React.FC = () => {
           </div>
         ))}
         {/* Step 5: Project World HTML shell */}
-        {worldIdx >= 0 && (() => { const p = PROJECTS[worldIdx]; const accent = hex(THEME[p.id] ?? 0x22d3ee); return (
-          <div data-exp-ui className="absolute inset-0 z-30 overflow-y-auto px-6 py-16 sm:px-12">
-            <div className="mx-auto max-w-3xl">
-              <button data-exp-ui onClick={exitWorld} className="mb-6 rounded-full border border-white/15 px-4 py-1.5 text-xs font-bold text-[#C3BFD6] hover:bg-white/10">← Exit</button>
-              <p className="text-xs font-bold uppercase tracking-[0.2em]" style={{ color: accent }}>{p.subtitle}</p>
-              <h3 className="mt-1 font-display text-3xl font-extrabold text-[#F5F3FF] sm:text-5xl">{p.title}</h3>
-              {p.achievements?.length ? <ul className="mt-4 space-y-1 text-sm text-[#ffe8a3]">{p.achievements.map((a) => <li key={a}>{a}</li>)}</ul> : null}
-              <p className="mt-5 leading-relaxed text-[#C3BFD6]">{p.overview}</p>
-              <div className="mt-8 grid gap-5 sm:grid-cols-2">
-                <div className="rounded-2xl border border-[#FF2BD6]/25 bg-[#160a18]/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#FF2BD6]">The challenge</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{p.challenges?.map((c) => <li key={c}>{c}</li>)}</ul></div>
-                <div className="rounded-2xl border border-[#22D3EE]/25 bg-[#08161a]/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]">The solution</p><ul className="mt-2 space-y-2 text-sm text-[#A8A3C2]">{p.solutions?.map((s) => <li key={s}>{s}</li>)}</ul></div>
-              </div>
-              <p className="mt-8 text-xs font-bold uppercase tracking-[0.16em] text-[#22D3EE]/80">Tech deployed</p>
-              <div className="mt-2 space-y-2">{p.techStackDetails?.map((g) => (<div key={g.category} className="flex flex-wrap items-center gap-2"><span className="text-[11px] font-bold uppercase text-[#7c5cff]">{g.category}</span>{g.tools.map((t) => <span key={t} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-2.5 py-0.5 text-[11px] font-semibold text-[#dffaff]">{t}</span>)}</div>))}</div>
-              <div id="proj-carousel-slot" className="mt-10" />
-            </div>
-          </div>
-        ); })()}
+        {worldIdx >= 0 && <ProjectWorld project={PROJECTS[worldIdx]} accent={hex(THEME[PROJECTS[worldIdx].id] ?? 0x22d3ee)} onExit={exitWorld} />}
         <div className={`pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 transition-opacity duration-300 sm:px-10 sm:pt-20 ${worldIdx >= 0 ? 'opacity-0' : 'opacity-100'}`}>
           <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Destinations // Projects</p>
           <h2 id="proj-heading" className="mt-3 font-display text-4xl font-extrabold leading-tight text-[#F5F3FF] sm:text-6xl">Worlds I&apos;ve built</h2>
