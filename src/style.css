@@ -460,6 +460,20 @@
 @media (prefers-reduced-motion: reduce) { .flip-3d { transform: none !important; transition: none !important; } }
 
 /* ============================================================
+   Contact — "The Relay" (calm space backdrop: stars + floating satellite + signal pulse)
+   ============================================================ */
+.contact-twinkle { animation: twinkle 5.5s ease-in-out infinite; }
+@keyframes satelliteFloat { 0%, 100% { transform: translateY(0) rotate(-1.5deg); } 50% { transform: translateY(-16px) rotate(1.5deg); } }
+.contact-satellite { animation: satelliteFloat 9s ease-in-out infinite; }
+@keyframes signalPulse { 0% { transform: scale(0.55); opacity: 0.55; } 100% { transform: scale(2.3); opacity: 0; } }
+.signal-ring { animation: signalPulse 3.6s ease-out infinite; }
+.signal-ring.delay { animation-delay: 1.8s; }
+@media (prefers-reduced-motion: reduce) {
+  .contact-twinkle, .contact-satellite, .signal-ring { animation: none; }
+  .signal-ring { opacity: 0; }
+}
+
+/* ============================================================
    About — cosmic scroll scene (dark space journey)
    ============================================================ */
 .about-starfield {
