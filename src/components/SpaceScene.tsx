@@ -75,7 +75,7 @@ function makeNebulaTexture(THREE: any) {
 
 // Scroll-progress phases of the journey (shared with Journey's GSAP timeline). About (planet + copy)
 // plays over [0, ABOUT_END]; the camera turns right into the skills universe over [TURN_START, TURN_END].
-export const PHASES = { ABOUT_END: 0.5, TURN_START: 0.62, TURN_END: 0.82, EXIT_START: 0.975 };
+export const PHASES = { ABOUT_END: 0.5, TURN_START: 0.62, TURN_END: 0.82, EXIT_START: 0.95 };
 
 // The 17 technical skills that crystallise in the skills universe (two waves: languages, then tools).
 // `dev` = the Devicon icon-font class (the font + CSS are already loaded in index.html, so the glyph is
@@ -528,6 +528,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const _tB = new THREE.Vector3();
       const _quat = new THREE.Quaternion();
       let copyEl: HTMLElement | null = null; // the About copy, carried through the camera turn (looked up lazily)
+      let introEl: HTMLElement | null = null; // the skills intro title — fades in with the turn, flies out with exitT
       let focusT = 0; // 0..1 zoom-to-crystal animation
       let lastFocusIdx = -1;
       let labelAlpha = 0;
@@ -677,10 +678,15 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           camera.rotation.set(0, -turn * (Math.PI / 2), 0); // explicit reset clears any pitch left by a focus/exit lookAt
           camera.up.set(0, 1, 0);
           if (turn > 0 && turn < 1) camera.translateZ(-Math.sin(turn * Math.PI) * 2.0); // dolly in mid-turn, settle back
-          // EXIT: the camera pushes FORWARD into the field (zoom) while descending, so the crystals rush toward
-          // the camera, grow, and sweep UP past it (out the top) — they physically fly by, no fade. The
-          // Experience scene below picks the motion up by rising in from beneath.
-          if (exitT > 0) { camera.translateZ(-exitT * 7.5); camera.position.y -= exitT * 6; }
+          // EXIT: the camera FLIPS DOWN — it pitches toward the floor while diving forward, so the ENTIRE skills
+          // field (crystals + the intro title, which rides the same exitT) swings UP and sweeps off the top of
+          // frame as one move, no fade. We end looking downward into empty space, which is exactly how the
+          // Experience flight-path enters (camera descending from above) — so the two scenes read as one shot.
+          if (exitT > 0) {
+            camera.rotateX(-exitT * 0.62);   // pitch down → field rotates up & out the top
+            camera.translateZ(-exitT * 7.5); // dive forward along the (now down-tilted) view
+            camera.position.y -= exitT * 2.4; // a touch of extra drop
+          }
         }
         starMat.opacity = turn * 0.95;
         nebMat.opacity = turn * 0.7 * (1 - exitT); // fade the nebula on exit so the bg darkens to match Experience
@@ -719,6 +725,23 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             copyEl.style.opacity = String(clamp01(1.3 - turn * 1.45));
             copyEl.style.visibility = 'visible';
           }
+        }
+
+        // ---- skills intro title: owned here (NOT GSAP) so it stays in lockstep with the crystals. It rises in
+        // as the camera turn completes, then on EXIT flies UP + zooms in EXACTLY the same exitT the crystals use,
+        // so the whole skills frame leaves as one parallel move (a scrubbed GSAP tween lagged ~1s behind the
+        // progress-ref camera, which read as "crystals first, then the text"). ----
+        if (!introEl) introEl = (typeof document !== 'undefined' ? (document.querySelector('.skills-intro') as HTMLElement | null) : null);
+        if (introEl) {
+          const introIn = smooth(clamp01((turn - 0.45) / 0.55));        // fades/rises in across the back half of the turn
+          const up = exitT * mount.clientHeight * 0.72;                  // sweeps off the top, matching the field
+          const scl = 1 + exitT * 0.6;                                   // zooms past like the crystals
+          const exitFade = clamp01((exitT - 0.45) / 0.55);              // only fades once it's already swept up
+          const op = introIn * (1 - exitFade);
+          const rise = (1 - introIn) * 24;                              // enter from 24px below
+          introEl.style.transform = `translateY(${(rise - up).toFixed(1)}px) scale(${scl.toFixed(3)})`;
+          introEl.style.opacity = op.toFixed(3);
+          introEl.style.visibility = op > 0.001 ? 'visible' : 'hidden';
         }
 
         // ---- meteor: flies in → HOLDS under sustained fire (progressive damage) → final blast → fragments ----

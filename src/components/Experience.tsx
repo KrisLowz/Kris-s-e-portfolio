@@ -162,6 +162,7 @@ const Experience: React.FC = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
+  const headingRef = useRef<HTMLDivElement>(null);
   const yearRef = useRef<HTMLSpanElement>(null);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const blipRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -550,6 +551,9 @@ const Experience: React.FC = () => {
         }
 
         if (yearRef.current) yearRef.current.textContent = String(Math.round(2023 + Math.min(1, Math.max(0, p)) * 3));
+        // Fade the heading in just after the seam (p≈0 is the top edge where this section meets the skills exit),
+        // so the title never pops in right on the divider — it rises in once we're clearly inside the scene.
+        if (headingRef.current) headingRef.current.style.opacity = Math.min(1, Math.max(0, (p - 0.02) / 0.08)).toFixed(3);
 
         renderer.render(scene, camera);
         raf = visible ? requestAnimationFrame(tick) : 0;
@@ -622,8 +626,13 @@ const Experience: React.FC = () => {
         {/* base matches the Journey's #070512 so the section seam is invisible; nebula glow sits lower-centre */}
         <div className="absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_58%,#110b2c_0%,#0a0820_48%,#070512_100%)]" />
         <div ref={mountRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
+        {/* Seam blend: force the TOP of this scene to the exact Journey-exit colour (#070512) and fade down to
+            clear, so where the two pinned sections scroll past each other there's no brightness step / hard line.
+            Sits above the WebGL canvas so it also dims the topmost stars near the seam. */}
+        <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 top-0 z-[15] h-[42%] bg-gradient-to-b from-[#070512] via-[#070512]/85 to-transparent" />
 
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 sm:px-10 sm:pt-20">
+        {/* Heading fades in from progress (driven in the tick) so it doesn't pop into view right at the seam. */}
+        <div ref={headingRef} style={{ opacity: 0 }} className="pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 sm:px-10 sm:pt-20">
           <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Flight Log // Experience</p>
           <h2 id="exp-heading" className="mt-3 font-display text-4xl font-extrabold leading-tight text-[#F5F3FF] sm:text-6xl">
             The route so far

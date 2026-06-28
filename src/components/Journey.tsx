@@ -154,16 +154,17 @@ const Journey: React.FC = () => {
       gsap.set('.jr-overlay', { opacity: 1 });
       gsap.set('.about-space', { opacity: 0 });
       gsap.set('.about-scrim', { opacity: 0 });
-      gsap.set('.skills-intro', { opacity: 0, y: 24 });
-      // NB: the About copy's reveal is driven imperatively by SpaceScene from the raw progress ref (reliable),
-      // NOT a scrubbed GSAP tween — a desynced timeline used to leave the copy stuck hidden ("sometimes gone").
+      // NB: BOTH the About copy AND the skills-intro title are driven imperatively by SpaceScene from the raw
+      // progress ref (reliable), NOT scrubbed GSAP tweens — a desynced timeline used to leave the copy stuck
+      // hidden ("sometimes gone") and lagged the title's fly-out ~1s behind the crystals ("crystals first,
+      // then the text"). SpaceScene now flies the title out on the SAME exitT as the crystals (perfectly parallel).
 
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
         scrollTrigger: {
           trigger: stageRef.current,
           start: 'top top',
-          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 2.9 : 4.0),
+          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 3.1 : 4.4),
           scrub: 1,
           pin: true,
           pinSpacing: true,
@@ -183,7 +184,7 @@ const Journey: React.FC = () => {
 
       // The planet entrance + the 90° camera turn are driven in 3D by progressRef (see SpaceScene);
       // this timeline only crossfades the HTML layers across the three acts.
-      const { ABOUT_END, TURN_START, TURN_END, EXIT_START } = PHASES;
+      const { ABOUT_END, TURN_START } = PHASES;
       tl
         // Act 1 — About (compressed into [0, ABOUT_END]): deep space washes in over the hero, hero
         // fades past, scrim + copy reveal as the planet lands.
@@ -195,13 +196,9 @@ const Journey: React.FC = () => {
         // world point + foreshortening by the yaw), so the copy and the planet sweep off as one 3D shot and
         // reverse together on scroll-up. SpaceScene also sets visibility:hidden once it's gone, so the
         // invisible text can't block the left crystals. Here we only fade the backdrop layers.
-        .to(['.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.14 }, TURN_START)
-        // Act 3 — the skills universe: its intro title rises in once the turn completes (settles well before
-        // the exit so the two don't fight).
-        .to('.skills-intro', { opacity: 1, y: 0, duration: 0.08, ease: 'power3.out' }, TURN_END)
-        // Act 4 — exit: the title flies UP + scales (zooming past the camera like the crystals), only fading
-        // right at the end once it's already swept off the top — not a fade-in-place.
-        .to('.skills-intro', { y: -360, scale: 1.5, autoAlpha: 0, duration: 1 - EXIT_START, ease: 'power3.in' }, EXIT_START);
+        .to(['.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.14 }, TURN_START);
+      // Act 3 + Act 4 (skills intro rise-in + parallel fly-out) are driven imperatively in SpaceScene off the
+      // shared exitT, so they move in perfect lockstep with the 3D crystals — see the `.skills-intro` block there.
 
       // Pin the timeline length to exactly 1.0 so scrub maps timeline-time 1:1 onto scroll progress —
       // i.e. a tween at position P fires at progress P, keeping these GSAP phases in lockstep with the
