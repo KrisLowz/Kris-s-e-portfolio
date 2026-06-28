@@ -301,7 +301,7 @@ const Projects: React.FC = () => {
             </div>
           </div>
         ); })()}
-        <div className="pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 sm:px-10 sm:pt-20">
+        <div className={`pointer-events-none absolute inset-x-0 top-0 z-20 px-6 pt-16 transition-opacity duration-300 sm:px-10 sm:pt-20 ${worldIdx >= 0 ? 'opacity-0' : 'opacity-100'}`}>
           <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Destinations // Projects</p>
           <h2 id="proj-heading" className="mt-3 font-display text-4xl font-extrabold leading-tight text-[#F5F3FF] sm:text-6xl">Worlds I&apos;ve built</h2>
         </div>
