@@ -75,7 +75,7 @@ function makeNebulaTexture(THREE: any) {
 
 // Scroll-progress phases of the journey (shared with Journey's GSAP timeline). About (planet + copy)
 // plays over [0, ABOUT_END]; the camera turns right into the skills universe over [TURN_START, TURN_END].
-export const PHASES = { ABOUT_END: 0.5, TURN_START: 0.62, TURN_END: 0.82 };
+export const PHASES = { ABOUT_END: 0.5, TURN_START: 0.62, TURN_END: 0.82, EXIT_START: 0.975 };
 
 // The 17 technical skills that crystallise in the skills universe (two waves: languages, then tools).
 // `dev` = the Devicon icon-font class (the font + CSS are already loaded in index.html, so the glyph is
@@ -340,7 +340,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
 
       // ---- the big meteor: hurtles in during the turn, then SHATTERS into the crystals (v2 cinematic).
       // Scrubbed: scroll forward = meteor flies in → explodes → fragments fly out to the grid; reverse = re-forms.
-      const MET_FLY0 = 0.64, MET_FLY1 = 0.80, SHA0 = 0.87, SHA1 = 0.975;
+      const MET_FLY0 = 0.64, MET_FLY1 = 0.80, SHA0 = 0.87, SHA1 = 0.93, EXIT0 = PHASES.EXIT_START;
       const meteorCenterV = new THREE.Vector3(CRYS_DEPTH, -0.2, 7);
       const meteorStartV = new THREE.Vector3(CRYS_DEPTH + 5, 8.5, 7 + 15);
       const meteorGeo = new THREE.IcosahedronGeometry(1.7, 1);
@@ -391,7 +391,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       scene.add(debris);
 
       // ---- the drama: a spaceship weaves in dodging small meteors, then fires on the big one ----
-      const SHIP0 = 0.66, FIRE0 = 0.81, SHIP_OUT0 = 0.885, SHIP_OUT1 = 0.99;
+      const SHIP0 = 0.66, FIRE0 = 0.81, SHIP_OUT0 = 0.885, SHIP_OUT1 = 0.96;
       const _yAxis = new THREE.Vector3(0, 1, 0);
       // the actual 3D cat-ship (shared with the hero scene). Model faces +X; it travels +Z here, so we yaw it.
       const shipDisposables: any[] = [];
@@ -666,6 +666,15 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           camera.position.set(0, 0, 7);
           camera.rotation.y = -turn * (Math.PI / 2);
           if (turn > 0 && turn < 1) camera.translateZ(-Math.sin(turn * Math.PI) * 2.0); // dolly in mid-turn, settle back
+          // EXIT: after the crystals settle, pitch the camera DOWN (+ slight descent) so the field swings up and
+          // out of the top — the vertical mirror of the 90° turn, handing off into the Experience scene below.
+          const exitT = smooth(clamp01((p - EXIT0) / (1 - EXIT0)));
+          if (exitT > 0) {
+            const phi = exitT * (Math.PI * 0.5); // pitch down toward straight-down
+            camera.position.y -= exitT * 2.0;
+            camera.up.set(0, 1, 0);
+            camera.lookAt(_v1.set(Math.cos(phi), camera.position.y - Math.sin(phi), 7));
+          }
         }
         starMat.opacity = turn * 0.95;
         nebMat.opacity = turn * 0.7;

@@ -163,7 +163,7 @@ const Journey: React.FC = () => {
         scrollTrigger: {
           trigger: stageRef.current,
           start: 'top top',
-          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 2.6 : 3.4),
+          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 2.9 : 4.0),
           scrub: 1,
           pin: true,
           pinSpacing: true,
@@ -183,7 +183,7 @@ const Journey: React.FC = () => {
 
       // The planet entrance + the 90° camera turn are driven in 3D by progressRef (see SpaceScene);
       // this timeline only crossfades the HTML layers across the three acts.
-      const { ABOUT_END, TURN_START, TURN_END } = PHASES;
+      const { ABOUT_END, TURN_START, TURN_END, EXIT_START } = PHASES;
       tl
         // Act 1 — About (compressed into [0, ABOUT_END]): deep space washes in over the hero, hero
         // fades past, scrim + copy reveal as the planet lands.
@@ -197,8 +197,12 @@ const Journey: React.FC = () => {
         // reverse together on scroll-up. SpaceScene also sets visibility:hidden once it's gone, so the
         // invisible text can't block the left crystals. Here we only fade the backdrop layers.
         .to(['.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.14 }, TURN_START)
-        // Act 3 — the skills universe: its intro title rises in once the turn completes.
-        .to('.skills-intro', { opacity: 1, y: 0, duration: 0.18, ease: 'power3.out' }, TURN_END);
+        // Act 3 — the skills universe: its intro title rises in once the turn completes (settles well before
+        // the exit so the two don't fight).
+        .to('.skills-intro', { opacity: 1, y: 0, duration: 0.08, ease: 'power3.out' }, TURN_END)
+        // Act 4 — exit: as the camera pitches DOWN into the Experience scene, the title slides up + fades out
+        // with the crystals (so the whole skills frame leaves together).
+        .to('.skills-intro', { autoAlpha: 0, y: -110, duration: 1 - EXIT_START, ease: 'power2.in' }, EXIT_START);
 
       // Pin the timeline length to exactly 1.0 so scrub maps timeline-time 1:1 onto scroll progress —
       // i.e. a tween at position P fires at progress P, keeping these GSAP phases in lockstep with the
