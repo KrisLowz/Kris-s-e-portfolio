@@ -42,6 +42,31 @@ const Browser: React.FC<{ src: string }> = ({ src }) => (
   </figure>
 );
 
+// Animated gradient border that continuously travels around the card edge — a dependency-free recreation of
+// MagicUI's ShineBorder (the project is Vite + Tailwind-via-CDN, so the shadcn/registry version can't be used).
+// The masked radial gradient shows only as a thin ring; the `shine-border` keyframe (style.css) moves it.
+const ShineBorder: React.FC<{ borderWidth?: number; duration?: number; shineColor?: string | string[]; className?: string }> = ({
+  borderWidth = 1,
+  duration = 14,
+  shineColor = '#22D3EE',
+  className = '',
+}) => (
+  <div
+    aria-hidden="true"
+    style={{
+      '--border-width': `${borderWidth}px`,
+      '--duration': `${duration}s`,
+      backgroundImage: `radial-gradient(transparent, transparent, ${Array.isArray(shineColor) ? shineColor.join(',') : shineColor}, transparent, transparent)`,
+      backgroundSize: '300% 300%',
+      WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+      WebkitMaskComposite: 'xor',
+      maskComposite: 'exclude',
+      padding: 'var(--border-width)',
+    } as React.CSSProperties}
+    className={`shine-border pointer-events-none absolute inset-0 z-[5] h-full w-full rounded-[inherit] will-change-[background-position] ${className}`}
+  />
+);
+
 const Projects: React.FC = () => {
   const [open, setOpen] = useState(-1); // index of the project whose gallery is open (-1 = card list)
   const railRef = useRef<HTMLDivElement>(null);
@@ -132,6 +157,7 @@ const Projects: React.FC = () => {
                   Learn More <span aria-hidden="true">→</span>
                 </span>
               </div>
+              <ShineBorder borderWidth={2} duration={11} shineColor={['#22D3EE', '#7C5CFF', '#FF2BD6']} />
             </button>
           ))}
         </div>

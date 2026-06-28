@@ -450,6 +450,12 @@
 .gallery-rail::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); border-radius: 999px; }
 .gallery-rail::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.32); }
 
+/* ShineBorder — an animated gradient that travels around a card's edge (MagicUI's ShineBorder, recreated for
+   this stack). The <ShineBorder> div sets --duration + the masked gradient; this just drives the motion. */
+@keyframes shineBorder { 0% { background-position: 0% 0%; } 50% { background-position: 100% 100%; } 100% { background-position: 0% 0%; } }
+.shine-border { animation: shineBorder var(--duration, 14s) linear infinite; }
+@media (prefers-reduced-motion: reduce) { .shine-border { animation: none; } }
+
 /* ============================================================
    About — cosmic scroll scene (dark space journey)
    ============================================================ */
