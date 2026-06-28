@@ -641,6 +641,8 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             idle = true;
             renderer.clear();
             for (let i = 0; i < chipRefs.current.length; i++) { const c = chipRefs.current[i]; if (c) c.style.opacity = '0'; }
+            if (!copyEl) copyEl = (typeof document !== 'undefined' ? (document.querySelector('.about-copy') as HTMLElement | null) : null);
+            if (copyEl) { copyEl.style.opacity = '0'; copyEl.style.visibility = 'hidden'; copyEl.style.transform = ''; } // keep copy off the hero
           }
           raf = visible ? requestAnimationFrame(tick) : 0;
           return;
@@ -683,8 +685,13 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         if (!copyEl) copyEl = (typeof document !== 'undefined' ? (document.querySelector('.about-copy') as HTMLElement | null) : null);
         if (copyEl) {
           if (turn <= 0.0001) {
-            // back in the About view — hand the copy back to its normal CSS layout
-            copyEl.style.transform = ''; copyEl.style.opacity = ''; copyEl.style.visibility = '';
+            // About/hero phase: reveal the copy from the RAW progress (reliable) — hidden over the hero,
+            // fades + rises in as the space washes in, then holds. (Not a scrubbed GSAP tween, which could
+            // desync and leave it stuck hidden = "sometimes gone".)
+            const rev = clamp01((p - 0.16) / 0.12);
+            copyEl.style.transform = rev < 1 ? `translateY(${((1 - rev) * 26).toFixed(1)}px)` : '';
+            copyEl.style.opacity = String(rev);
+            copyEl.style.visibility = rev > 0.001 ? 'visible' : 'hidden';
           } else if (turn > 0.9 || focusT > 0.001) {
             // settled in the skills act, or zoomed into a crystal: keep the copy hidden so it never reappears
             copyEl.style.opacity = '0'; copyEl.style.visibility = 'hidden';

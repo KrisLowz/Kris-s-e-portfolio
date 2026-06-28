@@ -65,7 +65,7 @@ const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObj
 
     {/* About copy — the container is click-through so hover reaches the 3D planet behind it;
         only the text block itself stays interactive (selection). */}
-    <div className="pointer-events-none absolute inset-0 z-10 flex items-end pb-16 sm:items-center sm:pb-0">
+    <div className="pointer-events-none absolute inset-0 z-10 flex items-end pb-6 sm:items-center sm:pb-0">
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-10 lg:px-12">
         <div className="about-copy pointer-events-auto max-w-xl">
           {/* Each line sits inside an overflow-hidden mask and slides up from behind it (staggered). */}
@@ -74,10 +74,10 @@ const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObj
               Origin // About
             </p>
           </div>
-          <div className="mt-5 overflow-hidden pb-1.5">
+          <div className="mt-3 overflow-hidden pb-1.5 sm:mt-5">
             <h2
               id="about-heading"
-              className="about-line font-display text-5xl font-extrabold leading-[1.06] tracking-tight text-[#F5F3FF] sm:text-7xl"
+              className="about-line font-display text-4xl font-extrabold leading-[1.05] tracking-tight text-[#F5F3FF] sm:text-7xl"
             >
               Engineering with{' '}
               <span className="about-gradient bg-gradient-to-r from-[#22D3EE] via-[#7C5CFF] to-[#FF2BD6] bg-clip-text text-transparent">
@@ -85,14 +85,14 @@ const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObj
               </span>
             </h2>
           </div>
-          <div className="mt-7 overflow-hidden pb-1">
-            <p className="about-line max-w-lg text-lg leading-relaxed text-[#C3BFD6] sm:text-xl">
+          <div className="mt-4 overflow-hidden pb-1 sm:mt-7">
+            <p className="about-line max-w-lg text-base leading-relaxed text-[#C3BFD6] sm:text-xl">
               I&apos;m a software developer who believes great code should be invisible to the user. Whether it&apos;s a
               mobile app or a website, the experience should feel fluid, intuitive, and reliable.
             </p>
           </div>
-          <div className="mt-4 overflow-hidden pb-1">
-            <p className="about-line max-w-lg text-lg leading-relaxed text-[#C3BFD6] sm:text-xl">
+          <div className="mt-3 overflow-hidden pb-1 sm:mt-4">
+            <p className="about-line max-w-lg text-base leading-relaxed text-[#C3BFD6] sm:text-xl">
               Having graduated from{' '}
               <span className="font-semibold text-[#F5F3FF]">Swinburne University of Technology</span> in 2026, I&apos;m now
               a Junior Software Developer — already helping businesses solve real-world logistics challenges through my
@@ -155,8 +155,8 @@ const Journey: React.FC = () => {
       gsap.set('.about-space', { opacity: 0 });
       gsap.set('.about-scrim', { opacity: 0 });
       gsap.set('.skills-intro', { opacity: 0, y: 24 });
-      // Masked reveal: each line starts pushed fully below its overflow-hidden wrapper, then wipes up.
-      gsap.set('.about-line', { yPercent: 120, opacity: 0 });
+      // NB: the About copy's reveal is driven imperatively by SpaceScene from the raw progress ref (reliable),
+      // NOT a scrubbed GSAP tween — a desynced timeline used to leave the copy stuck hidden ("sometimes gone").
 
       const tl = gsap.timeline({
         defaults: { ease: 'none' },
@@ -190,11 +190,6 @@ const Journey: React.FC = () => {
         .to('.about-space', { opacity: 1, duration: 0.12 }, 0.0)
         .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.12 }, 0.02)
         .to('.about-scrim', { opacity: 1, duration: 0.12 }, ABOUT_END - 0.40)
-        // Reveal the copy EARLY — as the space washes in over the hero — and finish well before the planet
-        // lands, so it's present across essentially the whole About instead of only a narrow late window.
-        // (Previously hidden below ~progress 0.26, so it looked "gone" whenever you were in the early About
-        // or scrolled up a touch.)
-        .to('.about-line', { yPercent: 0, opacity: 1, stagger: 0.03, duration: 0.08, ease: 'power3.out' }, ABOUT_END - 0.38)
         // Act 2 — the camera zooms + turns 90° right into the skills universe. The About copy is NOT animated
         // here: SpaceScene drives it through the LIVE scene camera each frame (projecting it from the planet's
         // world point + foreshortening by the yaw), so the copy and the planet sweep off as one 3D shot and
