@@ -1,6 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Hero from './Hero';
 import SpaceScene, { SKILLS, PHASES } from './SpaceScene';
+import Experience, { ExperienceStatic } from './Experience';
+
+// The merged journey is ONE pinned stage / ONE ScrollTrigger. The shared scroll progress p∈[0,1] is split
+// into two remapped sub-progresses: the skills act (SpaceScene) lives in [0, SEAM_HI]; the Experience act in
+// [SEAM_LO, 1]. They overlap across [SEAM_LO, SEAM_HI] where the two canvases crossfade — that overlap is what
+// removes the old ~1-viewport dead gap between the two formerly-separate pinned sections.
+const SEAM_LO = 0.64;
+const SEAM_HI = 0.7;
+const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
+const smooth01 = (a: number, b: number, x: number) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
 declare global {
   interface Window {
@@ -136,7 +146,9 @@ const AboutLayers: React.FC<{ use3D?: boolean; progressRef?: React.MutableRefObj
 const Journey: React.FC = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const progressRef = useRef(0); // ScrollTrigger writes scroll progress here each frame; SpaceScene reads it
+  const spaceProgRef = useRef(0); // remapped skills/about sub-progress → SpaceScene
+  const expProgRef = useRef(0);   // remapped Experience sub-progress → Experience layer
+  const expLayerRef = useRef<HTMLDivElement>(null); // the Experience layer wrapper (crossfaded in at the seam)
   const [reducedMotion] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
   );
@@ -164,7 +176,8 @@ const Journey: React.FC = () => {
         scrollTrigger: {
           trigger: stageRef.current,
           start: 'top top',
-          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 3.1 : 4.4),
+          // one pin spans the WHOLE journey (About+Skills+Experience) — no inter-section gap
+          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 5.0 : 7.0),
           scrub: 1,
           pin: true,
           pinSpacing: true,
@@ -172,31 +185,43 @@ const Journey: React.FC = () => {
           invalidateOnRefresh: true,
           onToggle: (self: any) =>
             stageRef.current && stageRef.current.classList.toggle('about-active', self.isActive),
-          // Keep the overlay click/select-through while the hero is in control; only capture
-          // pointer events once the About scene has taken over (hero is hidden by then).
           onUpdate: (self: any) => {
-            progressRef.current = self.progress; // drives the 3D planet entrance in SpaceScene
+            const p = self.progress;
+            spaceProgRef.current = clamp01(p / SEAM_HI);            // skills/about occupy [0, SEAM_HI]
+            expProgRef.current = clamp01((p - SEAM_LO) / (1 - SEAM_LO)); // experience occupies [SEAM_LO, 1]
+            const cf = smooth01(SEAM_LO, SEAM_HI, p);              // 0 = skills, 1 = experience
             const overlay = stageRef.current && (stageRef.current.querySelector('.jr-overlay') as HTMLElement | null);
-            if (overlay) overlay.style.pointerEvents = self.progress > 0.42 ? 'auto' : 'none';
+            if (overlay) {
+              overlay.style.opacity = String(1 - cf);             // fade the skills act out across the seam
+              // interactive only once About has taken over AND before the seam hands off to Experience
+              overlay.style.pointerEvents = p > 0.42 * SEAM_HI && cf < 0.5 ? 'auto' : 'none';
+            }
+            if (expLayerRef.current) {
+              expLayerRef.current.style.opacity = String(cf);     // fade the Experience act in across the seam
+              expLayerRef.current.style.pointerEvents = cf > 0.5 ? 'auto' : 'none';
+            }
           },
         },
       });
 
       // The planet entrance + the 90° camera turn are driven in 3D by progressRef (see SpaceScene);
       // this timeline only crossfades the HTML layers across the three acts.
+      // SpaceScene now reads a sub-progress = p/SEAM_HI, so its phases sit inside the [0, SEAM_HI] band of the
+      // shared scroll. These HTML crossfades must live in the SAME band → multiply every position+duration by
+      // SEAM_HI so they stay locked to the 3D turn (otherwise the backdrop fade desyncs from the camera turn).
       const { ABOUT_END, TURN_START } = PHASES;
+      const W = SEAM_HI;
       tl
-        // Act 1 — About (compressed into [0, ABOUT_END]): deep space washes in over the hero, hero
-        // fades past, scrim + copy reveal as the planet lands.
-        .to('.about-space', { opacity: 1, duration: 0.12 }, 0.0)
-        .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.12 }, 0.02)
-        .to('.about-scrim', { opacity: 1, duration: 0.12 }, ABOUT_END - 0.40)
+        // Act 1 — About: deep space washes in over the hero, hero fades past, scrim reveals as the planet lands.
+        .to('.about-space', { opacity: 1, duration: 0.12 * W }, 0.0)
+        .to('.jr-hero', { autoAlpha: 0, scale: 1.12, duration: 0.12 * W }, 0.02 * W)
+        .to('.about-scrim', { opacity: 1, duration: 0.12 * W }, (ABOUT_END - 0.40) * W)
         // Act 2 — the camera zooms + turns 90° right into the skills universe. The About copy is NOT animated
         // here: SpaceScene drives it through the LIVE scene camera each frame (projecting it from the planet's
         // world point + foreshortening by the yaw), so the copy and the planet sweep off as one 3D shot and
         // reverse together on scroll-up. SpaceScene also sets visibility:hidden once it's gone, so the
         // invisible text can't block the left crystals. Here we only fade the backdrop layers.
-        .to(['.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.14 }, TURN_START);
+        .to(['.about-space', '.about-scrim'], { autoAlpha: 0, duration: 0.14 * W }, TURN_START * W);
       // Act 3 + Act 4 (skills intro rise-in + parallel fly-out) are driven imperatively in SpaceScene off the
       // shared exitT, so they move in perfect lockstep with the 3D crystals — see the `.skills-intro` block there.
 
@@ -210,7 +235,7 @@ const Journey: React.FC = () => {
     return () => ctx.revert();
   }, [reducedMotion]);
 
-  // Reduced motion: no scroll-jacking — hero, then a static landed About below it.
+  // Reduced motion: no scroll-jacking — hero, static landed About, then the static Experience timeline.
   if (reducedMotion) {
     return (
       <>
@@ -222,6 +247,7 @@ const Journey: React.FC = () => {
         >
           <AboutLayers />
         </section>
+        <ExperienceStatic />
       </>
     );
   }
@@ -233,11 +259,14 @@ const Journey: React.FC = () => {
         <div className="jr-hero absolute inset-0">
           <Hero />
         </div>
-        {/* Space + planet + About overlay — hidden until JS so it never flashes over the hero.
-            pointer-events start OFF so the hero stays fully interactive; the scroll handler turns
-            them on once About has taken over. */}
+        {/* Skills/About act — the shared SpaceScene canvas + its overlays. Crossfaded OUT across the seam. */}
         <div className="jr-overlay absolute inset-0" style={{ opacity: 0, pointerEvents: 'none' }}>
-          <AboutLayers use3D progressRef={progressRef} />
+          <AboutLayers use3D progressRef={spaceProgRef} />
+        </div>
+        {/* Experience act — its own canvas + overlays, in the SAME pinned stage. Crossfaded IN across the seam,
+            so there is no longer a dead viewport between the two. Driven by the remapped Experience sub-progress. */}
+        <div ref={expLayerRef} className="absolute inset-0" style={{ opacity: 0, pointerEvents: 'none' }}>
+          <Experience progressRef={expProgRef} />
         </div>
       </div>
     </section>

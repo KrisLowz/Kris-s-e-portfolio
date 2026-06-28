@@ -158,8 +158,36 @@ function buildBeacon(THREE: any, track: <T>(o: T) => T, accent: number) {
   return { group: g, rings: null, core, nodes: null, ring };
 }
 
-const Experience: React.FC = () => {
-  const trackRef = useRef<HTMLDivElement>(null);
+// Static fallback (reduced-motion / no-WebGL) — a clean timeline. Exported so the merged
+// Journey stage can render it in its own reduced-motion path too.
+export const ExperienceStatic: React.FC = () => (
+  <section id="experience" aria-labelledby="exp-heading" className="relative w-full bg-[#05030f] py-24 sm:py-32">
+    <div className="mx-auto max-w-3xl px-6">
+      <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Flight Log // Experience</p>
+      <h2 id="exp-heading" className="mt-4 font-display text-4xl font-extrabold text-[#F5F3FF] sm:text-6xl">The route so far</h2>
+      <ol className="mt-12 space-y-8 border-l border-white/15 pl-8">
+        {[ONE_ERP, MR_BUR].filter(Boolean).map((e) => (
+          <li key={e!.id} className="relative">
+            <span className="absolute -left-[2.1rem] top-1.5 h-3 w-3 rounded-full bg-[#22D3EE] shadow-[0_0_12px_#22D3EE]" />
+            <p className="text-sm font-semibold text-[#22D3EE]">{e!.period}</p>
+            <h3 className="mt-1 text-xl font-bold text-[#F5F3FF]">{e!.role} · <span className="text-[#C3BFD6]">{e!.company}</span></h3>
+            <p className="mt-2 text-[#A8A3C2]">{e!.description}</p>
+            <ul className="mt-3 flex flex-wrap gap-2">
+              {e!.skills.map((s) => (
+                <li key={s} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-3 py-1 text-xs font-semibold text-[#dffaff]">{s}</li>
+              ))}
+            </ul>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+);
+
+// The Experience flight-path as a LAYER inside the shared merged stage (Journey owns the single pin +
+// ScrollTrigger). It reads the parent's remapped `progressRef` (0..1 across the Experience band) and
+// renders its own WebGL canvas + HTML overlays absolutely-positioned to fill the stage.
+const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({ progressRef }) => {
   const stageRef = useRef<HTMLDivElement>(null);
   const mountRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLDivElement>(null);
@@ -167,38 +195,13 @@ const Experience: React.FC = () => {
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const blipRefs = useRef<(HTMLDivElement | null)[]>([]);
   const radarLabelRef = useRef<HTMLSpanElement>(null);
-  const progressRef = useRef(0);
   const focusIdxRef = useRef(-1);
   const wantFocusRef = useRef(false);
   const focusProgRef = useRef(0);
   const [focusedIdx, setFocusedIdx] = useState(-1);
   const [failed, setFailed] = useState(false);
-  const [reduced] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  );
+  const reduced = false; // reduced-motion is handled by the parent Journey stage (this layer only mounts in the animated path)
   const closeFocus = () => { wantFocusRef.current = false; setFocusedIdx(-1); };
-
-  // ---- scroll pin (mirrors Journey): scrub writes progress for the 3D scene to read ----
-  useEffect(() => {
-    if (reduced) return;
-    const gsap = window.gsap, ScrollTrigger = window.ScrollTrigger;
-    if (!gsap || !ScrollTrigger || !stageRef.current) return;
-    gsap.registerPlugin(ScrollTrigger);
-    const ctx = gsap.context(() => {
-      ScrollTrigger.create({
-        trigger: stageRef.current,
-        start: 'top top',
-        end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 2.2 : 3),
-        scrub: 1,
-        pin: true,
-        pinSpacing: true,
-        anticipatePin: 1,
-        invalidateOnRefresh: true,
-        onUpdate: (self: any) => { progressRef.current = self.progress; },
-      });
-    }, trackRef);
-    return () => ctx.revert();
-  }, [reduced]);
 
   // ---- 3D scene ----
   useEffect(() => {
@@ -217,7 +220,7 @@ const Experience: React.FC = () => {
       let { w, h } = size();
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(42, w / h, 0.1, 100);
+      const camera = new THREE.PerspectiveCamera(40, w / h, 0.1, 100); // match SpaceScene FOV for a seamless crossfade
       camera.position.set(0, 1.3, 10);
       camera.lookAt(0, 0, 0);
 
@@ -359,6 +362,7 @@ const Experience: React.FC = () => {
       const ndc = new THREE.Vector2();
       let hoverIdx = -1;
       const onPointerMove = (e: PointerEvent) => {
+        if (progressRef.current <= 0.001) return; // Experience act not on screen yet (skills band) — ignore
         const rect = canvas.getBoundingClientRect();
         if (rect.width === 0) return;
         const fx = (e.clientX - rect.left) / rect.width, fy = (e.clientY - rect.top) / rect.height;
@@ -373,6 +377,7 @@ const Experience: React.FC = () => {
 
       // click router: station → focus-zoom, empty → close focus (HUD/links opt out via data-exp-ui)
       const onPointerDown = (e: PointerEvent) => {
+        if (progressRef.current <= 0.001) return; // Experience act not on screen yet (skills band) — ignore
         const el = e.target as HTMLElement | null;
         if (el && el.closest('a, button, [data-exp-ui]')) return;
         const rect = canvas.getBoundingClientRect();
@@ -594,38 +599,21 @@ const Experience: React.FC = () => {
     return () => { cancelled = true; cleanup(); };
   }, [reduced]);
 
-  // ---- reduced-motion / no-WebGL: clean static timeline ----
-  if (reduced || failed) {
+  // Runtime WebGL loss while merged: show the static timeline as a scrollable in-stage layer.
+  if (failed) {
     return (
-      <section id="experience" aria-labelledby="exp-heading" className="relative w-full bg-[#05030f] py-24 sm:py-32">
-        <div className="mx-auto max-w-3xl px-6">
-          <p className="text-sm font-bold uppercase tracking-[0.28em] text-[#22D3EE]">Flight Log // Experience</p>
-          <h2 id="exp-heading" className="mt-4 font-display text-4xl font-extrabold text-[#F5F3FF] sm:text-6xl">The route so far</h2>
-          <ol className="mt-12 space-y-8 border-l border-white/15 pl-8">
-            {[ONE_ERP, MR_BUR].filter(Boolean).map((e) => (
-              <li key={e!.id} className="relative">
-                <span className="absolute -left-[2.1rem] top-1.5 h-3 w-3 rounded-full bg-[#22D3EE] shadow-[0_0_12px_#22D3EE]" />
-                <p className="text-sm font-semibold text-[#22D3EE]">{e!.period}</p>
-                <h3 className="mt-1 text-xl font-bold text-[#F5F3FF]">{e!.role} · <span className="text-[#C3BFD6]">{e!.company}</span></h3>
-                <p className="mt-2 text-[#A8A3C2]">{e!.description}</p>
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {e!.skills.map((s) => (
-                    <li key={s} className="rounded-full border border-[#22D3EE]/40 bg-[#0a0820]/70 px-3 py-1 text-xs font-semibold text-[#dffaff]">{s}</li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
+      <div className="absolute inset-0 z-40 overflow-y-auto">
+        <ExperienceStatic />
+      </div>
     );
   }
 
+  // Nested LAYER inside Journey's single pinned stage (no own <section>/pin). Fills the stage.
   return (
-    <section ref={trackRef} id="experience" aria-labelledby="exp-heading" className="relative bg-[#070512]">
-      <div ref={stageRef} className="relative h-[100svh] w-full overflow-hidden bg-[#070512]">
-        {/* base matches the Journey's #070512 so the section seam is invisible; nebula glow sits lower-centre */}
-        <div className="absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_58%,#110b2c_0%,#0a0820_48%,#070512_100%)]" />
+    <div ref={stageRef} id="experience" className="absolute inset-0 h-full w-full overflow-hidden">
+      <div className="relative h-full w-full">
+        {/* radial nebula glow, lower-centre; base is transparent so it composites onto the shared stage bg */}
+        <div className="absolute inset-0 bg-[radial-gradient(120%_95%_at_50%_58%,#110b2c_0%,#0a0820_48%,transparent_100%)]" />
         <div ref={mountRef} aria-hidden="true" className="pointer-events-none absolute inset-0 z-10 h-full w-full" />
         {/* Seam blend: force the TOP of this scene to the exact Journey-exit colour (#070512) and fade down to
             clear, so where the two pinned sections scroll past each other there's no brightness step / hard line.
@@ -728,7 +716,7 @@ const Experience: React.FC = () => {
           ))}
         </ul>
       </div>
-    </section>
+    </div>
   );
 };
 
