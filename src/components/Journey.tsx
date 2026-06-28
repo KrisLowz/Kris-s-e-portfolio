@@ -8,9 +8,11 @@ import Experience, { ExperienceStatic } from './Experience';
 // [PAN_LO, 1]. Across the PAN window the two scenes physically SLIDE UP in tandem — skills exits the top while
 // Experience rises from below, flush-stacked like one continuous vertical space — so it reads as a real camera
 // pan DOWN through one dimension (an opacity crossfade looked like Experience just fading in over the top).
-const SKILLS_END = 0.7;  // skills/about sub-progress fills [0, SKILLS_END] of the shared scroll (SpaceScene)
-const PAN_LO = 0.665;    // pan starts where SpaceScene's flip-down begins (right after the settled-crystal beat)
-const PAN_HI = 0.8;      // pan ends once the Experience scene has fully slid up into view (slow + deliberate)
+const SKILLS_END = 0.665; // skills/about sub-progress fills [0, SKILLS_END] of the shared scroll (SpaceScene)
+const PAN_LO = 0.632;     // camera-down pan starts where SpaceScene's flip-down begins (after the settled beat)
+const PAN_HI = 0.74;      // pan ends once the Experience scene has fully slid up into view
+// Experience CONTENT (rail conveyor / stations / year / camera) stays FROZEN at its start through the whole pan,
+// then advances over [PAN_HI, 1] — so you arrive at the flight path with the FIRST station incoming, never the 2nd.
 const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const smooth01 = (a: number, b: number, x: number) => { const t = clamp01((x - a) / (b - a)); return t * t * (3 - 2 * t); };
 
@@ -179,7 +181,7 @@ const Journey: React.FC = () => {
           trigger: stageRef.current,
           start: 'top top',
           // one pin spans the WHOLE journey (About+Skills+Experience) — no inter-section gap
-          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 5.0 : 7.0),
+          end: () => '+=' + window.innerHeight * (window.innerWidth < 640 ? 6.0 : 8.0),
           scrub: 1,
           pin: true,
           pinSpacing: true,
@@ -190,7 +192,7 @@ const Journey: React.FC = () => {
           onUpdate: (self: any) => {
             const p = self.progress;
             spaceProgRef.current = clamp01(p / SKILLS_END);          // skills/about occupy [0, SKILLS_END]
-            expProgRef.current = clamp01((p - PAN_LO) / (1 - PAN_LO)); // experience occupies [PAN_LO, 1]
+            expProgRef.current = clamp01((p - PAN_HI) / (1 - PAN_HI)); // experience CONTENT only advances AFTER the pan
             // Vertical "camera-down" pan: both layers translate UP in tandem (flush-stacked), so skills slides
             // off the top as Experience rises from below — one continuous downward move, not a fade.
             const pan = smooth01(PAN_LO, PAN_HI, p);                // 0 = skills framed, 1 = experience framed

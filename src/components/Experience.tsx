@@ -544,15 +544,11 @@ const Experience: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           lookTarget.lerpVectors(BASE_LOOK, tmpStation, focusT);
           camera.lookAt(lookTarget);
         } else {
-          // entrance: a SHORT, shallow camera-down that continues the Skills flip — the scene is framed almost
-          // immediately (small drop, settles by p≈0.05) so the hand-off isn't a long dark descent into empty
-          // space. Because progress is clamped to 0 through the inter-section gap, keeping the drop small means
-          // the flight path (ship + first station + planet) is already on screen during the gap, not a black void.
-          const ent = Math.min(1, Math.max(0, p / 0.05));
-          const e = ent * ent * (3 - 2 * ent); // smoothstep
-          const drop = (1 - e) * 2.2;
-          camera.position.copy(BASE_CAM); camera.position.y += drop;
-          lookTarget.copy(BASE_LOOK); lookTarget.y += drop;
+          // No internal entrance descent: the camera-down IS the CSS pan in Journey (the whole layer slides up
+          // into view). Here we just hold the base framing. The rail conveyor (driven by progress that's frozen
+          // at 0 until the pan finishes) then brings the FIRST station in once we're docked into the flight path.
+          camera.position.copy(BASE_CAM);
+          lookTarget.copy(BASE_LOOK);
           camera.lookAt(lookTarget);
         }
 
