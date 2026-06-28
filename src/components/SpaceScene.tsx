@@ -346,10 +346,16 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       const meteorGeo = new THREE.IcosahedronGeometry(1.7, 1);
       {
         const mp = meteorGeo.attributes.position, v = new THREE.Vector3();
-        for (let i = 0; i < mp.count; i++) { v.fromBufferAttribute(mp, i); v.multiplyScalar(1 + (Math.sin(v.x * 3.3) + Math.cos(v.y * 4.1) + Math.sin(v.z * 5.2)) * 0.13); mp.setXYZ(i, v.x, v.y, v.z); }
+        let minY = Infinity, maxY = -Infinity;
+        for (let i = 0; i < mp.count; i++) { v.fromBufferAttribute(mp, i); v.multiplyScalar(1 + (Math.sin(v.x * 3.3) + Math.cos(v.y * 4.1) + Math.sin(v.z * 5.2)) * 0.13); mp.setXYZ(i, v.x, v.y, v.z); if (v.y < minY) minY = v.y; if (v.y > maxY) maxY = v.y; }
         meteorGeo.computeVertexNormals();
+        // grey → black vertex-colour gradient (lighter slate on top, near-black below); flatShading keeps facets
+        const cols = new Float32Array(mp.count * 3), cTop = new THREE.Color(0x767880), cBot = new THREE.Color(0x0b0b0e), cTmp = new THREE.Color();
+        for (let i = 0; i < mp.count; i++) { v.fromBufferAttribute(mp, i); const t = (v.y - minY) / Math.max(0.001, maxY - minY); cTmp.copy(cBot).lerp(cTop, t * t); cols[i * 3] = cTmp.r; cols[i * 3 + 1] = cTmp.g; cols[i * 3 + 2] = cTmp.b; }
+        meteorGeo.setAttribute('color', new THREE.BufferAttribute(cols, 3));
       }
-      const meteorMat = new THREE.MeshStandardMaterial({ color: 0x1b140d, roughness: 1, metalness: 0, emissive: 0xff4a12, emissiveIntensity: 0, flatShading: true });
+      // grey/black rock (vertex-colour gradient); the hot orange emissive only ramps in when the laser hits it
+      const meteorMat = new THREE.MeshStandardMaterial({ vertexColors: true, color: 0xffffff, roughness: 1, metalness: 0, emissive: 0xff5a2a, emissiveIntensity: 0, flatShading: true });
       const meteor = new THREE.Mesh(meteorGeo, meteorMat);
       const meteorGlowMat = new THREE.SpriteMaterial({ map: glowTex, color: 0xff5a18, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
       const meteorGlow = new THREE.Sprite(meteorGlowMat); meteorGlow.scale.set(7.5, 7.5, 1);
@@ -359,7 +365,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
       // ---- meteor fragments: chunks of rock that burst out when the laser cracks it open ("break into pieces") ----
       const fragGeo = new THREE.IcosahedronGeometry(1, 0);
       { const fp = fragGeo.attributes.position, v = new THREE.Vector3(); for (let i = 0; i < fp.count; i++) { v.fromBufferAttribute(fp, i); v.multiplyScalar(1 + (Math.sin(v.x * 5) + Math.cos(v.z * 6)) * 0.24); fp.setXYZ(i, v.x, v.y, v.z); } fragGeo.computeVertexNormals(); }
-      const fragMat = new THREE.MeshStandardMaterial({ color: 0x241a10, roughness: 1, metalness: 0, emissive: 0xff5212, emissiveIntensity: 0.55, flatShading: true });
+      const fragMat = new THREE.MeshStandardMaterial({ color: 0x3a3b42, roughness: 1, metalness: 0, emissive: 0xff5212, emissiveIntensity: 0.35, flatShading: true });
       const FRAG_N = isMobile ? 11 : 18;
       const frags: any[] = [];
       for (let i = 0; i < FRAG_N; i++) {
@@ -400,7 +406,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
 
       const smallGeo = new THREE.IcosahedronGeometry(0.34, 0);
       { const sp = smallGeo.attributes.position, v = new THREE.Vector3(); for (let i = 0; i < sp.count; i++) { v.fromBufferAttribute(sp, i); v.multiplyScalar(1 + (Math.sin(v.x * 6) + Math.cos(v.y * 7)) * 0.2); sp.setXYZ(i, v.x, v.y, v.z); } smallGeo.computeVertexNormals(); }
-      const smallMat = new THREE.MeshStandardMaterial({ color: 0x2a211a, roughness: 1, metalness: 0, emissive: 0x933008, emissiveIntensity: 0.5, flatShading: true });
+      const smallMat = new THREE.MeshStandardMaterial({ color: 0x44454d, roughness: 1, metalness: 0, emissive: 0x14141a, emissiveIntensity: 0.4, flatShading: true });
       const smalls: any[] = [];
       for (let i = 0; i < 3; i++) { const m = new THREE.Mesh(smallGeo, smallMat); m.visible = false; scene.add(m); smalls.push({ m, z0: 12 + i * 2.5, y: [2.1, -1.3, 0.7][i], spd: 1 + i * 0.3, off: i * 0.18 }); }
 
@@ -670,8 +676,12 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
         // foreshorten it by the camera yaw. Driven imperatively here (not GSAP) to share the real camera. ----
         if (!copyEl) copyEl = (typeof document !== 'undefined' ? (document.querySelector('.about-copy') as HTMLElement | null) : null);
         if (copyEl) {
-          if (turn <= 0.0001 || focusT > 0.001) {
+          if (turn <= 0.0001) {
+            // back in the About view — hand the copy back to its normal CSS layout
             copyEl.style.transform = ''; copyEl.style.opacity = ''; copyEl.style.visibility = '';
+          } else if (turn > 0.9 || focusT > 0.001) {
+            // settled in the skills act, or zoomed into a crystal: keep the copy hidden so it never reappears
+            copyEl.style.opacity = '0'; copyEl.style.visibility = 'hidden';
           } else {
             const W = mount.clientWidth, H = mount.clientHeight, aspect = W / H;
             const halfH0 = Math.tan((camera.fov * Math.PI) / 360) * 7; // apparent half-height at the rest depth (z=7)
@@ -687,7 +697,7 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
             copyEl.style.transformOrigin = '50% 50%';
             copyEl.style.transform = `perspective(1100px) translate3d(${(Tx - Tx0).toFixed(1)}px,${(Ty - Ty0).toFixed(1)}px,0) rotateY(${yawDeg.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
             copyEl.style.opacity = String(clamp01(1.3 - turn * 1.45));
-            copyEl.style.visibility = turn > 0.9 ? 'hidden' : 'visible';
+            copyEl.style.visibility = 'visible';
           }
         }
 
@@ -707,8 +717,8 @@ const SpaceScene: React.FC<{ progressRef: React.MutableRefObject<number> }> = ({
           const shrink = 1 - smooth(clamp01(shatterT / 0.35));
           meteorGroup.scale.setScalar(Math.max(0.001, (0.55 + flyT * 0.45) * (1 - dmgT * 0.18) * shrink)); // chips down as hit
           meteor.rotation.x += dt * (0.8 + dmgT * 3); meteor.rotation.y += dt * (1.1 + dmgT * 3); // spins up under fire
-          meteorMat.emissiveIntensity = 0.12 + flyT * 0.33 + dmgT * 1.6 + dmgT * 0.5 * Math.sin(now * 0.04) + shatterT * 2.2; // glows hotter + flickers
-          meteorGlowMat.opacity = (0.3 + flyT * 0.4 + dmgT * 0.5) * (1 - smooth(clamp01(shatterT / 0.4)));
+          meteorMat.emissiveIntensity = dmgT * 1.5 + dmgT * 0.5 * Math.sin(now * 0.04) + shatterT * 2.4; // grey/black until the laser heats it
+          meteorGlowMat.opacity = (dmgT * 0.55) * (1 - smooth(clamp01(shatterT / 0.4)));
         }
         // camera shake — builds while the meteor is hammered, spikes on the blast (skipped during crystal focus)
         if (focusT < 0.001) {
