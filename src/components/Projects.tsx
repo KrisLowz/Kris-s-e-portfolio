@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PROJECTS } from '../constants';
 import { buildShip, makeFlameTexture, makeGlowTexture } from './Spaceship3D';
-import { makeStarLayer, makeNebulaTexture, makeStreakTexture, makePlanetTexture } from './Experience';
+import { makeStarLayer, makeStreakTexture } from './Experience';
 
 declare global { interface Window { gsap: any; ScrollTrigger: any } }
 
@@ -19,11 +19,14 @@ const ProjectWorld: React.FC<{ project: typeof PROJECTS[number]; accent: string;
   }, []);
 
   useEffect(() => {
-    if (!lightbox) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setLightbox(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      if (lightbox) setLightbox(false);
+      else onExit();
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [lightbox]);
+  }, [lightbox, onExit]);
 
   return (
     <div data-exp-ui className="absolute inset-0 z-30 overflow-y-auto px-6 py-16 sm:px-12">
@@ -126,8 +129,11 @@ const Projects: React.FC = () => {
   const modeRef = useRef<'cruise' | 'warpIn' | 'world' | 'warpOut'>('cruise');
   const worldIdxRef = useRef(-1);
   const [worldIdx, setWorldIdx] = useState(-1);
-  const enterWorld = (i: number) => { worldIdxRef.current = i; modeRef.current = 'warpIn'; setWorldIdx(i); };
-  const exitWorld = () => { modeRef.current = 'warpOut'; setWorldIdx(-1); };
+  const enterWorld = (i: number) => { document.body.style.overflow = 'hidden'; worldIdxRef.current = i; modeRef.current = 'warpIn'; setWorldIdx(i); };
+  const exitWorld = () => { document.body.style.overflow = ''; modeRef.current = 'warpOut'; setWorldIdx(-1); };
+
+  // Safety: restore scroll if component unmounts while a world is open
+  useEffect(() => () => { document.body.style.overflow = ''; }, []);
 
   // scroll pin (mirror Experience.tsx): scrub writes progress for the 3D scene
   useEffect(() => {
@@ -307,11 +313,9 @@ const Projects: React.FC = () => {
           ship.rotation.set(Math.sin(t * 0.9) * 0.05, 0, Math.sin(t * 1.1) * 0.06);
           const flick = 0.8 + 0.2 * Math.sin(t * 26);
           flames.forEach((fl: any) => { fl.scale.set(0.7 * flick, 0.5 * flick, 1); fl.material.opacity = 0.85; });
-          let activeIdx = -1, bestAbs = 3;
           builtPortals.forEach((pt) => {
             const worldX = pt.idx * STEP + railX;
             const act = Math.max(0, 1 - Math.abs(worldX) / 3);
-            if (Math.abs(worldX) < bestAbs) { bestAbs = Math.abs(worldX); activeIdx = act > 0.4 ? pt.idx : activeIdx; }
             pt.group.scale.setScalar(0.7 + act * 0.4);
             pt.group.rotation.z += dt * (0.2 + act * 0.5);
             pt.glowMat.opacity = 0.15 + act * 0.5 + (hoverIdx === pt.idx ? 0.3 : 0);
