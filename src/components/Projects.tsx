@@ -129,11 +129,13 @@ const Projects: React.FC = () => {
   const modeRef = useRef<'cruise' | 'warpIn' | 'world' | 'warpOut'>('cruise');
   const worldIdxRef = useRef(-1);
   const [worldIdx, setWorldIdx] = useState(-1);
-  const enterWorld = (i: number) => { document.body.style.overflow = 'hidden'; worldIdxRef.current = i; modeRef.current = 'warpIn'; setWorldIdx(i); };
-  const exitWorld = () => { document.body.style.overflow = ''; modeRef.current = 'warpOut'; setWorldIdx(-1); };
+  // Lock BOTH <html> and <body> — the viewport scrollport is <html>, so body-only doesn't hold.
+  const lockScroll = (on: boolean) => { const v = on ? 'hidden' : ''; document.documentElement.style.overflow = v; document.body.style.overflow = v; };
+  const enterWorld = (i: number) => { lockScroll(true); worldIdxRef.current = i; modeRef.current = 'warpIn'; setWorldIdx(i); };
+  const exitWorld = () => { lockScroll(false); modeRef.current = 'warpOut'; setWorldIdx(-1); };
 
   // Safety: restore scroll if component unmounts while a world is open
-  useEffect(() => () => { document.body.style.overflow = ''; }, []);
+  useEffect(() => () => { lockScroll(false); }, []);
 
   // scroll pin (mirror Experience.tsx): scrub writes progress for the 3D scene
   useEffect(() => {
